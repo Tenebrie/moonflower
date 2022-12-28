@@ -4,6 +4,7 @@
 	"description": "",
 	"author": "tenebrie",
 	"license": "UNLICENSED",
+	"homepage": "https://github.com/tenebrie/tenebrie-framework",
 	"main": "./dist/index.js",
 	"types": "./dist/index.d.ts",
 	"scripts": {

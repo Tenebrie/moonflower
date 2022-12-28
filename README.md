@@ -1,6 +1,8 @@
 # Framework documentation
 > This section is work-in-progress.
 
+This package is NOT FINISHED, use at your own risk.
+
 ## Feature Overview
 
 - React hooks inspired backend REST API
