@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { ParameterizedContext } from 'koa'
 
 import { ValidationError } from '../errors/UserFacingErrors'

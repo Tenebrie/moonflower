@@ -12,11 +12,12 @@ This package is NOT FINISHED, use at your own risk.
 
 ## Planned features
 
-- Support for exporting named models
-- Proper support for router-level middleware
-- `useAuthentication` hook for native auth
-- `useCookies` hook to work with cookies
 - `useHeaders` hook to work with request header
+- `useCookies` hook to work with cookies
+- `useAuthentication` hook for native auth
+- Support for exporting named models
+- Support for list params
+- Proper support for router-level middleware
 - Ability to output spec as file
 - CLI-level spec generation function
 - Support for thrown errors in OpenApi engine
