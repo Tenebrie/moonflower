@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
+import { keysOf } from '@src/utils/object'
 import { ParameterizedContext } from 'koa'
 import { ValidationError } from '../errors/UserFacingErrors'
 import { Validator } from '../validators/types'
@@ -14,7 +15,7 @@ export const useQueryParams = <ValidatorsT extends Record<string, Validator<any>
 	validators: ValidatorsT
 ): ValidatedData<ValidatorsT> => {
 	const query = ctx.query
-	const expectedParams = Object.keys(validators)
+	const expectedParams = keysOf(validators)
 
 	const missingParams = expectedParams.filter(
 		(paramName) => !query[paramName] && !validators[paramName].optional
@@ -61,7 +62,7 @@ export const useQueryParams = <ValidatorsT extends Record<string, Validator<any>
 
 	const successfulValidations = validationResults.filter((result) => result.validated)
 
-	const returnValue = {}
+	const returnValue: Record<string, unknown> = {}
 	successfulValidations.forEach((result) => {
 		returnValue[result.paramName] = result.rehydratedValue
 	})

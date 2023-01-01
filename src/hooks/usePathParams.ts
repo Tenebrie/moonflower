@@ -1,3 +1,4 @@
+import { keysOf } from '@src/utils/object'
 import { ParameterizedContext } from 'koa'
 import { ValidationError } from '../errors/UserFacingErrors'
 import { SplitStringBy } from '../utils/TypeUtils'
@@ -45,7 +46,7 @@ export const usePathParams = <
 	validators: Pick<ValidatorsT, CleanUpPathParam<ParamsT[number]>>
 ): ValidatedData<ParamsT, TestTemplate, ValidatorsT> => {
 	const params = ctx.params
-	const expectedParams = Object.keys(validators)
+	const expectedParams = keysOf(validators)
 
 	const validationResults = expectedParams.map((paramName) => {
 		const paramValue = params[paramName] as string
@@ -56,7 +57,7 @@ export const usePathParams = <
 		}
 
 		try {
-			const validatorObject = validators[paramName] as Omit<Validator<any>, 'optional'>
+			const validatorObject = validators[paramName] as Omit<Validator<unknown>, 'optional'>
 			const prevalidatorSuccess = !validatorObject.prevalidate || validatorObject.prevalidate(paramValue)
 			const rehydratedValue = validatorObject.rehydrate(paramValue)
 			const validatorSuccess = !validatorObject.validate || validatorObject.validate(rehydratedValue)
@@ -82,7 +83,7 @@ export const usePathParams = <
 
 	const successfulValidations = validationResults.filter((result) => result.validated)
 
-	const returnValue = {}
+	const returnValue: Record<string, unknown> = {}
 	successfulValidations.forEach((result) => {
 		returnValue[result.paramName] = result.rehydratedValue
 	})

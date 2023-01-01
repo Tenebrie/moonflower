@@ -470,7 +470,7 @@ export const getValuesOfObjectLiteral = (objectLiteralNode: Node<ts.ObjectLitera
 			if (targetNode.isKind(SyntaxKind.StringLiteral)) {
 				return targetNode.getLiteralValue()
 			}
-			return null
+			return undefined
 		})()
 
 		return {

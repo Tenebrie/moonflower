@@ -58,7 +58,7 @@ export const getSchema = (shape: string | ShapeOfType[]): SchemaType => {
 	const isObject = shape[0].role === 'property'
 	if (isObject) {
 		const typedShapes = shape as ShapeOfProperty[]
-		const properties = {}
+		const properties: Record<string, SchemaType> = {}
 		typedShapes.forEach((prop) => {
 			properties[prop.identifier] = getSchema(prop.shape)
 		})

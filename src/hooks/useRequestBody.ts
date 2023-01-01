@@ -45,7 +45,7 @@ export const useRequestBody = <ValidatorsT extends Record<string, Validator<any>
 
 		try {
 			const convertedValue = typeof paramValue === 'object' ? JSON.stringify(paramValue) : String(paramValue)
-			const validatorObject = validators[paramName] as Validator<any>
+			const validatorObject = validators[paramName] as Validator<unknown>
 			const prevalidatorSuccess = !validatorObject.prevalidate || validatorObject.prevalidate(convertedValue)
 			const rehydratedValue = validatorObject.rehydrate(convertedValue)
 			const validatorSuccess = !validatorObject.validate || validatorObject.validate(rehydratedValue)
@@ -69,7 +69,7 @@ export const useRequestBody = <ValidatorsT extends Record<string, Validator<any>
 
 	const successfulValidations = validationResults.filter((result) => result.validated)
 
-	const returnValue = {}
+	const returnValue: Record<string, unknown> = {}
 	successfulValidations.forEach((result) => {
 		returnValue[result.paramName] = result.rehydratedValue
 	})

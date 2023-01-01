@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { ApiEndpointDocs } from '@src/hooks/useApiEndpoint'
 import { SyntaxKind, ts, Node } from 'ts-morph'
 import { EndpointData } from '../types'
 import {
@@ -115,7 +116,12 @@ const parseApiDocumentation = (node: Node<ts.Node>) => {
 	}
 
 	const objectLiteral = valueNode.asKind(SyntaxKind.ObjectLiteralExpression)!
-	return getValuesOfObjectLiteral(objectLiteral).filter((param) => param.value !== null)
+
+	const values = getValuesOfObjectLiteral(objectLiteral).filter((param) => param.value !== null)
+	return values as {
+		identifier: keyof ApiEndpointDocs
+		value: typeof values[number]['value']
+	}[]
 }
 
 const parseRequestParams = (node: Node<ts.Node>, endpointPath: string): EndpointData['params'] => {

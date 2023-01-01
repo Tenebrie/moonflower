@@ -41,7 +41,9 @@ export const generatePaths = (endpoints: EndpointData[], preferences: ApiDocsPre
 			schema: getSchema(param.signature),
 		}))
 
-		const acceptedBodyTypes = {}
+		const acceptedBodyTypes: Partial<
+			Record<'text/plain' | 'application/json' | 'application/x-www-form-urlencoded', unknown>
+		> = {}
 
 		if (endpoint.rawBody) {
 			acceptedBodyTypes['text/plain'] = {
@@ -50,7 +52,7 @@ export const generatePaths = (endpoints: EndpointData[], preferences: ApiDocsPre
 		}
 
 		if (endpoint.objectBody.length > 0) {
-			const properties = {}
+			const properties: Record<string, unknown> = {}
 			endpoint.objectBody.forEach((prop) => {
 				properties[prop.identifier] = getSchema(prop.signature)
 			})
