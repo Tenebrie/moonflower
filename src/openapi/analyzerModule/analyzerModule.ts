@@ -33,9 +33,9 @@ export const analyzeSourceFile = (sourceFile: SourceFile, filterEndpointPaths?: 
 
 	sourceFile.forEachChild((node) => {
 		if (node.getText().includes('router.get') || node.getText().includes('router.post')) {
-			const endpointText = node.getFirstDescendantByKind(SyntaxKind.StringLiteral)!.getText() ?? ''
+			const endpointText = node.getFirstDescendantByKind(SyntaxKind.StringLiteral)?.getText() ?? ''
 			const endpointPath = endpointText.substring(1, endpointText.length - 1)
-			if (!!filterEndpointPaths && !filterEndpointPaths.some(path => endpointPath.includes(path))) {
+			if (!!filterEndpointPaths && !filterEndpointPaths.some((path) => endpointPath.includes(path))) {
 				return
 			}
 
