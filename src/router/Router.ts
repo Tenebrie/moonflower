@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import * as Koa from 'koa'
 import * as KoaRouter from '@koa/router'
-import { ExtractedRequestParams } from '../utils/TypeUtils'
+import * as Koa from 'koa'
+
 import { OpenApiManager } from '../openapi/manager/OpenApiManager'
+import { ExtractedRequestParams } from '../utils/TypeUtils'
 
 type Props = {
 	skipOpenApiAnalysis: boolean

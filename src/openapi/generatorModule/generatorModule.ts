@@ -1,5 +1,5 @@
-import { generatePaths } from './generatePaths'
 import { OpenApiManager } from '../manager/OpenApiManager'
+import { generatePaths } from './generatePaths'
 
 export const generateOpenApiSpec = (manager: OpenApiManager) => {
 	const header = manager.getHeader()

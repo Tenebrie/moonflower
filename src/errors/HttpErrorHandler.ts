@@ -1,4 +1,5 @@
 import Koa from 'koa'
+
 import { BaseHttpError } from './BaseHttpError'
 
 export const HttpErrorHandler = async (ctx: Koa.ParameterizedContext, next: Koa.Next) => {

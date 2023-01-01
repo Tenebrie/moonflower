@@ -1,6 +1,6 @@
 import { Router } from '../../router/Router'
-import { OpenApiManager } from '../manager/OpenApiManager'
 import { generateOpenApiSpec } from '../generatorModule/generatorModule'
+import { OpenApiManager } from '../manager/OpenApiManager'
 
 const router = new Router({ skipOpenApiAnalysis: true })
 

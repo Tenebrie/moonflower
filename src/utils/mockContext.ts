@@ -1,6 +1,7 @@
 import * as Koa from 'koa'
 import * as httpMocks from 'node-mocks-http'
-import { ExtractedRequestParams } from '@src/utils/TypeUtils'
+
+import { ExtractedRequestParams } from './TypeUtils'
 
 export interface MockContext<RequestBody = undefined> extends Koa.Context {
 	request: Koa.Context['request'] & {

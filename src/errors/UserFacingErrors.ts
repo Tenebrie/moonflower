@@ -1,4 +1,5 @@
-import { StatusCodes, getReasonPhrase } from 'http-status-codes'
+import { getReasonPhrase, StatusCodes } from 'http-status-codes'
+
 import { BaseHttpError } from './BaseHttpError'
 
 export class ValidationError extends BaseHttpError {

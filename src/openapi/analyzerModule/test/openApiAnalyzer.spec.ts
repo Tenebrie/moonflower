@@ -1,5 +1,6 @@
 import * as path from 'path'
 import { Project, SourceFile } from 'ts-morph'
+
 import { analyzeSourceFile } from '../analyzerModule'
 
 describe('OpenApi Analyzer', () => {

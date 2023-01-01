@@ -1,10 +1,10 @@
-import { SourceFile, SyntaxKind } from 'ts-morph'
-import { parseEndpoint } from './parseEndpoint'
-import { EndpointData } from '../types'
-
 import * as path from 'path'
+import { SourceFile, SyntaxKind } from 'ts-morph'
 import { Project } from 'ts-morph'
+
 import { OpenApiManager } from '../manager/OpenApiManager'
+import { EndpointData } from '../types'
+import { parseEndpoint } from './parseEndpoint'
 
 /**
  * @param tsconfigPath Path to tsconfig file relative to project root

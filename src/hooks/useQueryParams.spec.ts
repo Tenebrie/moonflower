@@ -1,4 +1,3 @@
-import { mockContext, mockContextQuery } from '@src/utils/mockContext'
 import {
 	BooleanValidator,
 	NumberValidator,
@@ -8,6 +7,7 @@ import {
 	useQueryParams,
 	ValidationError,
 } from '..'
+import { mockContext, mockContextQuery } from '../utils/mockContext'
 
 describe('useQueryParams', () => {
 	it('rehydrates params correctly', () => {

@@ -1,4 +1,3 @@
-import { mockContextPath, mockContext } from '@src/utils/mockContext'
 import {
 	BooleanValidator,
 	NumberValidator,
@@ -7,6 +6,7 @@ import {
 	StringValidator,
 	ValidationError,
 } from '..'
+import { mockContext, mockContextPath } from '../utils/mockContext'
 import { usePathParams } from './usePathParams'
 
 describe('usePathParams', () => {

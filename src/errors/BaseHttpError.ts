@@ -1,4 +1,4 @@
-import { StatusCodes, getReasonPhrase } from 'http-status-codes'
+import { getReasonPhrase, StatusCodes } from 'http-status-codes'
 
 export interface HttpError {
 	status: StatusCodes

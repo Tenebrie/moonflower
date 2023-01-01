@@ -1,4 +1,5 @@
 import * as Koa from 'koa'
+
 import { prepareOpenApiSpec } from './analyzerModule/analyzerModule'
 import { OpenApiRouter } from './router/OpenApiRouter'
 

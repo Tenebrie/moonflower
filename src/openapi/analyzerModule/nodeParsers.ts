@@ -1,15 +1,16 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
+	Node,
+	PropertyAccessExpression,
+	PropertyAssignment,
+	PropertySignature,
+	ShorthandPropertyAssignment,
 	SyntaxKind,
 	ts,
-	Node,
-	TypeReferenceNode,
-	PropertySignature,
-	PropertyAssignment,
 	Type,
-	PropertyAccessExpression,
-	ShorthandPropertyAssignment,
+	TypeReferenceNode,
 } from 'ts-morph'
+
 import { ShapeOfProperty, ShapeOfType, ShapeOfUnionEntry } from './types'
 
 export const findNodeImplementation = (node: Node): Node => {

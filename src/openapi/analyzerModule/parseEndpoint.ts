@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { ApiEndpointDocs } from '@src/hooks/useApiEndpoint'
-import { SyntaxKind, ts, Node } from 'ts-morph'
+import { Node, SyntaxKind, ts } from 'ts-morph'
+
+import { ApiEndpointDocs } from '../../hooks/useApiEndpoint'
 import { EndpointData } from '../types'
 import {
 	findNodeImplementation,
