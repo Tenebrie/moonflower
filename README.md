@@ -54,7 +54,7 @@ const query = useQueryParams(ctx, {
 })
 
 query.name   // type is 'string'
-query.fooBar // type is '{ foo: string; bar: string }'
+query.fooBar // type is '{ foo: string; bar: string } | undefined'
 ```
 
 ## Built-in validators

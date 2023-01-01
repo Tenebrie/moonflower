@@ -28,17 +28,11 @@ export const mockContextPath = <Context extends Koa.ParameterizedContext, Path e
 	return typedContext
 }
 
-export const mockContextBody = <
-	Context extends Koa.ParameterizedContext,
-	RequestBody extends Record<any, any>
->(
+export const mockContextQuery = <Context extends Koa.ParameterizedContext, Path extends string>(
 	ctx: Context,
-	body: RequestBody
+	params: Record<string, string>
 ) => {
-	ctx.request.body = body
-	return ctx as Context & {
-		request: Context['request'] & {
-			body: RequestBody
-		}
-	}
+	const typedContext = ctx as Context & { params: any } & ExtractedRequestParams<Path>
+	typedContext.query = params
+	return typedContext
 }
