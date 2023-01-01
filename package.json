@@ -1,6 +1,6 @@
 {
 	"name": "tenebrie-framework",
-	"version": "0.0.4",
+	"version": "0.1.0",
 	"description": "",
 	"author": "tenebrie",
 	"license": "UNLICENSED",
@@ -42,9 +42,9 @@
 		"source-map-support": "^0.5.20",
 		"ts-jest": "28.0.8",
 		"ts-loader": "^9.2.3",
+		"ts-morph": "^16.0.0",
 		"ts-node": "^10.0.0",
 		"tsconfig-paths": "4.1.0",
-		"ts-morph": "^16.0.0",
 		"typescript": "^4.9.4"
 	},
 	"jest": {
