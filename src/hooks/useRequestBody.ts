@@ -24,7 +24,7 @@ export const useRequestBody = <ValidatorsT extends Record<string, Validator<any>
 	ctx: ParameterizedContext,
 	validators: ValidatorsT
 ): ValidatedData<ValidatorsT> => {
-	const providedParams = ctx.request.body || {}
+	const providedParams = (ctx.request.body || {}) as Record<string, string | number | boolean | object>
 	const expectedParams = Object.keys(validators)
 
 	const missingParams = expectedParams.filter(
