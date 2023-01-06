@@ -3,7 +3,7 @@ import { SchemaType } from './generatorModule/getSchema'
 
 type PathParam = {
 	name: string
-	in: 'query' | 'path'
+	in: 'query' | 'path' | 'header'
 	description: string
 	required: true | false | undefined
 }
@@ -35,12 +35,17 @@ export type EndpointData = {
 	name?: string
 	summary?: string
 	description?: string
-	params: {
+	requestPathParams: {
 		identifier: string
 		signature: string | ShapeOfType[]
 		optional: boolean
 	}[]
-	query: {
+	requestQuery: {
+		identifier: string
+		signature: string | ShapeOfType[]
+		optional: boolean
+	}[]
+	requestHeaders: {
 		identifier: string
 		signature: string | ShapeOfType[]
 		optional: boolean

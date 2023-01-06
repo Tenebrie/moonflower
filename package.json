@@ -59,12 +59,12 @@
 			"^.+\\.(t|j)s$": "ts-jest"
 		},
 		"collectCoverageFrom": [
-			"**/*.(t|j)s"
+			"src/**/{!(*.spec.data),(printers)}.ts"
 		],
 		"moduleNameMapper": {
 			"^@src(.*)$": "<rootDir>/src$1"
 		},
-		"coverageDirectory": "../coverage",
+		"coverageDirectory": "./coverage",
 		"testEnvironment": "node"
 	}
 }

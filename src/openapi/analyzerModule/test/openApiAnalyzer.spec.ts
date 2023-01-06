@@ -45,36 +45,36 @@ describe('OpenApi Analyzer', () => {
 			it('parses inline usePathParams validators correctly', () => {
 				const endpoint = analyzeEndpointById('bf6147f2-a1dc-4cc2-8327-e6f041f828bf')
 
-				expect(endpoint.params[0].identifier).toEqual('firstParam')
-				expect(endpoint.params[0].signature).toEqual('string')
-				expect(endpoint.params[0].optional).toEqual(false)
-				expect(endpoint.params[1].identifier).toEqual('secondParam')
-				expect(endpoint.params[1].signature).toEqual('boolean')
-				expect(endpoint.params[1].optional).toEqual(false)
-				expect(endpoint.params[2].identifier).toEqual('optionalParam')
-				expect(endpoint.params[2].signature).toEqual('number')
-				expect(endpoint.params[2].optional).toEqual(true)
+				expect(endpoint.requestPathParams[0].identifier).toEqual('firstParam')
+				expect(endpoint.requestPathParams[0].signature).toEqual('string')
+				expect(endpoint.requestPathParams[0].optional).toEqual(false)
+				expect(endpoint.requestPathParams[1].identifier).toEqual('secondParam')
+				expect(endpoint.requestPathParams[1].signature).toEqual('boolean')
+				expect(endpoint.requestPathParams[1].optional).toEqual(false)
+				expect(endpoint.requestPathParams[2].identifier).toEqual('optionalParam')
+				expect(endpoint.requestPathParams[2].signature).toEqual('number')
+				expect(endpoint.requestPathParams[2].optional).toEqual(true)
 			})
 
 			it('parses built-in usePathParams validators correctly', () => {
 				const endpoint = analyzeEndpointById('ef25ef5e-0f8f-4732-bf59-8825f94a5287')
 
-				expect(endpoint.params[0].identifier).toEqual('firstParam')
-				expect(endpoint.params[0].signature).toEqual('string')
-				expect(endpoint.params[0].optional).toEqual(false)
-				expect(endpoint.params[1].identifier).toEqual('secondParam')
-				expect(endpoint.params[1].signature).toEqual('boolean')
-				expect(endpoint.params[1].optional).toEqual(false)
-				expect(endpoint.params[2].identifier).toEqual('optionalParam')
-				expect(endpoint.params[2].signature).toEqual('number')
-				expect(endpoint.params[2].optional).toEqual(true)
+				expect(endpoint.requestPathParams[0].identifier).toEqual('firstParam')
+				expect(endpoint.requestPathParams[0].signature).toEqual('string')
+				expect(endpoint.requestPathParams[0].optional).toEqual(false)
+				expect(endpoint.requestPathParams[1].identifier).toEqual('secondParam')
+				expect(endpoint.requestPathParams[1].signature).toEqual('boolean')
+				expect(endpoint.requestPathParams[1].optional).toEqual(false)
+				expect(endpoint.requestPathParams[2].identifier).toEqual('optionalParam')
+				expect(endpoint.requestPathParams[2].signature).toEqual('number')
+				expect(endpoint.requestPathParams[2].optional).toEqual(true)
 			})
 
 			it('parses complex usePathParams validator correctly', () => {
 				const endpoint = analyzeEndpointById('5ab5dd0d-b241-4378-bea1-a2dd696d699a')
 
-				expect(endpoint.params[0].identifier).toEqual('firstParam')
-				expect(endpoint.params[0].signature).toEqual([
+				expect(endpoint.requestPathParams[0].identifier).toEqual('firstParam')
+				expect(endpoint.requestPathParams[0].signature).toEqual([
 					{
 						role: 'property',
 						identifier: 'foo',
@@ -88,9 +88,9 @@ describe('OpenApi Analyzer', () => {
 						optional: false,
 					},
 				])
-				expect(endpoint.params[0].optional).toEqual(false)
-				expect(endpoint.params[1].identifier).toEqual('secondParam')
-				expect(endpoint.params[1].signature).toEqual([
+				expect(endpoint.requestPathParams[0].optional).toEqual(false)
+				expect(endpoint.requestPathParams[1].identifier).toEqual('secondParam')
+				expect(endpoint.requestPathParams[1].signature).toEqual([
 					{
 						role: 'property',
 						identifier: 'foo',
@@ -104,14 +104,14 @@ describe('OpenApi Analyzer', () => {
 						optional: false,
 					},
 				])
-				expect(endpoint.params[1].optional).toEqual(false)
+				expect(endpoint.requestPathParams[1].optional).toEqual(false)
 			})
 
 			it('parses usePathParams validator with optional types correctly', () => {
 				const endpoint = analyzeEndpointById('209df2a1-55f9-4859-bc31-3277547c7d88')
 
-				expect(endpoint.params[0].identifier).toEqual('firstParam')
-				expect(endpoint.params[0].signature).toEqual([
+				expect(endpoint.requestPathParams[0].identifier).toEqual('firstParam')
+				expect(endpoint.requestPathParams[0].signature).toEqual([
 					{
 						identifier: 'foo',
 						optional: true,
@@ -119,9 +119,9 @@ describe('OpenApi Analyzer', () => {
 						shape: 'string',
 					},
 				])
-				expect(endpoint.params[0].optional).toEqual(false)
-				expect(endpoint.params[1].identifier).toEqual('secondParam')
-				expect(endpoint.params[1].signature).toEqual([
+				expect(endpoint.requestPathParams[0].optional).toEqual(false)
+				expect(endpoint.requestPathParams[1].identifier).toEqual('secondParam')
+				expect(endpoint.requestPathParams[1].signature).toEqual([
 					{
 						identifier: 'foo',
 						optional: true,
@@ -129,14 +129,14 @@ describe('OpenApi Analyzer', () => {
 						shape: 'string',
 					},
 				])
-				expect(endpoint.params[1].optional).toEqual(false)
+				expect(endpoint.requestPathParams[1].optional).toEqual(false)
 			})
 
 			it('parses usePathParams validator with union types correctly', () => {
 				const endpoint = analyzeEndpointById('89d961f1-7d36-4271-8bd3-665ee0992590')
 
-				expect(endpoint.params[0].identifier).toEqual('firstParam')
-				expect(endpoint.params[0].signature).toEqual([
+				expect(endpoint.requestPathParams[0].identifier).toEqual('firstParam')
+				expect(endpoint.requestPathParams[0].signature).toEqual([
 					{
 						identifier: 'foo',
 						optional: false,
@@ -161,9 +161,9 @@ describe('OpenApi Analyzer', () => {
 						],
 					},
 				])
-				expect(endpoint.params[0].optional).toEqual(false)
-				expect(endpoint.params[1].identifier).toEqual('secondParam')
-				expect(endpoint.params[1].signature).toEqual([
+				expect(endpoint.requestPathParams[0].optional).toEqual(false)
+				expect(endpoint.requestPathParams[1].identifier).toEqual('secondParam')
+				expect(endpoint.requestPathParams[1].signature).toEqual([
 					{
 						identifier: 'foo',
 						optional: false,
@@ -188,13 +188,15 @@ describe('OpenApi Analyzer', () => {
 						],
 					},
 				])
-				expect(endpoint.params[1].optional).toEqual(false)
+				expect(endpoint.requestPathParams[1].optional).toEqual(false)
 			})
 
 			it('parses params with destructuring correctly', () => {
 				const endpoint = analyzeEndpointById('39669151-c529-4bcd-86a5-a10de7834104')
 
-				expect(endpoint.params).toEqual([{ identifier: 'foo', optional: false, signature: 'string' }])
+				expect(endpoint.requestPathParams).toEqual([
+					{ identifier: 'foo', optional: false, signature: 'string' },
+				])
 			})
 		})
 
@@ -202,21 +204,21 @@ describe('OpenApi Analyzer', () => {
 			it('parses inline useQueryParams validators correctly', () => {
 				const endpoint = analyzeEndpointById('f89310d9-25ac-4005-93e4-614179d3bbd4')
 
-				expect(endpoint.query[0].identifier).toEqual('firstParam')
-				expect(endpoint.query[0].signature).toEqual('string')
-				expect(endpoint.query[0].optional).toEqual(false)
-				expect(endpoint.query[1].identifier).toEqual('secondParam')
-				expect(endpoint.query[1].signature).toEqual('boolean')
-				expect(endpoint.query[1].optional).toEqual(true)
-				expect(endpoint.query[2].identifier).toEqual('thirdParam')
-				expect(endpoint.query[2].signature).toEqual('number')
-				expect(endpoint.query[2].optional).toEqual(true)
+				expect(endpoint.requestQuery[0].identifier).toEqual('firstParam')
+				expect(endpoint.requestQuery[0].signature).toEqual('string')
+				expect(endpoint.requestQuery[0].optional).toEqual(false)
+				expect(endpoint.requestQuery[1].identifier).toEqual('secondParam')
+				expect(endpoint.requestQuery[1].signature).toEqual('boolean')
+				expect(endpoint.requestQuery[1].optional).toEqual(true)
+				expect(endpoint.requestQuery[2].identifier).toEqual('thirdParam')
+				expect(endpoint.requestQuery[2].signature).toEqual('number')
+				expect(endpoint.requestQuery[2].optional).toEqual(true)
 			})
 
 			it('parses enum union query type correctly', () => {
 				const endpoint = analyzeEndpointById('7c51de80-1ff1-4511-b0d3-8a75c296c507')
 
-				expect(endpoint.query[0].signature).toEqual([
+				expect(endpoint.requestQuery[0].signature).toEqual([
 					{
 						role: 'union',
 						shape: [
@@ -245,10 +247,34 @@ describe('OpenApi Analyzer', () => {
 			it('parses enum query type correctly', () => {
 				const endpoint = analyzeEndpointById('724a56ef-32f9-4c59-b22c-60bd33e45242')
 
-				expect(endpoint.query[0].signature).toEqual([
+				expect(endpoint.requestQuery[0].signature).toEqual([
 					{ role: 'literal_string', shape: 'hello world', optional: false },
 				])
 				expect(endpoint.responses.length).toEqual(1)
+			})
+		})
+
+		describe('useHeaderParams', () => {
+			it('parses inline validators correctly', () => {
+				const endpoint = analyzeEndpointById('03c247cb-96c0-4748-bb6a-9569c7bdb436')
+
+				expect(endpoint.requestHeaders[0].identifier).toEqual('firstParam')
+				expect(endpoint.requestHeaders[0].signature).toEqual('string')
+				expect(endpoint.requestHeaders[0].optional).toEqual(false)
+				expect(endpoint.requestHeaders[1].identifier).toEqual('secondParam')
+				expect(endpoint.requestHeaders[1].signature).toEqual('boolean')
+				expect(endpoint.requestHeaders[1].optional).toEqual(true)
+				expect(endpoint.requestHeaders[2].identifier).toEqual('thirdParam')
+				expect(endpoint.requestHeaders[2].signature).toEqual('number')
+				expect(endpoint.requestHeaders[2].optional).toEqual(true)
+			})
+
+			it('parses validator with dashes correctly', () => {
+				const endpoint = analyzeEndpointById('e563aa37-803e-4b79-a3e8-af0d01d024ae')
+
+				expect(endpoint.requestHeaders[0].identifier).toEqual('header-with-dashes')
+				expect(endpoint.requestHeaders[0].signature).toEqual('string')
+				expect(endpoint.requestHeaders[0].optional).toEqual(false)
 			})
 		})
 

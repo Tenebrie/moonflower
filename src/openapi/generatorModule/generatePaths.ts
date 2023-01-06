@@ -25,7 +25,7 @@ export const generatePaths = (endpoints: EndpointData[], preferences: ApiDocsPre
 			})
 			.join('/')
 
-		const pathParams = endpoint.params.map((param) => ({
+		const pathParams = endpoint.requestPathParams.map((param) => ({
 			name: param.identifier,
 			in: 'path' as const,
 			description: param.optional && !allowOptionalPathParams ? 'Optional parameter' : '',
@@ -33,9 +33,17 @@ export const generatePaths = (endpoints: EndpointData[], preferences: ApiDocsPre
 			schema: getSchema(param.signature),
 		}))
 
-		const queryParams = endpoint.query.map((param) => ({
+		const queryParams = endpoint.requestQuery.map((param) => ({
 			name: param.identifier,
 			in: 'query' as const,
+			description: '',
+			required: !param.optional,
+			schema: getSchema(param.signature),
+		}))
+
+		const headerParams = endpoint.requestHeaders.map((param) => ({
+			name: param.identifier,
+			in: 'header' as const,
 			description: '',
 			required: !param.optional,
 			schema: getSchema(param.signature),
@@ -101,9 +109,10 @@ export const generatePaths = (endpoints: EndpointData[], preferences: ApiDocsPre
 			operationId: endpoint.name,
 			summary: endpoint.summary,
 			description: endpoint.description ?? '',
-			parameters: ([] as (typeof pathParams[number] | typeof queryParams[number])[])
+			parameters: ([] as PathDefinition['parameters'])
 				.concat(pathParams)
-				.concat(queryParams),
+				.concat(queryParams)
+				.concat(headerParams),
 			requestBody: requestBody,
 			responses: responses,
 		}

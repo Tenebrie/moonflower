@@ -1,4 +1,5 @@
 import { useApiEndpoint } from '../../../hooks/useApiEndpoint'
+import { useHeaderParams } from '../../../hooks/useHeaderParams'
 import { usePathParams } from '../../../hooks/usePathParams'
 import { useQueryParams } from '../../../hooks/useQueryParams'
 import { useRequestBody } from '../../../hooks/useRequestBody'
@@ -82,6 +83,28 @@ router.get('/test/f89310d9-25ac-4005-93e4-614179d3bbd4', (ctx) => {
 		}),
 		thirdParam: OptionalParam({
 			rehydrate: (v) => Number(v),
+		}),
+	})
+})
+
+router.get('/test/03c247cb-96c0-4748-bb6a-9569c7bdb436', (ctx) => {
+	useHeaderParams(ctx, {
+		firstParam: RequiredParam({
+			rehydrate: (v) => v,
+		}),
+		secondParam: OptionalParam({
+			rehydrate: (v) => v === '1',
+		}),
+		thirdParam: OptionalParam({
+			rehydrate: (v) => Number(v),
+		}),
+	})
+})
+
+router.get('/test/e563aa37-803e-4b79-a3e8-af0d01d024ae', (ctx) => {
+	useHeaderParams(ctx, {
+		'header-with-dashes': RequiredParam({
+			rehydrate: (v) => v,
 		}),
 	})
 })

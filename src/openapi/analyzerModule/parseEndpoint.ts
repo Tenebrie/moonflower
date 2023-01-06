@@ -25,8 +25,9 @@ export const parseEndpoint = (node: Node<ts.Node>) => {
 	const endpointData: EndpointData = {
 		method: endpointMethod as 'GET' | 'POST',
 		path: endpointPath,
-		params: [],
-		query: [],
+		requestPathParams: [],
+		requestQuery: [],
+		requestHeaders: [],
 		rawBody: undefined,
 		objectBody: [],
 		responses: [],
@@ -50,7 +51,7 @@ export const parseEndpoint = (node: Node<ts.Node>) => {
 
 	// Request params
 	try {
-		endpointData.params = parseRequestParams(node, endpointPath)
+		endpointData.requestPathParams = parseRequestParams(node, endpointPath)
 	} catch (err) {
 		warningData.push((err as Error).message)
 		console.error('Error', err)
@@ -58,7 +59,15 @@ export const parseEndpoint = (node: Node<ts.Node>) => {
 
 	// Request query
 	try {
-		endpointData.query = parseRequestObjectInput(node, 'useQueryParams')
+		endpointData.requestQuery = parseRequestObjectInput(node, 'useQueryParams')
+	} catch (err) {
+		warningData.push((err as Error).message)
+		console.error('Error', err)
+	}
+
+	// Request headers
+	try {
+		endpointData.requestHeaders = parseRequestObjectInput(node, 'useHeaderParams')
 	} catch (err) {
 		warningData.push((err as Error).message)
 		console.error('Error', err)
@@ -95,7 +104,13 @@ export const parseEndpoint = (node: Node<ts.Node>) => {
 
 const getHookNode = (
 	endpointNode: Node<ts.Node>,
-	hookName: 'useApiEndpoint' | 'usePathParams' | 'useQueryParams' | 'useRequestBody' | 'useRequestRawBody'
+	hookName:
+		| 'useApiEndpoint'
+		| 'usePathParams'
+		| 'useQueryParams'
+		| 'useHeaderParams'
+		| 'useRequestBody'
+		| 'useRequestRawBody'
 ) => {
 	const callExpressions = endpointNode.getDescendantsOfKind(SyntaxKind.CallExpression)
 	const matchingCallExpressions = callExpressions.filter((node) => {
@@ -125,7 +140,7 @@ const parseApiDocumentation = (node: Node<ts.Node>) => {
 	}[]
 }
 
-const parseRequestParams = (node: Node<ts.Node>, endpointPath: string): EndpointData['params'] => {
+const parseRequestParams = (node: Node<ts.Node>, endpointPath: string): EndpointData['requestPathParams'] => {
 	const hookNode = getHookNode(node, 'usePathParams')
 	if (!hookNode) {
 		return []
@@ -172,8 +187,8 @@ const parseRequestRawBody = (node: Node<ts.Node>): NonNullable<EndpointData['raw
 
 const parseRequestObjectInput = (
 	node: Node<ts.Node>,
-	nodeName: 'useQueryParams' | 'useRequestBody'
-): EndpointData['query'] | EndpointData['objectBody'] => {
+	nodeName: 'useQueryParams' | 'useHeaderParams' | 'useRequestBody'
+): EndpointData['requestQuery'] | EndpointData['objectBody'] => {
 	const hookNode = getHookNode(node, nodeName)
 	if (!hookNode) {
 		return []

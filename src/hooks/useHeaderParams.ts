@@ -13,7 +13,7 @@ type ValidatedData<T extends Record<string, Validator<any>>> = {
 	[K in keyof T as HeaderToCamelCase<K>]: CheckIfOptional<ReturnType<T[K]['rehydrate']>, T[K]['optional']>
 }
 
-export const useRequestHeaders = <ValidatorsT extends Record<string, Validator<any>>>(
+export const useHeaderParams = <ValidatorsT extends Record<string, Validator<any>>>(
 	ctx: ParameterizedContext,
 	validators: ValidatorsT
 ) => {

@@ -185,8 +185,16 @@ export const getShapeOfValidatorLiteral = (
 	const assignmentNodes = syntaxListNode.getChildrenOfKind(SyntaxKind.PropertyAssignment)!
 
 	const properties = assignmentNodes.map((node) => {
-		const identifierNode = node.getFirstDescendantByKind(SyntaxKind.Identifier)!
-		const identifierName = identifierNode.getText()
+		const identifierNode = node.getFirstChild()!
+		const identifierName = (() => {
+			if (identifierNode.isKind(SyntaxKind.Identifier)) {
+				return identifierNode.getText()
+			}
+			if (identifierNode.isKind(SyntaxKind.StringLiteral)) {
+				return identifierNode.getLiteralText()
+			}
+			return 'unknown_30'
+		})()
 
 		const assignmentValueNode = node.getLastChild()!
 		const innerLiteralNode = findNodeImplementation(assignmentValueNode)

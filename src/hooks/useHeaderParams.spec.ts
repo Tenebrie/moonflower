@@ -4,12 +4,12 @@ import {
 	OptionalParam,
 	RequiredParam,
 	StringValidator,
-	useRequestHeaders,
+	useHeaderParams,
 	ValidationError,
 } from '..'
 import { mockContext, mockContextHeaders } from '../utils/mockContext'
 
-describe('useRequestHeaders', () => {
+describe('useHeaderParams', () => {
 	it('rehydrates params correctly', () => {
 		const ctx = mockContextHeaders(mockContext(), {
 			'string-header': 'test_string',
@@ -18,7 +18,7 @@ describe('useRequestHeaders', () => {
 			'object-header': '{ "foo": "aaa", "bar": "bbb" }',
 		})
 
-		const params = useRequestHeaders(ctx, {
+		const params = useHeaderParams(ctx, {
 			'string-header': StringValidator,
 			'number-header': NumberValidator,
 			'boolean-header': BooleanValidator,
@@ -38,7 +38,7 @@ describe('useRequestHeaders', () => {
 			stringheader: 'test_string',
 		})
 
-		const params = useRequestHeaders(ctx, {
+		const params = useHeaderParams(ctx, {
 			stringHeader: StringValidator,
 		})
 
@@ -50,7 +50,7 @@ describe('useRequestHeaders', () => {
 			'test-header': '12',
 		})
 
-		const params = useRequestHeaders(ctx, {
+		const params = useHeaderParams(ctx, {
 			'test-header': NumberValidator,
 		})
 
@@ -63,7 +63,7 @@ describe('useRequestHeaders', () => {
 				'test-header': 'qwerty',
 			})
 
-			useRequestHeaders(ctx, {
+			useHeaderParams(ctx, {
 				'test-header': NumberValidator,
 			})
 		}
@@ -75,7 +75,7 @@ describe('useRequestHeaders', () => {
 	it('passes validation when optional parameter is not provided', () => {
 		const ctx = mockContextHeaders(mockContext(), {})
 
-		const params = useRequestHeaders(ctx, {
+		const params = useHeaderParams(ctx, {
 			'test-header': OptionalParam(NumberValidator),
 		})
 
@@ -86,7 +86,7 @@ describe('useRequestHeaders', () => {
 		const test = () => {
 			const ctx = mockContextHeaders(mockContext(), {})
 
-			useRequestHeaders(ctx, {
+			useHeaderParams(ctx, {
 				'test-header': NumberValidator,
 			})
 		}
@@ -100,7 +100,7 @@ describe('useRequestHeaders', () => {
 			'test-header': 'valid',
 		})
 
-		const params = useRequestHeaders(ctx, {
+		const params = useHeaderParams(ctx, {
 			'test-header': RequiredParam({
 				prevalidate: (v) => v === 'valid',
 				rehydrate: (v) => v,
@@ -116,7 +116,7 @@ describe('useRequestHeaders', () => {
 				'test-header': 'invalid',
 			})
 
-			useRequestHeaders(ctx, {
+			useHeaderParams(ctx, {
 				'test-header': RequiredParam({
 					prevalidate: (v) => v === 'valid',
 					rehydrate: (v) => v,

@@ -17,14 +17,20 @@ describe('OpenApi Generator', () => {
 		)
 	}
 
+	const minimalEndpointData: EndpointData = {
+		method: 'GET',
+		path: '/test/path',
+		requestPathParams: [],
+		requestQuery: [],
+		requestHeaders: [],
+		objectBody: [],
+		responses: [],
+	}
+
 	it('does not include responses field if no responses are available', () => {
 		const manager = createManager([
 			{
-				method: 'GET',
-				path: '/test/path',
-				params: [],
-				query: [],
-				objectBody: [],
+				...minimalEndpointData,
 				responses: [
 					{
 						status: 204,
@@ -41,11 +47,7 @@ describe('OpenApi Generator', () => {
 	it('includes record response correctly', () => {
 		const manager = createManager([
 			{
-				method: 'GET',
-				path: '/test/path',
-				params: [],
-				query: [],
-				objectBody: [],
+				...minimalEndpointData,
 				responses: [
 					{
 						status: 200,
@@ -103,11 +105,7 @@ describe('OpenApi Generator', () => {
 	it('generates correct spec for circular dependency', () => {
 		const manager = createManager([
 			{
-				method: 'GET',
-				path: '/test/path',
-				params: [],
-				query: [],
-				objectBody: [],
+				...minimalEndpointData,
 				responses: [
 					{
 						status: 200,
@@ -153,11 +151,7 @@ describe('OpenApi Generator', () => {
 	it('generates correct spec for array in responses', () => {
 		const manager = createManager([
 			{
-				method: 'GET',
-				path: '/test/path',
-				params: [],
-				query: [],
-				objectBody: [],
+				...minimalEndpointData,
 				responses: [
 					{
 						status: 200,
@@ -202,11 +196,7 @@ describe('OpenApi Generator', () => {
 	it('generates correct spec for any in responses', () => {
 		const manager = createManager([
 			{
-				method: 'GET',
-				path: '/test/path',
-				params: [],
-				query: [],
-				objectBody: [],
+				...minimalEndpointData,
 				responses: [
 					{
 						status: 200,
@@ -252,11 +242,7 @@ describe('OpenApi Generator', () => {
 	it('generates correct spec for string literal union', () => {
 		const manager = createManager([
 			{
-				method: 'GET',
-				path: '/test/path',
-				params: [],
-				query: [],
-				objectBody: [],
+				...minimalEndpointData,
 				responses: [
 					{
 						status: 200,
@@ -266,7 +252,7 @@ describe('OpenApi Generator', () => {
 								shape: [
 									{
 										role: 'union_entry',
-										shape: [{ role: 'literal_string', shape: 'dec', optional: false }],
+										shape: [{ role: 'literal_string', shape: 'bin', optional: false }],
 										optional: false,
 									},
 									{
@@ -276,7 +262,7 @@ describe('OpenApi Generator', () => {
 									},
 									{
 										role: 'union_entry',
-										shape: [{ role: 'literal_string', shape: 'bin', optional: false }],
+										shape: [{ role: 'literal_number', shape: '10', optional: false }],
 										optional: false,
 									},
 								],
@@ -295,9 +281,9 @@ describe('OpenApi Generator', () => {
 					oneOf: [
 						{
 							oneOf: [
-								{ type: 'string', enum: ['dec'] },
-								{ type: 'string', enum: ['hex'] },
 								{ type: 'string', enum: ['bin'] },
+								{ type: 'string', enum: ['hex'] },
+								{ type: 'number', enum: ['10'] },
 							],
 						},
 					],
@@ -306,14 +292,10 @@ describe('OpenApi Generator', () => {
 		})
 	})
 
-	it('generates correct spec for stringle string literal', () => {
+	it('generates correct spec for string literal', () => {
 		const manager = createManager([
 			{
-				method: 'GET',
-				path: '/test/path',
-				params: [],
-				query: [],
-				objectBody: [],
+				...minimalEndpointData,
 				responses: [
 					{
 						status: 200,
@@ -326,6 +308,32 @@ describe('OpenApi Generator', () => {
 
 		expect(spec.paths['/test/path'].get?.responses[200].content).toEqual({
 			'application/json': { schema: { oneOf: [{ type: 'string', enum: ['hello world'] }] } },
+		})
+	})
+
+	it('generates correct spec for request headers', () => {
+		const manager = createManager([
+			{
+				...minimalEndpointData,
+				requestHeaders: [
+					{
+						identifier: 'x-auth',
+						signature: 'string',
+						optional: false,
+					},
+				],
+			},
+		])
+		const spec = generateOpenApiSpec(manager)
+
+		expect(spec.paths['/test/path'].get?.parameters[0]).toEqual({
+			name: 'x-auth',
+			in: 'header',
+			description: '',
+			required: true,
+			schema: {
+				type: 'string',
+			},
 		})
 	})
 })
