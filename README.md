@@ -6,24 +6,22 @@ This package is NOT FINISHED, use at your own risk.
 ## Feature Overview
 
 - React hooks inspired backend REST API
-- Fully type-safe definitions for path and query params, request body and response
+- Fully type-safe definitions for path, query and header params, request body and response
 - Minimal boilerplate code
 - Out-of-the-box OpenAPI 3.0.3 spec generation
 
 ## Planned features
 
-- `useHeaders` hook to work with request header
 - `useCookies` hook to work with cookies
 - `useAuthentication` hook for native auth
 - Support for exporting named models
-- Support for list params
+- Support for list query params
 - Proper support for router-level middleware
 - Ability to output spec as file
 - CLI-level spec generation function
 - Support for thrown errors in OpenApi engine
 - Support for binary data responses
 - Support for multipart form data
-- Custom descriptions in OpenApi engine output
 
 ## Known issues
 - `null` type may appear in spec 
