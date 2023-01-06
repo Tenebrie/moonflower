@@ -9,6 +9,7 @@ import {
 	getShapeOfValidatorLiteral,
 	getValidatorPropertyOptionality,
 	getValidatorPropertyShape,
+	getValidatorPropertyStringValue,
 	getValuesOfObjectLiteral,
 } from './nodeParsers'
 
@@ -36,7 +37,10 @@ export const parseEndpoint = (node: Node<ts.Node>) => {
 		description: undefined,
 	}
 
-	const warningData: string[] = []
+	const warningData: {
+		segment: string
+		error: Error
+	}[] = []
 
 	// API documentation
 	try {
@@ -45,7 +49,10 @@ export const parseEndpoint = (node: Node<ts.Node>) => {
 			endpointData[param.identifier] = param.value
 		})
 	} catch (err) {
-		warningData.push((err as Error).message)
+		warningData.push({
+			segment: 'api',
+			error: err as Error,
+		})
 		console.error('Error', err)
 	}
 
@@ -53,7 +60,10 @@ export const parseEndpoint = (node: Node<ts.Node>) => {
 	try {
 		endpointData.requestPathParams = parseRequestParams(node, endpointPath)
 	} catch (err) {
-		warningData.push((err as Error).message)
+		warningData.push({
+			segment: 'path',
+			error: err as Error,
+		})
 		console.error('Error', err)
 	}
 
@@ -61,7 +71,10 @@ export const parseEndpoint = (node: Node<ts.Node>) => {
 	try {
 		endpointData.requestQuery = parseRequestObjectInput(node, 'useQueryParams')
 	} catch (err) {
-		warningData.push((err as Error).message)
+		warningData.push({
+			segment: 'query',
+			error: err as Error,
+		})
 		console.error('Error', err)
 	}
 
@@ -69,7 +82,10 @@ export const parseEndpoint = (node: Node<ts.Node>) => {
 	try {
 		endpointData.requestHeaders = parseRequestObjectInput(node, 'useHeaderParams')
 	} catch (err) {
-		warningData.push((err as Error).message)
+		warningData.push({
+			segment: 'headers',
+			error: err as Error,
+		})
 		console.error('Error', err)
 	}
 
@@ -80,7 +96,10 @@ export const parseEndpoint = (node: Node<ts.Node>) => {
 			endpointData.rawBody = parsedBody
 		}
 	} catch (err) {
-		warningData.push((err as Error).message)
+		warningData.push({
+			segment: 'rawBody',
+			error: err as Error,
+		})
 		console.error('Error', err)
 	}
 
@@ -88,7 +107,10 @@ export const parseEndpoint = (node: Node<ts.Node>) => {
 	try {
 		endpointData.objectBody = parseRequestObjectInput(node, 'useRequestBody')
 	} catch (err) {
-		warningData.push((err as Error).message)
+		warningData.push({
+			segment: 'objectBody',
+			error: err as Error,
+		})
 		console.error('Error', err)
 	}
 
@@ -96,6 +118,10 @@ export const parseEndpoint = (node: Node<ts.Node>) => {
 	try {
 		endpointData.responses = parseRequestResponse(node)
 	} catch (err) {
+		warningData.push({
+			segment: 'response',
+			error: err as Error,
+		})
 		console.error('Error', err)
 	}
 
@@ -168,6 +194,8 @@ const parseRequestParams = (node: Node<ts.Node>, endpointPath: string): Endpoint
 			identifier: param.identifier,
 			signature: param.shape as string,
 			optional: declaredParams.some((declared) => declared.name === param.identifier && declared.optional),
+			description: param.description,
+			errorMessage: param.errorMessage,
 		}))
 }
 
@@ -182,6 +210,8 @@ const parseRequestRawBody = (node: Node<ts.Node>): NonNullable<EndpointData['raw
 	return {
 		signature: getValidatorPropertyShape(valueNode),
 		optional: getValidatorPropertyOptionality(valueNode),
+		description: getValidatorPropertyStringValue(valueNode, 'description'),
+		errorMessage: getValidatorPropertyStringValue(valueNode, 'errorMessage'),
 	}
 }
 
@@ -207,6 +237,8 @@ const parseRequestObjectInput = (
 			identifier: param.identifier,
 			signature: param.shape as string,
 			optional: param.optional,
+			description: param.description,
+			errorMessage: param.errorMessage,
 		}))
 }
 
@@ -231,6 +263,8 @@ const parseRequestResponse = (node: Node<ts.Node>): EndpointData['responses'] =>
 			{
 				status: responseType === 'void' ? 204 : 200,
 				signature: responseType,
+				description: '',
+				errorMessage: '',
 			},
 		]
 	}
@@ -241,6 +275,8 @@ const parseRequestResponse = (node: Node<ts.Node>): EndpointData['responses'] =>
 				{
 					status: 200,
 					signature: responseType[0].shape,
+					description: '',
+					errorMessage: '',
 				},
 			]
 		}
@@ -248,6 +284,8 @@ const parseRequestResponse = (node: Node<ts.Node>): EndpointData['responses'] =>
 		return responseType[0].shape.map((unionEntry) => ({
 			status: 200,
 			signature: unionEntry.shape,
+			description: '',
+			errorMessage: '',
 		}))
 	}
 
@@ -255,6 +293,8 @@ const parseRequestResponse = (node: Node<ts.Node>): EndpointData['responses'] =>
 		{
 			status: 200,
 			signature: responseType,
+			description: '',
+			errorMessage: '',
 		},
 	]
 }

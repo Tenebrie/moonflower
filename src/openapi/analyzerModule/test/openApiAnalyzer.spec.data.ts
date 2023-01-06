@@ -87,6 +87,40 @@ router.get('/test/f89310d9-25ac-4005-93e4-614179d3bbd4', (ctx) => {
 	})
 })
 
+router.post('/test/7c51de80-1ff1-4511-b0d3-8a75c296c507', (ctx) => {
+	useQueryParams(ctx, {
+		foo: RequiredParam<'dec' | 'hex' | 'bin'>({
+			rehydrate: (v) => v as 'dec' | 'hex' | 'bin',
+		}),
+	})
+})
+
+router.get('/test/724a56ef-32f9-4c59-b22c-60bd33e45242', (ctx) => {
+	useQueryParams(ctx, {
+		foo: RequiredParam({
+			rehydrate: (v) => v as 'hello world',
+		}),
+	})
+})
+
+router.get('/test/2b9a53fa-4418-4303-9202-3f8e46f73aed', (ctx) => {
+	useQueryParams(ctx, {
+		foo: RequiredParam({
+			rehydrate: (v) => v,
+			description: 'Test description',
+		}),
+	})
+})
+
+router.get('/test/685ac7fb-18ee-4ace-b68e-a6ee354ad4db', (ctx) => {
+	useQueryParams(ctx, {
+		foo: RequiredParam({
+			rehydrate: (v) => v,
+			errorMessage: 'Test error message',
+		}),
+	})
+})
+
 router.get('/test/03c247cb-96c0-4748-bb6a-9569c7bdb436', (ctx) => {
 	useHeaderParams(ctx, {
 		firstParam: RequiredParam({
@@ -106,6 +140,36 @@ router.get('/test/e563aa37-803e-4b79-a3e8-af0d01d024ae', (ctx) => {
 		'header-with-dashes': RequiredParam({
 			rehydrate: (v) => v,
 		}),
+	})
+})
+
+router.get('/test/a3e79aaa-2d0f-4481-9226-a10904e76354', (ctx) => {
+	useHeaderParams(ctx, {
+		foo: RequiredParam({
+			rehydrate: (v) => v,
+			description: 'Test description',
+		}),
+	})
+})
+
+router.get('/test/219c5c4e-1558-4d0b-85be-9753dfc14083', (ctx) => {
+	useHeaderParams(ctx, {
+		foo: RequiredParam({
+			rehydrate: (v) => v,
+			errorMessage: 'Test error message',
+		}),
+	})
+})
+
+router.get('/test/1ea8bc2f-3f66-4409-ba4a-289f33bcc8fd', (ctx) => {
+	useHeaderParams(ctx, {
+		foo: StringValidator,
+	})
+})
+
+router.get('/test/c679c01e-a403-4a5c-8097-3abbe891a625', (ctx) => {
+	useHeaderParams(ctx, {
+		foo: RequiredParam(StringValidator),
 	})
 })
 
@@ -138,6 +202,36 @@ router.get('/test/1ab973ff-9937-4e2d-b432-ff43a9df42cb', (ctx) => {
 
 router.get('/test/f74f6003-2aba-4f8c-855e-c0149f4217b7', (ctx) => {
 	useRequestRawBody(ctx, OptionalParam(BooleanValidator))
+})
+
+router.get('/test/54768e53-4094-4e2e-96bf-8891235f264b', (ctx) => {
+	useRequestRawBody(
+		ctx,
+		RequiredParam({
+			rehydrate: (v) => v,
+			description: 'Test description',
+			errorMessage: 'Test error message',
+		})
+	)
+})
+
+router.get('/test/87a1470c-3fec-492a-bc4c-ff35fc95524a', (ctx) => {
+	useRequestRawBody(
+		ctx,
+		RequiredParam({
+			rehydrate: (v) => v,
+			description: 'Test description',
+			errorMessage: 'Test error message',
+		})
+	)
+})
+
+router.get('/test/32f51057-743a-4c37-9647-476f9a8581f3', (ctx) => {
+	useRequestRawBody(ctx, StringValidator)
+})
+
+router.get('/test/2fbc419b-2f1c-4782-9113-ef4125dd813b', (ctx) => {
+	useRequestRawBody(ctx, OptionalParam(StringValidator))
 })
 
 router.get('/test/e8e5496b-11a0-41e3-a68d-f03d524e413c', (ctx) => {
@@ -258,22 +352,6 @@ router.post('/test/33a0f888-396e-4c4d-b1d9-4cf6600ab88d', () => {
 
 router.post('/test/e3659429-1a05-4590-a5a6-dc80a30878e6', () => {
 	return ['foo', 'bar']
-})
-
-router.post('/test/7c51de80-1ff1-4511-b0d3-8a75c296c507', (ctx) => {
-	useQueryParams(ctx, {
-		foo: RequiredParam<'dec' | 'hex' | 'bin'>({
-			rehydrate: (v) => v as 'dec' | 'hex' | 'bin',
-		}),
-	})
-})
-
-router.get('/test/724a56ef-32f9-4c59-b22c-60bd33e45242', (ctx) => {
-	useQueryParams(ctx, {
-		foo: RequiredParam({
-			rehydrate: (v) => v as 'hello world',
-		}),
-	})
 })
 
 router.get('/test/39669151-c529-4bcd-86a5-a10de7834104/:foo', (ctx) => {

@@ -755,7 +755,7 @@ export const manyEndpointsResults = {
 					{
 						name: 'optionalParam',
 						in: 'path',
-						description: 'Optional parameter',
+						description: '(Optional parameter) undefined',
 						required: true,
 						schema: { type: 'number' },
 					},
@@ -772,7 +772,7 @@ export const manyEndpointsResults = {
 					{
 						name: 'optionalParam',
 						in: 'path',
-						description: 'Optional parameter',
+						description: '(Optional parameter) undefined',
 						required: true,
 						schema: { type: 'number' },
 					},

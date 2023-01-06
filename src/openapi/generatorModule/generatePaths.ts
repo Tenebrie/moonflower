@@ -28,7 +28,10 @@ export const generatePaths = (endpoints: EndpointData[], preferences: ApiDocsPre
 		const pathParams = endpoint.requestPathParams.map((param) => ({
 			name: param.identifier,
 			in: 'path' as const,
-			description: param.optional && !allowOptionalPathParams ? 'Optional parameter' : '',
+			description:
+				param.optional && !allowOptionalPathParams
+					? `(Optional parameter) ${param.description}`
+					: param.description ?? '',
 			required: !allowOptionalPathParams || !param.optional,
 			schema: getSchema(param.signature),
 		}))
@@ -36,7 +39,7 @@ export const generatePaths = (endpoints: EndpointData[], preferences: ApiDocsPre
 		const queryParams = endpoint.requestQuery.map((param) => ({
 			name: param.identifier,
 			in: 'query' as const,
-			description: '',
+			description: param.description ?? '',
 			required: !param.optional,
 			schema: getSchema(param.signature),
 		}))
@@ -44,7 +47,7 @@ export const generatePaths = (endpoints: EndpointData[], preferences: ApiDocsPre
 		const headerParams = endpoint.requestHeaders.map((param) => ({
 			name: param.identifier,
 			in: 'header' as const,
-			description: '',
+			description: param.description ?? '',
 			required: !param.optional,
 			schema: getSchema(param.signature),
 		}))
@@ -100,7 +103,7 @@ export const generatePaths = (endpoints: EndpointData[], preferences: ApiDocsPre
 			})()
 
 			responses[status] = {
-				description: '',
+				description: response.description || '',
 				content,
 			}
 		})

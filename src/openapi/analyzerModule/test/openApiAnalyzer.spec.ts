@@ -1,6 +1,7 @@
 import * as path from 'path'
 import { Project, SourceFile } from 'ts-morph'
 
+import { StringValidator } from '../../../validators/BuiltInValidators'
 import { analyzeSourceFile } from '../analyzerModule'
 
 describe('OpenApi Analyzer', () => {
@@ -195,7 +196,7 @@ describe('OpenApi Analyzer', () => {
 				const endpoint = analyzeEndpointById('39669151-c529-4bcd-86a5-a10de7834104')
 
 				expect(endpoint.requestPathParams).toEqual([
-					{ identifier: 'foo', optional: false, signature: 'string' },
+					{ identifier: 'foo', optional: false, signature: 'string', description: '', errorMessage: '' },
 				])
 			})
 		})
@@ -252,6 +253,18 @@ describe('OpenApi Analyzer', () => {
 				])
 				expect(endpoint.responses.length).toEqual(1)
 			})
+
+			it('parses validator with description correctly', () => {
+				const endpoint = analyzeEndpointById('2b9a53fa-4418-4303-9202-3f8e46f73aed')
+
+				expect(endpoint.requestQuery[0].description).toEqual('Test description')
+			})
+
+			it('parses validator with error message correctly', () => {
+				const endpoint = analyzeEndpointById('685ac7fb-18ee-4ace-b68e-a6ee354ad4db')
+
+				expect(endpoint.requestQuery[0].errorMessage).toEqual('Test error message')
+			})
 		})
 
 		describe('useHeaderParams', () => {
@@ -275,6 +288,32 @@ describe('OpenApi Analyzer', () => {
 				expect(endpoint.requestHeaders[0].identifier).toEqual('header-with-dashes')
 				expect(endpoint.requestHeaders[0].signature).toEqual('string')
 				expect(endpoint.requestHeaders[0].optional).toEqual(false)
+			})
+
+			it('parses validator with description correctly', () => {
+				const endpoint = analyzeEndpointById('a3e79aaa-2d0f-4481-9226-a10904e76354')
+
+				expect(endpoint.requestHeaders[0].description).toEqual('Test description')
+			})
+
+			it('parses validator with error message correctly', () => {
+				const endpoint = analyzeEndpointById('219c5c4e-1558-4d0b-85be-9753dfc14083')
+
+				expect(endpoint.requestHeaders[0].errorMessage).toEqual('Test error message')
+			})
+
+			it('parses info from built-in validator correctly', () => {
+				const endpoint = analyzeEndpointById('1ea8bc2f-3f66-4409-ba4a-289f33bcc8fd')
+
+				expect(endpoint.requestHeaders[0].description).toEqual(StringValidator.description)
+				expect(endpoint.requestHeaders[0].errorMessage).toEqual(StringValidator.errorMessage)
+			})
+
+			it('parses info from built-in wrapped validator correctly', () => {
+				const endpoint = analyzeEndpointById('c679c01e-a403-4a5c-8097-3abbe891a625')
+
+				expect(endpoint.requestHeaders[0].description).toEqual(StringValidator.description)
+				expect(endpoint.requestHeaders[0].errorMessage).toEqual(StringValidator.errorMessage)
 			})
 		})
 
@@ -360,6 +399,32 @@ describe('OpenApi Analyzer', () => {
 				}
 				expect(body.signature).toEqual('boolean')
 				expect(body.optional).toEqual(true)
+			})
+
+			it('parses description from inline validator correctly', () => {
+				const endpoint = analyzeEndpointById('54768e53-4094-4e2e-96bf-8891235f264b')
+
+				expect(endpoint.rawBody?.description).toEqual('Test description')
+			})
+
+			it('parses errorMessage from inline validator correctly', () => {
+				const endpoint = analyzeEndpointById('87a1470c-3fec-492a-bc4c-ff35fc95524a')
+
+				expect(endpoint.rawBody?.errorMessage).toEqual('Test error message')
+			})
+
+			it('parses info from built-in validator correctly', () => {
+				const endpoint = analyzeEndpointById('32f51057-743a-4c37-9647-476f9a8581f3')
+
+				expect(endpoint.rawBody?.description).toEqual(StringValidator.description)
+				expect(endpoint.rawBody?.errorMessage).toEqual(StringValidator.errorMessage)
+			})
+
+			it('parses info from built-in optional validator correctly', () => {
+				const endpoint = analyzeEndpointById('2fbc419b-2f1c-4782-9113-ef4125dd813b')
+
+				expect(endpoint.rawBody?.description).toEqual(StringValidator.description)
+				expect(endpoint.rawBody?.errorMessage).toEqual(StringValidator.errorMessage)
 			})
 		})
 

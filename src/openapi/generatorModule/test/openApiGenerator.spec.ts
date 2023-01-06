@@ -336,4 +336,104 @@ describe('OpenApi Generator', () => {
 			},
 		})
 	})
+
+	it('includes descriptions if provided in request headers', () => {
+		const manager = createManager([
+			{
+				...minimalEndpointData,
+				requestHeaders: [
+					{
+						identifier: 'x-auth',
+						signature: 'string',
+						optional: false,
+						description: 'Test description',
+					},
+				],
+			},
+		])
+		const spec = generateOpenApiSpec(manager)
+
+		expect(spec.paths['/test/path'].get?.parameters[0].in).toEqual('header')
+		expect(spec.paths['/test/path'].get?.parameters[0].description).toEqual('Test description')
+	})
+
+	it('includes descriptions if provided in request path params', () => {
+		const manager = createManager([
+			{
+				...minimalEndpointData,
+				requestPathParams: [
+					{
+						identifier: 'pathParam',
+						signature: 'string',
+						optional: false,
+						description: 'Test description',
+					},
+				],
+			},
+		])
+		const spec = generateOpenApiSpec(manager)
+
+		expect(spec.paths['/test/path'].get?.parameters[0].in).toEqual('path')
+		expect(spec.paths['/test/path'].get?.parameters[0].description).toEqual('Test description')
+	})
+
+	it('includes descriptions if provided in optional request path params', () => {
+		const manager = createManager([
+			{
+				...minimalEndpointData,
+				requestPathParams: [
+					{
+						identifier: 'pathParam',
+						signature: 'string',
+						optional: true,
+						description: 'Test description',
+					},
+				],
+			},
+		])
+		const spec = generateOpenApiSpec(manager)
+
+		expect(spec.paths['/test/path'].get?.parameters[0].in).toEqual('path')
+		expect(spec.paths['/test/path'].get?.parameters[0].description).toEqual(
+			'(Optional parameter) Test description'
+		)
+	})
+
+	it('includes descriptions if provided in request path params', () => {
+		const manager = createManager([
+			{
+				...minimalEndpointData,
+				requestQuery: [
+					{
+						identifier: 'pathParam',
+						signature: 'string',
+						optional: false,
+						description: 'Test description',
+					},
+				],
+			},
+		])
+		const spec = generateOpenApiSpec(manager)
+
+		expect(spec.paths['/test/path'].get?.parameters[0].in).toEqual('query')
+		expect(spec.paths['/test/path'].get?.parameters[0].description).toEqual('Test description')
+	})
+
+	it('includes descriptions if provided in response', () => {
+		const manager = createManager([
+			{
+				...minimalEndpointData,
+				responses: [
+					{
+						status: 200,
+						signature: 'string',
+						description: 'Test description',
+					},
+				],
+			},
+		])
+		const spec = generateOpenApiSpec(manager)
+
+		expect(spec.paths['/test/path'].get?.responses[200].description).toEqual('Test description')
+	})
 })

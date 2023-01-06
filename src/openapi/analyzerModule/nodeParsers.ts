@@ -180,7 +180,7 @@ export const getRecursiveNodeShape = (nodeOrReference: Node): ShapeOfType['shape
 
 export const getShapeOfValidatorLiteral = (
 	objectLiteralNode: Node<ts.ObjectLiteralExpression>
-): ShapeOfProperty[] => {
+): (ShapeOfProperty & { description: string; errorMessage: string })[] => {
 	const syntaxListNode = objectLiteralNode.getFirstDescendantByKind(SyntaxKind.SyntaxList)!
 	const assignmentNodes = syntaxListNode.getChildrenOfKind(SyntaxKind.PropertyAssignment)!
 
@@ -204,6 +204,8 @@ export const getShapeOfValidatorLiteral = (
 			identifier: identifierName,
 			shape: getValidatorPropertyShape(innerLiteralNode),
 			optional: getValidatorPropertyOptionality(innerLiteralNode),
+			description: getValidatorPropertyStringValue(innerLiteralNode, 'description'),
+			errorMessage: getValidatorPropertyStringValue(innerLiteralNode, 'errorMessage'),
 		}
 	})
 
@@ -310,6 +312,35 @@ export const getValidatorPropertyOptionality = (node: Node): boolean => {
 		}
 		return false
 	})
+}
+
+export const getValidatorPropertyStringValue = (
+	nodeOrReference: Node,
+	name: 'description' | 'errorMessage'
+): string => {
+	const node = findNodeImplementation(nodeOrReference)
+
+	const callExpressionNode = node.asKind(SyntaxKind.CallExpression)
+	if (callExpressionNode) {
+		const targetChild = callExpressionNode.getLastChildByKind(SyntaxKind.SyntaxList)!
+		return getValidatorPropertyStringValue(targetChild, name)
+	}
+
+	const syntaxListNode = node.asKind(SyntaxKind.SyntaxList)
+	if (syntaxListNode) {
+		return getValidatorPropertyStringValue(syntaxListNode.getFirstChild()!, name)
+	}
+
+	const objectLiteralNode = node.asKind(SyntaxKind.ObjectLiteralExpression)
+	if (objectLiteralNode) {
+		const values = getValuesOfObjectLiteral(objectLiteralNode)
+		const targetValue = values.find((value) => value.identifier === name)
+		if (!targetValue) {
+			return ''
+		}
+		return targetValue.value || ''
+	}
+	return 'unknown_25'
 }
 
 const isPromise = (type: Type) => {

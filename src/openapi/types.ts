@@ -39,28 +39,40 @@ export type EndpointData = {
 		identifier: string
 		signature: string | ShapeOfType[]
 		optional: boolean
+		description?: string
+		errorMessage?: string
 	}[]
 	requestQuery: {
 		identifier: string
 		signature: string | ShapeOfType[]
 		optional: boolean
+		description?: string
+		errorMessage?: string
 	}[]
 	requestHeaders: {
 		identifier: string
 		signature: string | ShapeOfType[]
 		optional: boolean
+		description?: string
+		errorMessage?: string
 	}[]
 	rawBody?: {
 		signature: string | ShapeOfType[]
 		optional: boolean
+		description?: string
+		errorMessage?: string
 	}
 	objectBody: {
 		identifier: string
 		signature: string | ShapeOfType[]
 		optional: boolean
+		description?: string
+		errorMessage?: string
 	}[]
 	responses: {
 		status: number
 		signature: string | ShapeOfType[]
+		description?: string
+		errorMessage?: string
 	}[]
 }
