@@ -29,6 +29,11 @@ export type PathDefinition = {
 	>
 }
 
+export type ExposedModelData = {
+	name: string
+	shape: string | ShapeOfType[]
+}
+
 export type EndpointData = {
 	method: 'GET' | 'POST'
 	path: string

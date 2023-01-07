@@ -3,16 +3,16 @@ import * as path from 'path'
 import { Project, SourceFile, SyntaxKind } from 'ts-morph'
 
 import { StringValidator } from '../../../validators/BuiltInValidators'
-import { analyzeSourceFile } from '../analyzerModule'
+import { analyzeSourceFileEndpoints } from '../analyzerModule'
 import { getValidatorPropertyShape } from '../nodeParsers'
 
 describe('OpenApi Analyzer', () => {
 	describe('when analyzing a test data file', () => {
 		let dataFile: SourceFile
-		let analysisResult: ReturnType<typeof analyzeSourceFile>
+		let analysisResult: ReturnType<typeof analyzeSourceFileEndpoints>
 
 		const analyzeEndpointById = (id: string) => {
-			analysisResult = analyzeSourceFile(dataFile, [`/test/${id}`])
+			analysisResult = analyzeSourceFileEndpoints(dataFile, [`/test/${id}`])
 			const endpoint = analysisResult.find((endpoint) => endpoint.path.startsWith(`/test/${id}`))
 			if (!endpoint) {
 				throw new Error(`No endpoint with id ${id} found!`)

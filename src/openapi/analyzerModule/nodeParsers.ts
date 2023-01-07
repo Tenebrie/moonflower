@@ -15,15 +15,26 @@ import { ShapeOfProperty, ShapeOfType, ShapeOfUnionEntry } from './types'
 
 export const findNodeImplementation = (node: Node): Node => {
 	if (node.getKind() === SyntaxKind.Identifier) {
-		if (!node.asKind(SyntaxKind.Identifier)!.getImplementations()[0]) {
-			throw new Error('No implementation available')
+		const implementationNode = node.asKind(SyntaxKind.Identifier)!.getImplementations()[0]?.getNode()
+		if (implementationNode) {
+			const implementationParentNode = implementationNode.getParent()!
+			const assignmentValueNode = implementationParentNode.getLastChild()!
+			if (assignmentValueNode === node) {
+				throw new Error('Recursive implementation found')
+			}
+			return findNodeImplementation(assignmentValueNode)
 		}
-		const implementation = node.asKind(SyntaxKind.Identifier)!.getImplementations()[0].getNode().getParent()!
-		const assignmentValueNode = implementation.getLastChild()!
-		if (assignmentValueNode === node) {
-			throw new Error('Recursive implementation found')
+
+		const definitionNode = node.asKind(SyntaxKind.Identifier)!.getDefinitions()[0]?.getNode()
+		if (definitionNode) {
+			const definitionParentNode = definitionNode.getParent()!
+			const assignmentValueNode = definitionParentNode.getLastChild()!
+			if (assignmentValueNode === node) {
+				throw new Error('Recursive implementation found')
+			}
+			return findNodeImplementation(assignmentValueNode)
 		}
-		return findNodeImplementation(assignmentValueNode)
+		throw new Error('No implementation nor definition available')
 	}
 
 	return node

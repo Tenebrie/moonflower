@@ -2,9 +2,11 @@ import * as path from 'path'
 import { SourceFile, SyntaxKind } from 'ts-morph'
 import { Project } from 'ts-morph'
 
+import { debugNode } from '../../utils/printers'
 import { OpenApiManager } from '../manager/OpenApiManager'
-import { EndpointData } from '../types'
+import { EndpointData, ExposedModelData } from '../types'
 import { parseEndpoint } from './parseEndpoint'
+import { parseExposedModel, parseNamedExposedModels } from './parseExposedModels'
 
 /**
  * @param tsconfigPath Path to tsconfig file relative to project root
@@ -23,12 +25,15 @@ export const prepareOpenApiSpec = (tsconfigPath: string, sourceFilePaths: string
 	const resolvedSourceFilePaths = sourceFilePaths.map((filepath) => path.resolve(filepath))
 
 	const sourceFiles = resolvedSourceFilePaths.map((filePath) => project.getSourceFileOrThrow(filePath))
-	const endpoints = sourceFiles.flatMap((sourceFile) => analyzeSourceFile(sourceFile))
+	const endpoints = sourceFiles.flatMap((sourceFile) => analyzeSourceFileEndpoints(sourceFile))
 
 	openApiManager.initialize(endpoints)
 }
 
-export const analyzeSourceFile = (sourceFile: SourceFile, filterEndpointPaths?: string[]): EndpointData[] => {
+export const analyzeSourceFileEndpoints = (
+	sourceFile: SourceFile,
+	filterEndpointPaths?: string[]
+): EndpointData[] => {
 	const endpoints: EndpointData[] = []
 
 	sourceFile.forEachChild((node) => {
@@ -39,9 +44,52 @@ export const analyzeSourceFile = (sourceFile: SourceFile, filterEndpointPaths?: 
 				return
 			}
 
-			const result = parseEndpoint(node)
-			endpoints.push(result)
+			endpoints.push(parseEndpoint(node))
 		}
 	})
 	return endpoints
+}
+
+export const analyzeSourceFileExposedModels = (sourceFile: SourceFile): ExposedModelData[] => {
+	const models: ExposedModelData[] = []
+
+	sourceFile
+		.forEachChildAsArray()
+		.filter((node) => node.isKind(SyntaxKind.ExpressionStatement))
+		.map((node) => {
+			if (node.getText().startsWith('useExposeApiModel')) {
+				const callExpressionNode = node.getFirstChild()
+				const syntaxListChildren = callExpressionNode?.getChildrenOfKind(SyntaxKind.SyntaxList) || []
+				if (syntaxListChildren.length < 2) {
+					console.error('Missing type argument in useExposeApiModel')
+					return
+				}
+
+				const firstChild = syntaxListChildren[0].getFirstChild()
+				if (!firstChild) {
+					return
+				}
+
+				models.push(parseExposedModel(firstChild))
+				return
+			}
+
+			if (node.getText().startsWith('useExposeNamedApiModels')) {
+				const callExpressionNode = node.getFirstChild()
+				const syntaxListChildren = callExpressionNode?.getChildrenOfKind(SyntaxKind.SyntaxList) || []
+				if (syntaxListChildren.length < 2) {
+					console.error('Missing type argument in useExposeApiModel')
+					return
+				}
+
+				const firstChild = syntaxListChildren[0].getFirstChild()
+				if (!firstChild) {
+					return
+				}
+
+				const parsedModels = parseNamedExposedModels(firstChild)
+				parsedModels.forEach((model) => models.push(model))
+			}
+		})
+	return models
 }
