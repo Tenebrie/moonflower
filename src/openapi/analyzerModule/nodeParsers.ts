@@ -20,6 +20,9 @@ export const findNodeImplementation = (node: Node): Node => {
 		}
 		const implementation = node.asKind(SyntaxKind.Identifier)!.getImplementations()[0].getNode().getParent()!
 		const assignmentValueNode = implementation.getLastChild()!
+		if (assignmentValueNode === node) {
+			throw new Error('Recursive implementation found')
+		}
 		return findNodeImplementation(assignmentValueNode)
 	}
 
@@ -144,15 +147,6 @@ export const getRecursiveNodeShape = (nodeOrReference: Node): ShapeOfType['shape
 		return getRecursiveNodeShape(qualifiedNameNode.getLastChild()!)
 	}
 
-	// // Validator call expression
-	// const callExpressionNode = node.asKind(SyntaxKind.CallExpression)
-	// if (callExpressionNode) {
-	// 	debugNode(callExpressionNode)
-	// 	return getValidatorPropertyShape(
-	// 		findNodeImplementation(node.getFirstChildByKind(SyntaxKind.SyntaxList)!.getFirstChild()!)
-	// 	)
-	// }
-
 	// Call expression
 	const callExpressionNode = node.asKind(SyntaxKind.CallExpression)
 	if (callExpressionNode) {
@@ -162,7 +156,6 @@ export const getRecursiveNodeShape = (nodeOrReference: Node): ShapeOfType['shape
 	// Await expression
 	const awaitExpressionNode = node.asKind(SyntaxKind.AwaitExpression)
 	if (awaitExpressionNode) {
-		// debugNode(awaitExpressionNode)
 		return getRecursiveNodeShape(awaitExpressionNode.getChildAtIndex(1)!)
 	}
 
@@ -171,8 +164,6 @@ export const getRecursiveNodeShape = (nodeOrReference: Node): ShapeOfType['shape
 	if (asExpressionNode) {
 		return getRecursiveNodeShape(asExpressionNode.getChildAtIndex(2)!)
 	}
-
-	// debugNode(node)
 
 	// TODO
 	return 'unknown_1'
@@ -256,7 +247,6 @@ export const getValidatorPropertyShape = (innerLiteralNode: Node): ShapeOfType['
 			.getParent()!
 			.getFirstChildByKind(SyntaxKind.ObjectLiteralExpression)!
 		if (thingyNode) {
-			// debugNode(thingyNode)
 			return getValidatorPropertyShape(thingyNode)
 		}
 
@@ -279,6 +269,18 @@ export const getValidatorPropertyShape = (innerLiteralNode: Node): ShapeOfType['
 			.asKind(SyntaxKind.ArrowFunction)!
 			.getReturnType()
 		return getProperTypeShape(returnType, rehydratePropertyAssignment)
+	}
+
+	// Import statement
+	const importTypeNode = innerLiteralNode
+		.getFirstChildByKind(SyntaxKind.SyntaxList)
+		?.getFirstChildByKind(SyntaxKind.ImportType)
+	if (importTypeNode) {
+		const indexOfGreaterThanToken = importTypeNode
+			.getLastChildByKind(SyntaxKind.GreaterThanToken)!
+			.getChildIndex()
+		const targetSyntaxList = importTypeNode.getChildAtIndex(indexOfGreaterThanToken - 1)
+		return getRecursiveNodeShape(targetSyntaxList.getFirstChild()!)
 	}
 
 	return 'unknown_2'

@@ -1,26 +1,14 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import * as path from 'path'
-import { Project, SourceFile } from 'ts-morph'
+import { Project, SourceFile, SyntaxKind } from 'ts-morph'
 
 import { StringValidator } from '../../../validators/BuiltInValidators'
 import { analyzeSourceFile } from '../analyzerModule'
+import { getValidatorPropertyShape } from '../nodeParsers'
 
 describe('OpenApi Analyzer', () => {
-	let dataFile: SourceFile
-
-	beforeAll(() => {
-		const project = new Project({
-			tsConfigFilePath: path.resolve('./tsconfig.json'),
-		})
-
-		const sourceFile = project.getSourceFile('openApiAnalyzer.spec.data.ts')
-		if (!sourceFile) {
-			throw new Error('Where file?')
-		}
-
-		dataFile = sourceFile
-	})
-
 	describe('when analyzing a test data file', () => {
+		let dataFile: SourceFile
 		let analysisResult: ReturnType<typeof analyzeSourceFile>
 
 		const analyzeEndpointById = (id: string) => {
@@ -31,6 +19,19 @@ describe('OpenApi Analyzer', () => {
 			}
 			return endpoint
 		}
+
+		beforeAll(() => {
+			const project = new Project({
+				tsConfigFilePath: path.resolve('./tsconfig.json'),
+			})
+
+			const sourceFile = project.getSourceFile('openApiAnalyzer.spec.data.ts')
+			if (!sourceFile) {
+				throw new Error('Where file?')
+			}
+
+			dataFile = sourceFile
+		})
 
 		describe('useApiEndpoint', () => {
 			it('parses useApiEndpoint values correctly', () => {
@@ -670,6 +671,37 @@ describe('OpenApi Analyzer', () => {
 				])
 				expect(endpoint.responses.length).toEqual(1)
 			})
+		})
+	})
+
+	describe('when validator is imported from another package', () => {
+		let project: Project
+
+		beforeAll(() => {
+			project = new Project({
+				useInMemoryFileSystem: true,
+			})
+		})
+
+		it('parses shape correctly', () => {
+			const sourceFile = project.createSourceFile(
+				'/test-file',
+				'export declare const StringValidator: import("./types").Validator<string> & {optional: false;};'
+			)
+
+			const node = sourceFile
+				.getFirstChild()!
+				.getFirstChildByKind(SyntaxKind.VariableStatement)!
+				.getFirstChildByKind(SyntaxKind.VariableDeclarationList)!
+				.getFirstChildByKind(SyntaxKind.SyntaxList)!
+				.getFirstChildByKind(SyntaxKind.VariableDeclaration)!
+				.getFirstChildByKind(SyntaxKind.IntersectionType)!
+
+			if (!node) {
+				throw new Error('Node not found')
+			}
+
+			expect(getValidatorPropertyShape(node)).toEqual('string')
 		})
 	})
 })

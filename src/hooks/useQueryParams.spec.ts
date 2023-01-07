@@ -115,4 +115,43 @@ describe('useQueryParams', () => {
 		expect(test).toThrow(ValidationError)
 		expect(test).toThrow("Failed query param validation: 'testParam'")
 	})
+
+	it('sends an error message when validation fails', () => {
+		const test = () => {
+			const ctx = mockContextQuery(mockContext(), {
+				testParam: 'invalid',
+			})
+
+			useQueryParams(ctx, {
+				testParam: RequiredParam({
+					prevalidate: (v) => v === 'valid',
+					rehydrate: (v) => v,
+					description: 'Description',
+					errorMessage: 'Error message',
+				}),
+			})
+		}
+
+		expect(test).toThrow(ValidationError)
+		expect(test).toThrow("Failed query param validation: 'testParam' (Error message)")
+	})
+
+	it('sends the description when validation fails with no error message provided', () => {
+		const test = () => {
+			const ctx = mockContextQuery(mockContext(), {
+				testParam: 'invalid',
+			})
+
+			useQueryParams(ctx, {
+				testParam: RequiredParam({
+					prevalidate: (v) => v === 'valid',
+					rehydrate: (v) => v,
+					description: 'Description',
+				}),
+			})
+		}
+
+		expect(test).toThrow(ValidationError)
+		expect(test).toThrow("Failed query param validation: 'testParam' (Description)")
+	})
 })

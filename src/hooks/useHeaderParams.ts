@@ -3,6 +3,7 @@ import { ParameterizedContext } from 'koa'
 import { ValidationError } from '../errors/UserFacingErrors'
 import { kebabToCamelCase, keysOf } from '../utils/object'
 import { CamelCase } from '../utils/TypeUtils'
+import { getValidationResultMessage as getValidationFailedMessage } from '../utils/validationMessages'
 import { Validator } from '../validators/types'
 
 type CheckIfOptional<T, B extends boolean | undefined> = B extends false ? T : T | undefined
@@ -33,12 +34,11 @@ export const useHeaderParams = <ValidatorsT extends Record<string, Validator<any
 	}
 
 	const validationResults = params.map((param) => {
-		const paramName = param.originalName
 		const paramValue = headers[param.name]
 
 		// Param is optional and is not provided - skip validation
 		if (paramValue === undefined) {
-			return { paramName, validated: true }
+			return { param, validated: true }
 		}
 
 		try {
@@ -48,12 +48,12 @@ export const useHeaderParams = <ValidatorsT extends Record<string, Validator<any
 			const rehydratedValue = validatorObject.rehydrate(paramValue as string)
 			const validatorSuccess = !validatorObject.validate || validatorObject.validate(rehydratedValue)
 			return {
-				paramName,
+				param,
 				validated: prevalidatorSuccess && validatorSuccess,
 				rehydratedValue,
 			}
 		} catch (error) {
-			return { paramName, validated: false }
+			return { param, validated: false }
 		}
 	})
 
@@ -61,7 +61,9 @@ export const useHeaderParams = <ValidatorsT extends Record<string, Validator<any
 
 	if (failedValidations.length > 0) {
 		throw new ValidationError(
-			`Failed header validation: ${failedValidations.map((result) => `'${result.paramName}'`).join(', ')}`
+			`Failed header validation: ${failedValidations
+				.map((result) => getValidationFailedMessage(result.param))
+				.join(', ')}`
 		)
 	}
 
@@ -69,7 +71,7 @@ export const useHeaderParams = <ValidatorsT extends Record<string, Validator<any
 
 	const returnValue: Record<string, unknown> = {}
 	successfulValidations.forEach((result) => {
-		returnValue[kebabToCamelCase(result.paramName)] = result.rehydratedValue
+		returnValue[kebabToCamelCase(result.param.originalName)] = result.rehydratedValue
 	})
 
 	return returnValue as ValidatedData<ValidatorsT>

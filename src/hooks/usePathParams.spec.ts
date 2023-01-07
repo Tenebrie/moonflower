@@ -102,4 +102,43 @@ describe('usePathParams', () => {
 		expect(test).toThrow(ValidationError)
 		expect(test).toThrow("Failed route param validation: 'testParam'")
 	})
+
+	it('sends an error message when validation fails', () => {
+		const test = () => {
+			const ctx = mockContextPath(mockContext(), '/test/:testParam', {
+				testParam: 'invalid',
+			})
+
+			usePathParams(ctx, {
+				testParam: PathParam({
+					prevalidate: (v) => v === 'valid',
+					rehydrate: (v) => v,
+					description: 'Description',
+					errorMessage: 'Error message',
+				}),
+			})
+		}
+
+		expect(test).toThrow(ValidationError)
+		expect(test).toThrow("Failed route param validation: 'testParam' (Error message)")
+	})
+
+	it('sends the description when validation fails with no error message provided', () => {
+		const test = () => {
+			const ctx = mockContextPath(mockContext(), '/test/:testParam', {
+				testParam: 'invalid',
+			})
+
+			usePathParams(ctx, {
+				testParam: PathParam({
+					prevalidate: (v) => v === 'valid',
+					rehydrate: (v) => v,
+					description: 'Description',
+				}),
+			})
+		}
+
+		expect(test).toThrow(ValidationError)
+		expect(test).toThrow("Failed route param validation: 'testParam' (Description)")
+	})
 })

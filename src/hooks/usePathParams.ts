@@ -3,6 +3,7 @@ import { ParameterizedContext } from 'koa'
 import { ValidationError } from '../errors/UserFacingErrors'
 import { keysOf } from '../utils/object'
 import { SplitStringBy } from '../utils/TypeUtils'
+import { getValidationResultMessage } from '../utils/validationMessages'
 import { Validator } from '../validators/types'
 
 type CheckIfOptional<T, B> = B extends string ? (B extends `${string}?` ? T | undefined : T) : never
@@ -47,28 +48,31 @@ export const usePathParams = <
 	validators: Pick<ValidatorsT, CleanUpPathParam<ParamsT[number]>>
 ): ValidatedData<ParamsT, TestTemplate, ValidatorsT> => {
 	const params = ctx.params
-	const expectedParams = keysOf(validators)
+	const expectedParams = keysOf(validators).map((name) => ({
+		name,
+		validator: validators[name],
+	}))
 
-	const validationResults = expectedParams.map((paramName) => {
-		const paramValue = params[paramName] as string
+	const validationResults = expectedParams.map((param) => {
+		const paramValue = params[param.name] as string
 
 		// Param is optional and is not provided - skip validation
 		if (paramValue === undefined) {
-			return { paramName, validated: true }
+			return { param, validated: true }
 		}
 
 		try {
-			const validatorObject = validators[paramName] as Omit<Validator<unknown>, 'optional'>
+			const validatorObject = param.validator
 			const prevalidatorSuccess = !validatorObject.prevalidate || validatorObject.prevalidate(paramValue)
 			const rehydratedValue = validatorObject.rehydrate(paramValue)
 			const validatorSuccess = !validatorObject.validate || validatorObject.validate(rehydratedValue)
 			return {
-				paramName,
+				param,
 				validated: prevalidatorSuccess && validatorSuccess,
 				rehydratedValue,
 			}
 		} catch (error) {
-			return { paramName, validated: false }
+			return { param, validated: false }
 		}
 	})
 
@@ -77,7 +81,7 @@ export const usePathParams = <
 	if (failedValidations.length > 0) {
 		throw new ValidationError(
 			`Failed route param validation: ${failedValidations
-				.map((result) => `'${result.paramName}'`)
+				.map((result) => getValidationResultMessage(result.param))
 				.join(', ')}`
 		)
 	}
@@ -86,7 +90,7 @@ export const usePathParams = <
 
 	const returnValue: Record<string, unknown> = {}
 	successfulValidations.forEach((result) => {
-		returnValue[result.paramName] = result.rehydratedValue
+		returnValue[result.param.name] = result.rehydratedValue
 	})
 
 	return returnValue as ValidatedData<ParamsT, TestTemplate, ValidatorsT>

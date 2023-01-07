@@ -127,4 +127,43 @@ describe('useHeaderParams', () => {
 		expect(test).toThrow(ValidationError)
 		expect(test).toThrow("Failed header validation: 'test-header'")
 	})
+
+	it('sends an error message when validation fails', () => {
+		const test = () => {
+			const ctx = mockContextHeaders(mockContext(), {
+				'test-header': 'invalid',
+			})
+
+			useHeaderParams(ctx, {
+				'test-header': RequiredParam({
+					prevalidate: (v) => v === 'valid',
+					rehydrate: (v) => v,
+					description: 'Description',
+					errorMessage: 'Error message',
+				}),
+			})
+		}
+
+		expect(test).toThrow(ValidationError)
+		expect(test).toThrow("Failed header validation: 'test-header' (Error message)")
+	})
+
+	it('sends the description when validation fails with no error message provided', () => {
+		const test = () => {
+			const ctx = mockContextHeaders(mockContext(), {
+				'test-header': 'invalid',
+			})
+
+			useHeaderParams(ctx, {
+				'test-header': RequiredParam({
+					prevalidate: (v) => v === 'valid',
+					rehydrate: (v) => v,
+					description: 'Description',
+				}),
+			})
+		}
+
+		expect(test).toThrow(ValidationError)
+		expect(test).toThrow("Failed header validation: 'test-header' (Description)")
+	})
 })
