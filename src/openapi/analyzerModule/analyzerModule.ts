@@ -2,7 +2,6 @@ import * as path from 'path'
 import { SourceFile, SyntaxKind } from 'ts-morph'
 import { Project } from 'ts-morph'
 
-import { debugNode } from '../../utils/printers'
 import { OpenApiManager } from '../manager/OpenApiManager'
 import { EndpointData, ExposedModelData } from '../types'
 import { parseEndpoint } from './parseEndpoint'
