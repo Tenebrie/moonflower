@@ -28,3 +28,8 @@ export type Validator<T> = {
 	 */
 	errorMessage?: string
 }
+
+export type BuiltInValidator<T, DescriptionT extends string, ErrorMessageT extends string> = Validator<T> & {
+	description: DescriptionT
+	errorMessage: ErrorMessageT
+}

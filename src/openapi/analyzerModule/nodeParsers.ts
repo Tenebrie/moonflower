@@ -11,7 +11,7 @@ import {
 	TypeReferenceNode,
 } from 'ts-morph'
 
-import { debugNode } from '../../utils/printers'
+import { debugNode, debugNodes } from '../../utils/printers'
 import { OpenApiManager } from '../manager/OpenApiManager'
 import { ShapeOfProperty, ShapeOfType, ShapeOfUnionEntry } from './types'
 
@@ -358,7 +358,8 @@ export const getValidatorPropertyStringValue = (
 
 	const syntaxListNode = node.asKind(SyntaxKind.SyntaxList)
 	if (syntaxListNode) {
-		return getValidatorPropertyStringValue(syntaxListNode.getFirstChild()!, name)
+		const children = syntaxListNode.getChildren().map((c) => getValidatorPropertyStringValue(c, name))
+		return children.find((value) => !!value && value !== 'unknown_25') || ''
 	}
 
 	const objectLiteralNode = node.asKind(SyntaxKind.ObjectLiteralExpression)
@@ -369,6 +370,32 @@ export const getValidatorPropertyStringValue = (
 			return ''
 		}
 		return targetValue.value || ''
+	}
+
+	const intersectionTypeNode = node.asKind(SyntaxKind.IntersectionType)
+	if (intersectionTypeNode) {
+		return (
+			intersectionTypeNode
+				.getTypeNodes()
+				.flatMap((t) => getValidatorPropertyStringValue(t, name))
+				.filter((v) => !!v && v !== 'unknown_25')[0] || 'unknown_27'
+		)
+	}
+
+	const typeLiteralNode = node.asKind(SyntaxKind.TypeLiteral)
+	if (typeLiteralNode) {
+		return getValidatorPropertyStringValue(typeLiteralNode.getFirstChildByKind(SyntaxKind.SyntaxList)!, name)
+	}
+
+	const propertySignatureNode = node.asKind(SyntaxKind.PropertySignature)
+	if (propertySignatureNode) {
+		const identifier = node.getFirstDescendantByKind(SyntaxKind.Identifier)!
+		if (identifier.getText() === name) {
+			const targetNode = findPropertyAssignmentValueNode(propertySignatureNode).getFirstDescendantByKind(
+				SyntaxKind.StringLiteral
+			)!
+			return targetNode.getLiteralText()
+		}
 	}
 
 	return 'unknown_25'
@@ -479,7 +506,7 @@ export const getProperTypeShape = (
 		return type
 			.getProperties()
 			.map((prop) => {
-				const valueDeclaration = prop.getValueDeclaration()!
+				const valueDeclaration = prop.getValueDeclaration() || prop.getDeclarations()[0]!
 				const valueDeclarationNode =
 					valueDeclaration.asKind(SyntaxKind.PropertySignature) ||
 					valueDeclaration.asKind(SyntaxKind.PropertyAssignment) ||
@@ -494,9 +521,7 @@ export const getProperTypeShape = (
 					}
 				}
 
-				const isOptional =
-					!!valueDeclarationNode.getFirstChildByKind(SyntaxKind.QuestionToken) ||
-					valueDeclarationNode.getType().isNullable()
+				const isOptional = prop.getTypeAtLocation(atLocation).isNullable()
 
 				const shape = getProperTypeShape(prop.getTypeAtLocation(atLocation), atLocation, nextStack)
 				return {

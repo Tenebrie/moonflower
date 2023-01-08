@@ -13,3 +13,6 @@ useExposeNamedApiModels<{
 	SimpleBoolean: boolean
 	NumberBase: 'foo' | 'bar'
 }>()
+
+type OptionalFooObject = Partial<Pick<FooBarObject, 'foo'>>
+useExposeApiModel<OptionalFooObject>()

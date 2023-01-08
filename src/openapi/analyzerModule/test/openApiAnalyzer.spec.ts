@@ -5,7 +5,7 @@ import { Project, SourceFile, SyntaxKind } from 'ts-morph'
 import { StringValidator } from '../../../validators/BuiltInValidators'
 import { OpenApiManager } from '../../manager/OpenApiManager'
 import { analyzeSourceFileEndpoints } from '../analyzerModule'
-import { getValidatorPropertyShape } from '../nodeParsers'
+import { getValidatorPropertyShape, getValidatorPropertyStringValue } from '../nodeParsers'
 
 describe('OpenApi Analyzer', () => {
 	describe('when analyzing a test data file', () => {
@@ -728,7 +728,14 @@ describe('OpenApi Analyzer', () => {
 		it('parses shape correctly', () => {
 			const sourceFile = project.createSourceFile(
 				'/test-file',
-				'export declare const StringValidator: import("./types").Validator<string> & {optional: false;};'
+				`
+				export declare const StringValidator: import("./types").Validator<string> & {
+					description: "Any string value.";
+					errorMessage: "Must be a valid string.";
+				} & {
+					optional: false;
+				};
+				`
 			)
 
 			const node = sourceFile
@@ -744,6 +751,8 @@ describe('OpenApi Analyzer', () => {
 			}
 
 			expect(getValidatorPropertyShape(node)).toEqual('string')
+			expect(getValidatorPropertyStringValue(node, 'description')).toEqual('Any string value.')
+			expect(getValidatorPropertyStringValue(node, 'errorMessage')).toEqual('Must be a valid string.')
 		})
 	})
 })

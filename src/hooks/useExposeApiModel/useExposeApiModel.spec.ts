@@ -83,5 +83,14 @@ describe('useExposeApiModel', () => {
 				},
 			])
 		})
+
+		it('parses complex model correctly', () => {
+			const optionalFooObject = analyzeModelByName('OptionalFooObject')
+
+			expect(optionalFooObject).toEqual({
+				name: 'OptionalFooObject',
+				shape: [{ identifier: 'foo', optional: true, role: 'property', shape: 'string' }],
+			})
+		})
 	})
 })

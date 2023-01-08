@@ -1,4 +1,4 @@
-import { Validator } from './types'
+import { BuiltInValidator, Validator } from './types'
 
 export const PathParam = <T>(
 	validator: Omit<Validator<T>, 'optional'>
@@ -19,4 +19,16 @@ export const OptionalParam = <T>(
 ): Validator<T> & { optional: true } => ({
 	...validator,
 	optional: true,
+})
+
+/**
+ * More complex type to preserve description and errorMessage in .d.ts file.
+ * For internal use only.
+ */
+export const BuiltInValidatorParam = <T, DescriptionT extends string, ErrorMessageT extends string>(
+	validator: Omit<BuiltInValidator<T, DescriptionT, ErrorMessageT>, 'optional'> &
+		Pick<BuiltInValidator<T, DescriptionT, ErrorMessageT>, 'description' | 'errorMessage'>
+): BuiltInValidator<T, DescriptionT, ErrorMessageT> & { optional: false } => ({
+	...validator,
+	optional: false,
 })
