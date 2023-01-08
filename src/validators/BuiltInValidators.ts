@@ -1,4 +1,4 @@
-import { BuiltInValidatorParam } from './ParamWrappers'
+import { BuiltInValidatorParam } from './InternalParamWrappers'
 
 export const EmailString = BuiltInValidatorParam({
 	rehydrate: (v) => v,
