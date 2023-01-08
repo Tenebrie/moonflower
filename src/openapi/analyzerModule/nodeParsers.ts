@@ -11,6 +11,7 @@ import {
 	TypeReferenceNode,
 } from 'ts-morph'
 
+import { OpenApiManager } from '../manager/OpenApiManager'
 import { ShapeOfProperty, ShapeOfType, ShapeOfUnionEntry } from './types'
 
 export const findNodeImplementation = (node: Node): Node => {
@@ -62,10 +63,25 @@ export const findPropertyAssignmentValueNode = (
 }
 
 export const getTypeReferenceShape = (node: TypeReferenceNode): ShapeOfType['shape'] => {
-	return getRecursiveNodeShape(node.getFirstChildByKind(SyntaxKind.SyntaxList)!.getFirstChild()!)
+	const firstChild = node.getFirstChild()!
+	if (firstChild.isKind(SyntaxKind.SyntaxList)) {
+		return getRecursiveNodeShape(firstChild.getFirstChild()!)
+	} else {
+		return getRecursiveNodeShape(firstChild)
+	}
 }
 
 export const getRecursiveNodeShape = (nodeOrReference: Node): ShapeOfType['shape'] => {
+	if (OpenApiManager.getInstance().hasExposedModel(nodeOrReference.getText())) {
+		return [
+			{
+				role: 'ref',
+				shape: nodeOrReference.getText(),
+				optional: false,
+			},
+		]
+	}
+
 	const node = findNodeImplementation(nodeOrReference)
 
 	// Undefined
@@ -370,6 +386,16 @@ export const getProperTypeShape = (
 	atLocation: Node,
 	stack: Type[] = []
 ): ShapeOfType['shape'] => {
+	if (OpenApiManager.getInstance().hasExposedModel(typeOrPromise.getText())) {
+		return [
+			{
+				role: 'ref',
+				shape: typeOrPromise.getText(),
+				optional: false,
+			},
+		]
+	}
+
 	const type = isPromise(typeOrPromise) ? typeOrPromise.getTypeArguments()[0] : typeOrPromise
 
 	if (stack.some((previousType) => previousType === type)) {

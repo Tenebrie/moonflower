@@ -2,6 +2,7 @@ import {
 	ShapeOfNumberLiteral,
 	ShapeOfProperty,
 	ShapeOfRecord,
+	ShapeOfRef,
 	ShapeOfStringLiteral,
 	ShapeOfType,
 	ShapeOfUnion,
@@ -15,6 +16,7 @@ export type SchemaType =
 	| { type: 'object'; additionalProperties: SchemaType }
 	| { type: 'string'; enum: string[] }
 	| { type: 'number'; enum: string[] }
+	| { $ref: string }
 
 export const getSchema = (shape: string | ShapeOfType[]): SchemaType => {
 	if (typeof shape === 'string' && shape === 'any') {
@@ -92,6 +94,14 @@ export const getSchema = (shape: string | ShapeOfType[]): SchemaType => {
 		return {
 			type: 'array',
 			items: getSchema(shape[0].shape),
+		}
+	}
+
+	const isRef = shape[0].role === 'ref'
+	if (isRef) {
+		const refShape = shape[0] as ShapeOfRef
+		return {
+			$ref: `#/components/schemas/${refShape.shape}`,
 		}
 	}
 

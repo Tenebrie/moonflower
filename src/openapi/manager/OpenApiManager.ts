@@ -1,5 +1,5 @@
 import { Router } from '../../router/Router'
-import { EndpointData } from '../types'
+import { EndpointData, ExposedModelData } from '../types'
 
 type UrlType = `${'http' | 'https'}://${string}.${string}`
 
@@ -31,6 +31,7 @@ export class OpenApiManager {
 
 	constructor(
 		private apiDocsHeader: ApiDocsHeader,
+		private exposedModels: ExposedModelData[],
 		private endpoints: EndpointData[],
 		private preferences: ApiDocsPreferences
 	) {}
@@ -39,8 +40,23 @@ export class OpenApiManager {
 		return this.isInitialized
 	}
 
-	public initialize(endpoints: EndpointData[]) {
+	public hasExposedModel(name: string) {
+		return this.exposedModels.some((model) => model.name === name)
+	}
+
+	public getExposedModels() {
+		return this.exposedModels
+	}
+
+	public setExposedModels(models: ExposedModelData[]) {
+		this.exposedModels = models
+	}
+
+	public setEndpoints(endpoints: EndpointData[]) {
 		this.endpoints = endpoints
+	}
+
+	public markAsReady() {
 		this.isInitialized = true
 	}
 
@@ -74,6 +90,11 @@ export class OpenApiManager {
 		this.registeredRouters.push(router)
 	}
 
+	public reset() {
+		this.exposedModels = []
+		this.endpoints = []
+	}
+
 	public static getInstance() {
 		if (!OpenApiManager.instance) {
 			OpenApiManager.instance = new OpenApiManager(
@@ -81,6 +102,7 @@ export class OpenApiManager {
 					title: 'Default title',
 					version: '1.0.0',
 				},
+				[],
 				[],
 				{
 					allowOptionalPathParams: false,

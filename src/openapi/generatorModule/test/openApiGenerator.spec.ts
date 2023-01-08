@@ -1,16 +1,45 @@
 import { OpenApiManager } from '../../manager/OpenApiManager'
-import { EndpointData } from '../../types'
+import { EndpointData, ExposedModelData } from '../../types'
 import { generateOpenApiSpec } from '../generatorModule'
 import { manyEndpointsData, manyEndpointsResults } from './openApiGenerator.spec.data'
 
 describe('OpenApi Generator', () => {
-	const createManager = (endpoints: EndpointData[]): OpenApiManager => {
+	const createManager = (models: ExposedModelData[], endpoints: EndpointData[]): OpenApiManager => {
 		return new OpenApiManager(
 			{
 				title: 'Default title',
 				version: '1.0.0',
 			},
+			models,
 			endpoints,
+			{
+				allowOptionalPathParams: false,
+			}
+		)
+	}
+
+	const createManagerWithEndpoints = (endpoints: EndpointData[]): OpenApiManager => {
+		return new OpenApiManager(
+			{
+				title: 'Default title',
+				version: '1.0.0',
+			},
+			[],
+			endpoints,
+			{
+				allowOptionalPathParams: false,
+			}
+		)
+	}
+
+	const createManagerWithModels = (models: ExposedModelData[]): OpenApiManager => {
+		return new OpenApiManager(
+			{
+				title: 'Default title',
+				version: '1.0.0',
+			},
+			models,
+			[],
 			{
 				allowOptionalPathParams: false,
 			}
@@ -28,7 +57,7 @@ describe('OpenApi Generator', () => {
 	}
 
 	it('does not include responses field if no responses are available', () => {
-		const manager = createManager([
+		const manager = createManagerWithEndpoints([
 			{
 				...minimalEndpointData,
 				responses: [
@@ -45,7 +74,7 @@ describe('OpenApi Generator', () => {
 	})
 
 	it('includes record response correctly', () => {
-		const manager = createManager([
+		const manager = createManagerWithEndpoints([
 			{
 				...minimalEndpointData,
 				responses: [
@@ -96,14 +125,14 @@ describe('OpenApi Generator', () => {
 	})
 
 	it('generates correct spec for many endpoints', () => {
-		const manager = createManager(manyEndpointsData)
+		const manager = createManagerWithEndpoints(manyEndpointsData)
 		const spec = generateOpenApiSpec(manager)
 
 		expect(spec).toEqual(manyEndpointsResults)
 	})
 
 	it('generates correct spec for circular dependency', () => {
-		const manager = createManager([
+		const manager = createManagerWithEndpoints([
 			{
 				...minimalEndpointData,
 				responses: [
@@ -149,7 +178,7 @@ describe('OpenApi Generator', () => {
 	})
 
 	it('generates correct spec for array in responses', () => {
-		const manager = createManager([
+		const manager = createManagerWithEndpoints([
 			{
 				...minimalEndpointData,
 				responses: [
@@ -194,7 +223,7 @@ describe('OpenApi Generator', () => {
 	})
 
 	it('generates correct spec for any in responses', () => {
-		const manager = createManager([
+		const manager = createManagerWithEndpoints([
 			{
 				...minimalEndpointData,
 				responses: [
@@ -240,7 +269,7 @@ describe('OpenApi Generator', () => {
 	})
 
 	it('generates correct spec for string literal union', () => {
-		const manager = createManager([
+		const manager = createManagerWithEndpoints([
 			{
 				...minimalEndpointData,
 				responses: [
@@ -293,7 +322,7 @@ describe('OpenApi Generator', () => {
 	})
 
 	it('generates correct spec for string literal', () => {
-		const manager = createManager([
+		const manager = createManagerWithEndpoints([
 			{
 				...minimalEndpointData,
 				responses: [
@@ -312,7 +341,7 @@ describe('OpenApi Generator', () => {
 	})
 
 	it('generates correct spec for request headers', () => {
-		const manager = createManager([
+		const manager = createManagerWithEndpoints([
 			{
 				...minimalEndpointData,
 				requestHeaders: [
@@ -338,7 +367,7 @@ describe('OpenApi Generator', () => {
 	})
 
 	it('includes descriptions if provided in request headers', () => {
-		const manager = createManager([
+		const manager = createManagerWithEndpoints([
 			{
 				...minimalEndpointData,
 				requestHeaders: [
@@ -358,7 +387,7 @@ describe('OpenApi Generator', () => {
 	})
 
 	it('includes descriptions if provided in request path params', () => {
-		const manager = createManager([
+		const manager = createManagerWithEndpoints([
 			{
 				...minimalEndpointData,
 				requestPathParams: [
@@ -378,7 +407,7 @@ describe('OpenApi Generator', () => {
 	})
 
 	it('includes descriptions if provided in optional request path params', () => {
-		const manager = createManager([
+		const manager = createManagerWithEndpoints([
 			{
 				...minimalEndpointData,
 				requestPathParams: [
@@ -400,7 +429,7 @@ describe('OpenApi Generator', () => {
 	})
 
 	it('includes descriptions if provided in request path params', () => {
-		const manager = createManager([
+		const manager = createManagerWithEndpoints([
 			{
 				...minimalEndpointData,
 				requestQuery: [
@@ -420,7 +449,7 @@ describe('OpenApi Generator', () => {
 	})
 
 	it('includes descriptions if provided in response', () => {
-		const manager = createManager([
+		const manager = createManagerWithEndpoints([
 			{
 				...minimalEndpointData,
 				responses: [
@@ -435,5 +464,94 @@ describe('OpenApi Generator', () => {
 		const spec = generateOpenApiSpec(manager)
 
 		expect(spec.paths['/test/path'].get?.responses[200].description).toEqual('Test description')
+	})
+
+	it('includes exposed models as references', () => {
+		const manager = createManager(
+			[
+				{
+					name: 'FooBarObject',
+					shape: [
+						{
+							role: 'property',
+							identifier: 'foo',
+							shape: 'string',
+							optional: false,
+						},
+						{
+							role: 'property',
+							identifier: 'bar',
+							shape: 'string',
+							optional: false,
+						},
+					],
+				},
+			],
+			[
+				{
+					...minimalEndpointData,
+					requestQuery: [
+						{
+							identifier: 'pathParam',
+							signature: [
+								{
+									role: 'ref',
+									shape: 'FooBarObject',
+									optional: false,
+								},
+							],
+							optional: false,
+						},
+					],
+				},
+			]
+		)
+		const spec = generateOpenApiSpec(manager)
+
+		expect(spec.paths['/test/path'].get?.parameters[0]).toEqual({
+			name: 'pathParam',
+			in: 'query',
+			description: '',
+			required: true,
+			schema: {
+				$ref: '#/components/schemas/FooBarObject',
+			},
+		})
+	})
+
+	it('includes exposed models as component schemas', () => {
+		const manager = createManagerWithModels([
+			{
+				name: 'FooBarObject',
+				shape: [
+					{
+						role: 'property',
+						identifier: 'foo',
+						shape: 'string',
+						optional: false,
+					},
+					{
+						role: 'property',
+						identifier: 'bar',
+						shape: 'string',
+						optional: false,
+					},
+				],
+			},
+		])
+		const spec = generateOpenApiSpec(manager)
+
+		expect(spec.components.schemas['FooBarObject']).toEqual({
+			type: 'object',
+			properties: {
+				['foo']: {
+					type: 'string',
+				},
+				['bar']: {
+					type: 'string',
+				},
+			},
+			required: ['foo', 'bar'],
+		})
 	})
 })

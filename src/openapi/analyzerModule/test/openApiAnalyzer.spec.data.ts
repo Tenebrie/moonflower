@@ -1,4 +1,8 @@
 import { useApiEndpoint } from '../../../hooks/useApiEndpoint'
+import {
+	useExposeApiModel,
+	useExposeNamedApiModels,
+} from '../../../hooks/useExposeApiModel/useExposeApiModel'
 import { useHeaderParams } from '../../../hooks/useHeaderParams'
 import { usePathParams } from '../../../hooks/usePathParams'
 import { useQueryParams } from '../../../hooks/useQueryParams'
@@ -354,6 +358,25 @@ router.post('/test/e3659429-1a05-4590-a5a6-dc80a30878e6', () => {
 	return ['foo', 'bar']
 })
 
+router.get('/test/66a075bc-c9d4-4622-8c04-e0a982a19fb0', (ctx) => {
+	type AnotherNamedParam = {
+		aaa: string
+		bbb: number
+		ccc: boolean
+	}
+
+	type NamedParam = {
+		firstVal: string
+		secondVal: AnotherNamedParam
+	}
+
+	useQueryParams(ctx, {
+		foo: RequiredParam({
+			rehydrate: (v) => JSON.parse(v) as NamedParam,
+		}),
+	})
+})
+
 router.get('/test/39669151-c529-4bcd-86a5-a10de7834104/:foo', (ctx) => {
 	const { foo } = usePathParams(ctx, {
 		foo: RequiredParam({
@@ -361,4 +384,34 @@ router.get('/test/39669151-c529-4bcd-86a5-a10de7834104/:foo', (ctx) => {
 		}),
 	})
 	foo
+})
+
+type FooBarObject = {
+	foo: string
+	bar: number
+	baz: boolean
+}
+
+useExposeApiModel<FooBarObject>()
+useExposeNamedApiModels<{
+	SimpleString: string
+	SimpleNumber: number
+	SimpleBoolean: boolean
+	NumberBase: 'foo' | 'bar'
+}>()
+
+router.get('/test/e917e982-b5ce-4a8f-804e-13466e7a00a2', (ctx) => {
+	useQueryParams(ctx, {
+		foo: RequiredParam({
+			rehydrate: (v) => JSON.parse(v) as FooBarObject,
+		}),
+	})
+})
+
+router.get('/test/af22e5ff-7cbf-4aa3-8ea9-fd538a747c01', (ctx) => {
+	useQueryParams(ctx, {
+		foo: RequiredParam<FooBarObject>({
+			rehydrate: (v) => JSON.parse(v),
+		}),
+	})
 })

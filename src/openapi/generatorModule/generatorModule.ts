@@ -1,4 +1,5 @@
 import { OpenApiManager } from '../manager/OpenApiManager'
+import { generateComponentSchemas } from './generateComponentSchemas'
 import { generatePaths } from './generatePaths'
 
 export const generateOpenApiSpec = (manager: OpenApiManager) => {
@@ -16,5 +17,8 @@ export const generateOpenApiSpec = (manager: OpenApiManager) => {
 			version: header.version,
 		},
 		paths: generatePaths(endpoints, manager.getPreferences()),
+		components: {
+			schemas: generateComponentSchemas(manager.getExposedModels()),
+		},
 	}
 }

@@ -1091,4 +1091,5 @@ export const manyEndpointsResults = {
 			get: { description: '', parameters: [], responses: { '204': { description: '' } } },
 		},
 	},
+	components: { schemas: {} },
 }

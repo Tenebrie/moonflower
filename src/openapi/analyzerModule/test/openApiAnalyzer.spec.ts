@@ -3,6 +3,7 @@ import * as path from 'path'
 import { Project, SourceFile, SyntaxKind } from 'ts-morph'
 
 import { StringValidator } from '../../../validators/BuiltInValidators'
+import { OpenApiManager } from '../../manager/OpenApiManager'
 import { analyzeSourceFileEndpoints } from '../analyzerModule'
 import { getValidatorPropertyShape } from '../nodeParsers'
 
@@ -670,6 +671,47 @@ describe('OpenApi Analyzer', () => {
 					},
 				])
 				expect(endpoint.responses.length).toEqual(1)
+			})
+		})
+
+		describe('when using an exposed model', () => {
+			beforeEach(() => {
+				OpenApiManager.getInstance().setExposedModels([
+					{
+						name: 'FooBarObject',
+						shape: 'string',
+					},
+				])
+			})
+
+			it('places a reference to the model for type inferred validator', () => {
+				const endpoint = analyzeEndpointById('e917e982-b5ce-4a8f-804e-13466e7a00a2')
+
+				expect(endpoint.requestQuery[0].identifier).toEqual('foo')
+				expect(endpoint.requestQuery[0].signature).toEqual([
+					{
+						role: 'ref',
+						shape: 'FooBarObject',
+						optional: false,
+					},
+				])
+			})
+
+			it('places a reference to the model for explicit validator', () => {
+				const endpoint = analyzeEndpointById('af22e5ff-7cbf-4aa3-8ea9-fd538a747c01')
+
+				expect(endpoint.requestQuery[0].identifier).toEqual('foo')
+				expect(endpoint.requestQuery[0].signature).toEqual([
+					{
+						role: 'ref',
+						shape: 'FooBarObject',
+						optional: false,
+					},
+				])
+			})
+
+			afterEach(() => {
+				OpenApiManager.getInstance().reset()
 			})
 		})
 	})

@@ -24,9 +24,14 @@ export const prepareOpenApiSpec = (tsconfigPath: string, sourceFilePaths: string
 	const resolvedSourceFilePaths = sourceFilePaths.map((filepath) => path.resolve(filepath))
 
 	const sourceFiles = resolvedSourceFilePaths.map((filePath) => project.getSourceFileOrThrow(filePath))
+	const exposedModels = sourceFiles.flatMap((sourceFile) => analyzeSourceFileExposedModels(sourceFile))
+
+	openApiManager.setExposedModels(exposedModels)
+
 	const endpoints = sourceFiles.flatMap((sourceFile) => analyzeSourceFileEndpoints(sourceFile))
 
-	openApiManager.initialize(endpoints)
+	openApiManager.setEndpoints(endpoints)
+	openApiManager.markAsReady()
 }
 
 export const analyzeSourceFileEndpoints = (

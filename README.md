@@ -14,7 +14,6 @@ This package is NOT FINISHED, use at your own risk.
 
 - `useCookies` hook to work with cookies
 - `useAuthentication` hook for native auth
-- Support for exporting named models
 - Support for list query params
 - Proper support for router-level middleware
 - Ability to output spec as file
@@ -24,7 +23,8 @@ This package is NOT FINISHED, use at your own risk.
 - Support for multipart form data
 
 ## Known issues
-- `null` type may appear in spec 
+- `null` type may appear in spec
+- Exported models are referenced by name only, leading to potential name collisions and invalid spec
 
 # Hooks
 > This section is work-in-progress.

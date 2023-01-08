@@ -6,6 +6,7 @@ export type ShapeOfType =
 	| ShapeOfUnionEntry
 	| ShapeOfRecord
 	| ShapeOfArray
+	| ShapeOfRef
 
 export type ShapeOfProperty = {
 	role: 'property'
@@ -47,5 +48,11 @@ export type ShapeOfRecord = {
 export type ShapeOfArray = {
 	role: 'array'
 	shape: string | ShapeOfType[]
+	optional: boolean
+}
+
+export type ShapeOfRef = {
+	role: 'ref'
+	shape: string
 	optional: boolean
 }
