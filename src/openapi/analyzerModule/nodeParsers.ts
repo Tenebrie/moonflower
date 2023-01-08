@@ -267,7 +267,7 @@ export const getValidatorPropertyShape = (innerLiteralNode: Node): ShapeOfType['
 			.getParent()!
 			.getFirstChildByKind(SyntaxKind.TypeReference)!
 		if (typeReferenceNode) {
-			return getTypeReferenceShape(typeReferenceNode)
+			return getProperTypeShape(typeReferenceNode.getType(), typeReferenceNode, [])
 		}
 
 		const thingyNode = callExpressionArgument
@@ -480,6 +480,20 @@ export const getProperTypeShape = (
 		return 'number'
 	}
 
+	if (type.isTuple()) {
+		return [
+			{
+				role: 'tuple' as const,
+				shape: type.getTupleElements().map((t) => ({
+					role: 'tuple_entry' as const,
+					shape: getProperTypeShape(t, atLocation, nextStack),
+					optional: false,
+				})),
+				optional: false,
+			},
+		]
+	}
+
 	if (type.isArray()) {
 		return [
 			{
@@ -506,6 +520,14 @@ export const getProperTypeShape = (
 			.getProperties()
 			.map((prop) => {
 				const valueDeclaration = prop.getValueDeclaration() || prop.getDeclarations()[0]!
+				if (!valueDeclaration) {
+					return {
+						role: 'property' as const,
+						identifier: prop.getName(),
+						shape: getProperTypeShape(prop.getTypeAtLocation(atLocation), atLocation, nextStack),
+						optional: false,
+					}
+				}
 				const valueDeclarationNode =
 					valueDeclaration.asKind(SyntaxKind.PropertySignature) ||
 					valueDeclaration.asKind(SyntaxKind.PropertyAssignment) ||
@@ -515,7 +537,7 @@ export const getProperTypeShape = (
 					return {
 						role: 'property' as const,
 						identifier: prop.getName(),
-						shape: 'unknown_4',
+						shape: getProperTypeShape(prop.getTypeAtLocation(atLocation), atLocation, nextStack),
 						optional: false,
 					}
 				}

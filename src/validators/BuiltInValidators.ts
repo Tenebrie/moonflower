@@ -3,7 +3,7 @@ import { BuiltInValidatorParam } from './InternalParamWrappers'
 export const EmailString = BuiltInValidatorParam({
 	rehydrate: (v) => v,
 	validate: (v) => v.includes('@'),
-	description: "A string containing an '@' sign." as const,
+	description: "A string containing an '@' sign.",
 	errorMessage: "Must include an '@' sign.",
 })
 export const BooleanValidator = BuiltInValidatorParam({

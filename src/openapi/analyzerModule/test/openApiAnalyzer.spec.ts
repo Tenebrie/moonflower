@@ -267,6 +267,30 @@ describe('OpenApi Analyzer', () => {
 
 				expect(endpoint.requestQuery[0].errorMessage).toEqual('Test error message')
 			})
+
+			it('parses validator with tuple type correctly', () => {
+				const endpoint = analyzeEndpointById('d8b07b26-5202-434c-9ff6-3fe792dad40f')
+
+				expect(endpoint.requestQuery[0].identifier).toEqual('foo')
+				expect(endpoint.requestQuery[0].signature).toEqual([
+					{
+						identifier: 'tuple',
+						optional: false,
+						role: 'property',
+						shape: [
+							{
+								optional: false,
+								role: 'tuple',
+								shape: [
+									{ optional: false, role: 'tuple_entry', shape: 'number' },
+									{ optional: false, role: 'tuple_entry', shape: 'string' },
+									{ optional: false, role: 'tuple_entry', shape: 'boolean' },
+								],
+							},
+						],
+					},
+				])
+			})
 		})
 
 		describe('useHeaderParams', () => {

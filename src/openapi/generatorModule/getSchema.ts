@@ -4,6 +4,7 @@ import {
 	ShapeOfRecord,
 	ShapeOfRef,
 	ShapeOfStringLiteral,
+	ShapeOfTuple,
 	ShapeOfType,
 	ShapeOfUnion,
 } from '../../openapi/analyzerModule/types'
@@ -12,7 +13,9 @@ export type SchemaType =
 	| { type: string }
 	| { type: string; properties: Record<string, SchemaType>; required: string[] }
 	| { oneOf: SchemaType[] }
+	| { allOf: SchemaType[] }
 	| { type: 'array'; items: SchemaType }
+	| { type: 'array'; items: SchemaType; minItems: number; maxItems: number }
 	| { type: 'object'; additionalProperties: SchemaType }
 	| { type: 'string'; enum: string[] }
 	| { type: 'number'; enum: string[] }
@@ -102,6 +105,20 @@ export const getSchema = (shape: string | ShapeOfType[]): SchemaType => {
 		const refShape = shape[0] as ShapeOfRef
 		return {
 			$ref: `#/components/schemas/${refShape.shape}`,
+		}
+	}
+
+	const isTuple = shape[0].role === 'tuple'
+	if (isTuple) {
+		const tupleShape = shape[0] as ShapeOfTuple
+		const tupleEntries = tupleShape.shape
+		return {
+			type: 'array',
+			items: {
+				oneOf: tupleEntries.map((entry) => getSchema(entry.shape)),
+			},
+			minItems: tupleEntries.length,
+			maxItems: tupleEntries.length,
 		}
 	}
 

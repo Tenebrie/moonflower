@@ -7,6 +7,8 @@ export type ShapeOfType =
 	| ShapeOfRecord
 	| ShapeOfArray
 	| ShapeOfRef
+	| ShapeOfTuple
+	| ShapeOfTupleEntry
 
 export type ShapeOfProperty = {
 	role: 'property'
@@ -54,5 +56,17 @@ export type ShapeOfArray = {
 export type ShapeOfRef = {
 	role: 'ref'
 	shape: string
+	optional: boolean
+}
+
+export type ShapeOfTuple = {
+	role: 'tuple'
+	shape: ShapeOfTupleEntry[]
+	optional: boolean
+}
+
+export type ShapeOfTupleEntry = {
+	role: 'tuple_entry'
+	shape: string | ShapeOfType[]
 	optional: boolean
 }

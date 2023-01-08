@@ -125,6 +125,18 @@ router.get('/test/685ac7fb-18ee-4ace-b68e-a6ee354ad4db', (ctx) => {
 	})
 })
 
+router.get('/test/d8b07b26-5202-434c-9ff6-3fe792dad40f', (ctx) => {
+	type TupleType = {
+		tuple: [number, string, boolean]
+	}
+
+	useQueryParams(ctx, {
+		foo: RequiredParam<TupleType>({
+			rehydrate: (v) => JSON.parse(v),
+		}),
+	})
+})
+
 router.get('/test/03c247cb-96c0-4748-bb6a-9569c7bdb436', (ctx) => {
 	useHeaderParams(ctx, {
 		firstParam: RequiredParam({

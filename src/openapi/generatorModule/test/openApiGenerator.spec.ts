@@ -1,3 +1,4 @@
+import { debugObject } from '../../../utils/printers'
 import { OpenApiManager } from '../../manager/OpenApiManager'
 import { EndpointData, ExposedModelData } from '../../types'
 import { generateOpenApiSpec } from '../generatorModule'
@@ -552,6 +553,47 @@ describe('OpenApi Generator', () => {
 				},
 			},
 			required: ['foo', 'bar'],
+		})
+	})
+
+	it('generates correct spec for tuple', () => {
+		const manager = createManagerWithEndpoints([
+			{
+				...minimalEndpointData,
+				requestQuery: [
+					{
+						identifier: 'foo',
+						signature: [
+							{
+								role: 'tuple',
+								shape: [
+									{ optional: false, role: 'tuple_entry', shape: 'number' },
+									{ optional: false, role: 'tuple_entry', shape: 'string' },
+									{ optional: false, role: 'tuple_entry', shape: 'boolean' },
+								],
+								optional: false,
+							},
+						],
+						optional: false,
+					},
+				],
+			},
+		])
+		const spec = generateOpenApiSpec(manager)
+
+		expect(spec.paths['/test/path'].get?.parameters[0]).toEqual({
+			name: 'foo',
+			in: 'query',
+			description: '',
+			required: true,
+			schema: {
+				type: 'array',
+				items: {
+					oneOf: [{ type: 'number' }, { type: 'string' }, { type: 'boolean' }],
+				},
+				minItems: 3,
+				maxItems: 3,
+			},
 		})
 	})
 })

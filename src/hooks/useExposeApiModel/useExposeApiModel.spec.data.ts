@@ -16,3 +16,23 @@ useExposeNamedApiModels<{
 
 type OptionalFooObject = Partial<Pick<FooBarObject, 'foo'>>
 useExposeApiModel<OptionalFooObject>()
+
+type UnionWithTuple = { fff: string | [string, string, string] }
+useExposeApiModel<UnionWithTuple>()
+
+type NumberBase = 'dec' | 'hex' | 'bin'
+
+type ModelWithPrimitiveRecord = {
+	key: Record<string, number>
+}
+useExposeApiModel<ModelWithPrimitiveRecord>()
+
+type ModelWithSimpleRecord = {
+	key: Record<NumberBase, number>
+}
+useExposeApiModel<ModelWithSimpleRecord>()
+
+type ModelWithComplexRecord = {
+	key: Record<NumberBase, NumberBase>
+}
+useExposeApiModel<ModelWithComplexRecord>()

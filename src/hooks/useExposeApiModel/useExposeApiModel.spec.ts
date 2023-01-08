@@ -84,12 +84,269 @@ describe('useExposeApiModel', () => {
 			])
 		})
 
-		it('parses complex model correctly', () => {
+		it('parses model with type utilities correctly', () => {
 			const optionalFooObject = analyzeModelByName('OptionalFooObject')
 
 			expect(optionalFooObject).toEqual({
 				name: 'OptionalFooObject',
 				shape: [{ identifier: 'foo', optional: true, role: 'property', shape: 'string' }],
+			})
+		})
+
+		it('parses model with tuple correctly', () => {
+			const unionWithTupleObject = analyzeModelByName('UnionWithTuple')
+
+			expect(unionWithTupleObject).toEqual({
+				name: 'UnionWithTuple',
+				shape: [
+					{
+						role: 'property',
+						identifier: 'fff',
+						shape: [
+							{
+								role: 'union',
+								shape: [
+									{ role: 'union_entry', shape: 'string', optional: false },
+									{
+										role: 'union_entry',
+										shape: [
+											{
+												role: 'tuple',
+												shape: [
+													{
+														role: 'tuple_entry',
+														shape: 'string',
+														optional: false,
+													},
+													{
+														role: 'tuple_entry',
+														shape: 'string',
+														optional: false,
+													},
+													{
+														role: 'tuple_entry',
+														shape: 'string',
+														optional: false,
+													},
+												],
+												optional: false,
+											},
+										],
+										optional: false,
+									},
+								],
+								optional: false,
+							},
+						],
+						optional: false,
+					},
+				],
+			})
+		})
+
+		it('parses model with primitive Record correctly', () => {
+			const modelWithRecord = analyzeModelByName('ModelWithPrimitiveRecord')
+
+			expect(modelWithRecord).toEqual({
+				name: 'ModelWithPrimitiveRecord',
+				shape: [
+					{
+						role: 'property',
+						identifier: 'key',
+						shape: [{ role: 'record', shape: 'number', optional: false }],
+						optional: false,
+					},
+				],
+			})
+		})
+
+		it('parses model with simple Record correctly', () => {
+			const modelWithRecord = analyzeModelByName('ModelWithSimpleRecord')
+
+			expect(modelWithRecord).toEqual({
+				name: 'ModelWithSimpleRecord',
+				shape: [
+					{
+						role: 'property',
+						identifier: 'key',
+						shape: [
+							{
+								role: 'property',
+								identifier: 'dec',
+								shape: 'number',
+								optional: false,
+							},
+							{
+								role: 'property',
+								identifier: 'hex',
+								shape: 'number',
+								optional: false,
+							},
+							{
+								role: 'property',
+								identifier: 'bin',
+								shape: 'number',
+								optional: false,
+							},
+						],
+						optional: false,
+					},
+				],
+			})
+		})
+
+		it('parses model with complex Record correctly', () => {
+			const modelWithRecord = analyzeModelByName('ModelWithComplexRecord')
+
+			expect(modelWithRecord).toEqual({
+				name: 'ModelWithComplexRecord',
+				shape: [
+					{
+						role: 'property',
+						identifier: 'key',
+						shape: [
+							{
+								role: 'property',
+								identifier: 'dec',
+								shape: [
+									{
+										role: 'union',
+										shape: [
+											{
+												role: 'union_entry',
+												shape: [
+													{
+														role: 'literal_string',
+														shape: 'dec',
+														optional: false,
+													},
+												],
+												optional: false,
+											},
+											{
+												role: 'union_entry',
+												shape: [
+													{
+														role: 'literal_string',
+														shape: 'hex',
+														optional: false,
+													},
+												],
+												optional: false,
+											},
+											{
+												role: 'union_entry',
+												shape: [
+													{
+														role: 'literal_string',
+														shape: 'bin',
+														optional: false,
+													},
+												],
+												optional: false,
+											},
+										],
+										optional: false,
+									},
+								],
+								optional: false,
+							},
+							{
+								role: 'property',
+								identifier: 'hex',
+								shape: [
+									{
+										role: 'union',
+										shape: [
+											{
+												role: 'union_entry',
+												shape: [
+													{
+														role: 'literal_string',
+														shape: 'dec',
+														optional: false,
+													},
+												],
+												optional: false,
+											},
+											{
+												role: 'union_entry',
+												shape: [
+													{
+														role: 'literal_string',
+														shape: 'hex',
+														optional: false,
+													},
+												],
+												optional: false,
+											},
+											{
+												role: 'union_entry',
+												shape: [
+													{
+														role: 'literal_string',
+														shape: 'bin',
+														optional: false,
+													},
+												],
+												optional: false,
+											},
+										],
+										optional: false,
+									},
+								],
+								optional: false,
+							},
+							{
+								role: 'property',
+								identifier: 'bin',
+								shape: [
+									{
+										role: 'union',
+										shape: [
+											{
+												role: 'union_entry',
+												shape: [
+													{
+														role: 'literal_string',
+														shape: 'dec',
+														optional: false,
+													},
+												],
+												optional: false,
+											},
+											{
+												role: 'union_entry',
+												shape: [
+													{
+														role: 'literal_string',
+														shape: 'hex',
+														optional: false,
+													},
+												],
+												optional: false,
+											},
+											{
+												role: 'union_entry',
+												shape: [
+													{
+														role: 'literal_string',
+														shape: 'bin',
+														optional: false,
+													},
+												],
+												optional: false,
+											},
+										],
+										optional: false,
+									},
+								],
+								optional: false,
+							},
+						],
+						optional: false,
+					},
+				],
 			})
 		})
 	})
