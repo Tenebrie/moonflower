@@ -3,7 +3,7 @@ import { ParameterizedContext } from 'koa'
 
 import { ValidationError } from '../errors/UserFacingErrors'
 import { keysOf } from '../utils/object'
-import { getValidationResultMessage } from '../utils/validationMessages'
+import { getMissingParamMessage, getValidationResultMessage } from '../utils/validationMessages'
 import { Validator } from '../validators/types'
 
 type CheckIfOptional<T, B extends boolean | undefined> = B extends false ? T : T | undefined
@@ -26,7 +26,7 @@ export const useQueryParams = <ValidatorsT extends Record<string, Validator<any>
 
 	if (missingParams.length > 0) {
 		throw new ValidationError(
-			`Missing query params: ${missingParams.map((param) => `'${param.name}'`).join(', ')}`
+			`Missing query params: ${missingParams.map((param) => getMissingParamMessage(param)).join(', ')}`
 		)
 	}
 

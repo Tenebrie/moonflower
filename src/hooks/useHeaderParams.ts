@@ -3,7 +3,10 @@ import { ParameterizedContext } from 'koa'
 import { ValidationError } from '../errors/UserFacingErrors'
 import { kebabToCamelCase, keysOf } from '../utils/object'
 import { CamelCase } from '../utils/TypeUtils'
-import { getValidationResultMessage as getValidationFailedMessage } from '../utils/validationMessages'
+import {
+	getMissingParamMessage,
+	getValidationResultMessage as getValidationFailedMessage,
+} from '../utils/validationMessages'
 import { Validator } from '../validators/types'
 
 type CheckIfOptional<T, B extends boolean | undefined> = B extends false ? T : T | undefined
@@ -29,7 +32,7 @@ export const useHeaderParams = <ValidatorsT extends Record<string, Validator<any
 
 	if (missingParams.length > 0) {
 		throw new ValidationError(
-			`Missing headers: ${missingParams.map((param) => `'${param.name}'`).join(', ')}`
+			`Missing headers: ${missingParams.map((param) => getMissingParamMessage(param)).join(', ')}`
 		)
 	}
 
