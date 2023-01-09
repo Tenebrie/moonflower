@@ -1,0 +1,139 @@
+import { NumberValidator, OptionalParam, RequiredParam, useRequestRawBody, ValidationError } from '..'
+import { mockContext, mockContextBody, mockContextRawBody } from '../utils/mockContext'
+
+describe('useRequestRawBody', () => {
+	it('rehydrates param correctly', () => {
+		const ctx = mockContextBody(mockContext(), {
+			foo: 'aaa',
+			bar: 'bbb',
+		})
+
+		const params = useRequestRawBody(
+			ctx,
+			RequiredParam<{ foo: string; bar: string }>({
+				rehydrate: (v) => JSON.parse(v),
+			})
+		)
+
+		expect(params.foo).toEqual('aaa')
+		expect(params.bar).toEqual('bbb')
+	})
+
+	it('passes validation on valid parameter', () => {
+		const ctx = mockContextRawBody(mockContext(), '12')
+
+		const rawBody = useRequestRawBody(ctx, NumberValidator)
+
+		expect(rawBody).toEqual(12)
+	})
+
+	it('fails validation on invalid parameter', () => {
+		const test = () => {
+			const ctx = mockContextRawBody(mockContext(), 'not a number')
+
+			useRequestRawBody(ctx, NumberValidator)
+		}
+
+		expect(test).toThrow(ValidationError)
+		expect(test).toThrow('Failed request body validation (Must be a valid number).')
+	})
+
+	it('passes validation when optional parameter is not provided', () => {
+		const params = useRequestRawBody(mockContext(), OptionalParam(NumberValidator))
+
+		expect(params).toEqual(undefined)
+	})
+
+	it('fails validation when required parameter is not provided', () => {
+		const test = () => {
+			useRequestRawBody(mockContext(), NumberValidator)
+		}
+
+		expect(test).toThrow(ValidationError)
+		expect(test).toThrow('Missing request body (Any numeric value).')
+	})
+
+	it('passes prevalidation on valid parameter', () => {
+		const ctx = mockContextRawBody(mockContext(), 'valid')
+
+		const params = useRequestRawBody(
+			ctx,
+			RequiredParam({
+				prevalidate: (v) => v === 'valid',
+				rehydrate: (v) => v,
+			})
+		)
+
+		expect(params).toEqual('valid')
+	})
+
+	it('fails prevalidation on invalid parameter', () => {
+		const test = () => {
+			const ctx = mockContextRawBody(mockContext(), 'invalid')
+
+			useRequestRawBody(
+				ctx,
+				RequiredParam({
+					prevalidate: (v) => v === 'valid',
+					rehydrate: (v) => v,
+				})
+			)
+		}
+
+		expect(test).toThrow(ValidationError)
+		expect(test).toThrow('Failed request body validation.')
+	})
+
+	it('fails prevalidation on rehydrate error', () => {
+		const test = () => {
+			const ctx = mockContextRawBody(mockContext(), 'not a valid json')
+
+			useRequestRawBody(
+				ctx,
+				RequiredParam<{ foo: 'aaa' }>({
+					rehydrate: (v) => JSON.parse(v),
+				})
+			)
+		}
+
+		expect(test).toThrow(ValidationError)
+		expect(test).toThrow('Failed request body validation.')
+	})
+
+	it('sends an error message when validation fails', () => {
+		const test = () => {
+			const ctx = mockContextRawBody(mockContext(), 'invalid')
+
+			useRequestRawBody(
+				ctx,
+				RequiredParam({
+					prevalidate: (v) => v === 'valid',
+					rehydrate: (v) => v,
+					description: 'Description',
+					errorMessage: 'Error message',
+				})
+			)
+		}
+
+		expect(test).toThrow(ValidationError)
+		expect(test).toThrow('Failed request body validation (Error message).')
+	})
+
+	it('sends the description when validation fails with no error message provided', () => {
+		const test = () => {
+			const ctx = mockContextRawBody(mockContext(), 'invalid')
+
+			useRequestRawBody(
+				ctx,
+				RequiredParam({
+					prevalidate: (v) => v === 'valid',
+					rehydrate: (v) => v,
+					description: 'Description',
+				})
+			)
+		}
+
+		expect(test).toThrow(ValidationError)
+		expect(test).toThrow('Failed request body validation (Description).')
+	})
+})

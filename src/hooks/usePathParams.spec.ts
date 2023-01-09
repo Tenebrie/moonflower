@@ -103,6 +103,23 @@ describe('usePathParams', () => {
 		expect(test).toThrow("Failed route param validation: 'testParam'")
 	})
 
+	it('fails prevalidation on rehydrate error', () => {
+		const test = () => {
+			const ctx = mockContextPath(mockContext(), '/test/:testParam', {
+				testParam: 'not a json',
+			})
+
+			usePathParams(ctx, {
+				testParam: PathParam<{ foo: 'aaa' }>({
+					rehydrate: (v) => JSON.parse(v),
+				}),
+			})
+		}
+
+		expect(test).toThrow(ValidationError)
+		expect(test).toThrow("Failed route param validation: 'testParam'")
+	})
+
 	it('sends an error message when validation fails', () => {
 		const test = () => {
 			const ctx = mockContextPath(mockContext(), '/test/:testParam', {

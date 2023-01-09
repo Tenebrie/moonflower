@@ -4,21 +4,24 @@ import {
 	OptionalParam,
 	RequiredParam,
 	StringValidator,
-	useQueryParams,
+	useRequestBody,
 	ValidationError,
 } from '..'
-import { mockContext, mockContextQuery } from '../utils/mockContext'
+import { mockContext, mockContextBody } from '../utils/mockContext'
 
-describe('useQueryParams', () => {
+describe('useRequestBody', () => {
 	it('rehydrates params correctly', () => {
-		const ctx = mockContextQuery(mockContext(), {
+		const ctx = mockContextBody(mockContext(), {
 			stringParam: 'test_string',
 			numberParam: '12',
 			booleanParam: 'true',
-			objectParam: '{ "foo": "aaa", "bar": "bbb" }',
+			objectParam: {
+				foo: 'aaa',
+				bar: 'bbb',
+			},
 		})
 
-		const params = useQueryParams(ctx, {
+		const params = useRequestBody(ctx, {
 			stringParam: StringValidator,
 			numberParam: NumberValidator,
 			booleanParam: BooleanValidator,
@@ -34,11 +37,11 @@ describe('useQueryParams', () => {
 	})
 
 	it('passes validation on valid parameter', () => {
-		const ctx = mockContextQuery(mockContext(), {
+		const ctx = mockContextBody(mockContext(), {
 			testParam: '12',
 		})
 
-		const params = useQueryParams(ctx, {
+		const params = useRequestBody(ctx, {
 			testParam: NumberValidator,
 		})
 
@@ -47,23 +50,23 @@ describe('useQueryParams', () => {
 
 	it('fails validation on invalid parameter', () => {
 		const test = () => {
-			const ctx = mockContextQuery(mockContext(), {
+			const ctx = mockContextBody(mockContext(), {
 				testParam: 'qwerty',
 			})
 
-			useQueryParams(ctx, {
+			useRequestBody(ctx, {
 				testParam: NumberValidator,
 			})
 		}
 
 		expect(test).toThrow(ValidationError)
-		expect(test).toThrow("Failed query param validation: 'testParam'")
+		expect(test).toThrow("Failed body param validation: 'testParam'")
 	})
 
 	it('passes validation when optional parameter is not provided', () => {
-		const ctx = mockContextQuery(mockContext(), {})
+		const ctx = mockContextBody(mockContext(), {})
 
-		const params = useQueryParams(ctx, {
+		const params = useRequestBody(ctx, {
 			testParam: OptionalParam(NumberValidator),
 		})
 
@@ -72,23 +75,23 @@ describe('useQueryParams', () => {
 
 	it('fails validation when required parameter is not provided', () => {
 		const test = () => {
-			const ctx = mockContextQuery(mockContext(), {})
+			const ctx = mockContextBody(mockContext(), {})
 
-			useQueryParams(ctx, {
+			useRequestBody(ctx, {
 				testParam: NumberValidator,
 			})
 		}
 
 		expect(test).toThrow(ValidationError)
-		expect(test).toThrow("Missing query params: 'testParam'")
+		expect(test).toThrow("Missing body params: 'testParam'")
 	})
 
 	it('passes prevalidation on valid parameter', () => {
-		const ctx = mockContextQuery(mockContext(), {
+		const ctx = mockContextBody(mockContext(), {
 			testParam: 'valid',
 		})
 
-		const params = useQueryParams(ctx, {
+		const params = useRequestBody(ctx, {
 			testParam: RequiredParam({
 				prevalidate: (v) => v === 'valid',
 				rehydrate: (v) => v,
@@ -100,11 +103,11 @@ describe('useQueryParams', () => {
 
 	it('fails prevalidation on invalid parameter', () => {
 		const test = () => {
-			const ctx = mockContextQuery(mockContext(), {
+			const ctx = mockContextBody(mockContext(), {
 				testParam: 'invalid',
 			})
 
-			useQueryParams(ctx, {
+			useRequestBody(ctx, {
 				testParam: RequiredParam({
 					prevalidate: (v) => v === 'valid',
 					rehydrate: (v) => v,
@@ -113,16 +116,16 @@ describe('useQueryParams', () => {
 		}
 
 		expect(test).toThrow(ValidationError)
-		expect(test).toThrow("Failed query param validation: 'testParam'")
+		expect(test).toThrow("Failed body param validation: 'testParam'")
 	})
 
 	it('fails prevalidation on rehydrate error', () => {
 		const test = () => {
-			const ctx = mockContextQuery(mockContext(), {
+			const ctx = mockContextBody(mockContext(), {
 				testParam: 'not a json',
 			})
 
-			useQueryParams(ctx, {
+			useRequestBody(ctx, {
 				testParam: RequiredParam<{ foo: 'aaa' }>({
 					rehydrate: (v) => JSON.parse(v),
 				}),
@@ -130,16 +133,16 @@ describe('useQueryParams', () => {
 		}
 
 		expect(test).toThrow(ValidationError)
-		expect(test).toThrow("Failed query param validation: 'testParam'")
+		expect(test).toThrow("Failed body param validation: 'testParam'")
 	})
 
 	it('sends an error message when validation fails', () => {
 		const test = () => {
-			const ctx = mockContextQuery(mockContext(), {
+			const ctx = mockContextBody(mockContext(), {
 				testParam: 'invalid',
 			})
 
-			useQueryParams(ctx, {
+			useRequestBody(ctx, {
 				testParam: RequiredParam({
 					prevalidate: (v) => v === 'valid',
 					rehydrate: (v) => v,
@@ -150,16 +153,16 @@ describe('useQueryParams', () => {
 		}
 
 		expect(test).toThrow(ValidationError)
-		expect(test).toThrow("Failed query param validation: 'testParam' (Error message)")
+		expect(test).toThrow("Failed body param validation: 'testParam' (Error message)")
 	})
 
 	it('sends the description when validation fails with no error message provided', () => {
 		const test = () => {
-			const ctx = mockContextQuery(mockContext(), {
+			const ctx = mockContextBody(mockContext(), {
 				testParam: 'invalid',
 			})
 
-			useQueryParams(ctx, {
+			useRequestBody(ctx, {
 				testParam: RequiredParam({
 					prevalidate: (v) => v === 'valid',
 					rehydrate: (v) => v,
@@ -169,6 +172,6 @@ describe('useQueryParams', () => {
 		}
 
 		expect(test).toThrow(ValidationError)
-		expect(test).toThrow("Failed query param validation: 'testParam' (Description)")
+		expect(test).toThrow("Failed body param validation: 'testParam' (Description)")
 	})
 })

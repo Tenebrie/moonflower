@@ -1,6 +1,8 @@
 import { ParameterizedContext } from 'koa'
 
 import { ValidationError } from '../errors/UserFacingErrors'
+import { keysOf } from '../utils/object'
+import { getMissingParamMessage, getValidationResultMessage } from '../utils/validationMessages'
 import { Validator } from '../validators/types'
 
 type CheckIfOptional<T, B extends boolean | undefined> = B extends false ? T : T | undefined
@@ -25,37 +27,42 @@ export const useRequestBody = <ValidatorsT extends Record<string, Validator<any>
 	validators: ValidatorsT
 ): ValidatedData<ValidatorsT> => {
 	const providedParams = (ctx.request.body || {}) as Record<string, string | number | boolean | object>
-	const expectedParams = Object.keys(validators)
+	const params = keysOf(validators).map((name) => ({
+		name,
+		validator: validators[name],
+	}))
 
-	const missingParams = expectedParams.filter(
-		(paramName) => !providedParams[paramName] && !validators[paramName].optional
+	const missingParams = params.filter(
+		(param) => !providedParams[param.name] && !validators[param.name].optional
 	)
 
 	if (missingParams.length > 0) {
-		throw new ValidationError(`Missing body params: ${missingParams.map((param) => `'${param}'`).join(', ')}`)
+		throw new ValidationError(
+			`Missing body params: ${missingParams.map((param) => getMissingParamMessage(param)).join(', ')}`
+		)
 	}
 
-	const validationResults = expectedParams.map((paramName) => {
-		const paramValue = providedParams[paramName] as string | number | boolean | object
+	const validationResults = params.map((param) => {
+		const paramValue = providedParams[param.name]
 
 		// Param is optional and is not provided - skip validation
 		if (paramValue === undefined) {
-			return { paramName, validated: true }
+			return { param, validated: true }
 		}
 
 		try {
 			const convertedValue = typeof paramValue === 'object' ? JSON.stringify(paramValue) : String(paramValue)
-			const validatorObject = validators[paramName] as Validator<unknown>
+			const validatorObject = param.validator
 			const prevalidatorSuccess = !validatorObject.prevalidate || validatorObject.prevalidate(convertedValue)
 			const rehydratedValue = validatorObject.rehydrate(convertedValue)
 			const validatorSuccess = !validatorObject.validate || validatorObject.validate(rehydratedValue)
 			return {
-				paramName,
+				param,
 				validated: prevalidatorSuccess && validatorSuccess,
 				rehydratedValue,
 			}
 		} catch (error) {
-			return { paramName, validated: false }
+			return { param, validated: false }
 		}
 	})
 
@@ -63,7 +70,9 @@ export const useRequestBody = <ValidatorsT extends Record<string, Validator<any>
 
 	if (failedValidations.length > 0) {
 		throw new ValidationError(
-			`Failed body param validation: ${failedValidations.map((result) => `'${result.paramName}'`).join(', ')}`
+			`Failed body param validation: ${failedValidations
+				.map((result) => getValidationResultMessage(result.param))
+				.join(', ')}`
 		)
 	}
 
@@ -71,7 +80,7 @@ export const useRequestBody = <ValidatorsT extends Record<string, Validator<any>
 
 	const returnValue: Record<string, unknown> = {}
 	successfulValidations.forEach((result) => {
-		returnValue[result.paramName] = result.rehydratedValue
+		returnValue[result.param.name] = result.rehydratedValue
 	})
 
 	return returnValue as ValidatedData<ValidatorsT>

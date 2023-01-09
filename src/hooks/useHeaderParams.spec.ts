@@ -128,6 +128,23 @@ describe('useHeaderParams', () => {
 		expect(test).toThrow("Failed header validation: 'test-header'")
 	})
 
+	it('fails prevalidation on rehydrate error', () => {
+		const test = () => {
+			const ctx = mockContextHeaders(mockContext(), {
+				'test-header': 'not a json',
+			})
+
+			useHeaderParams(ctx, {
+				'test-header': RequiredParam<{ foo: 'aaa' }>({
+					rehydrate: (v) => JSON.parse(v),
+				}),
+			})
+		}
+
+		expect(test).toThrow(ValidationError)
+		expect(test).toThrow("Failed header validation: 'test-header'")
+	})
+
 	it('sends an error message when validation fails', () => {
 		const test = () => {
 			const ctx = mockContextHeaders(mockContext(), {

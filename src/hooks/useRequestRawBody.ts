@@ -1,6 +1,7 @@
 import { ParameterizedContext } from 'koa'
 
 import { ValidationError } from '../errors/UserFacingErrors'
+import { getFailedRawBodyValidationMessage, getMissingRawBodyMessage } from '../utils/validationMessages'
 import { Validator } from '../validators/types'
 
 type CheckIfOptional<T, B extends boolean | undefined> = B extends false ? T : T | undefined
@@ -27,7 +28,11 @@ export const useRequestRawBody = <ValidatorT extends Validator<any>>(
 	const isOptional = validator.optional
 
 	if (!isOptional && !providedBody) {
-		throw new ValidationError('Missing required body')
+		throw new ValidationError(getMissingRawBodyMessage(validator))
+	}
+
+	if (isOptional && !providedBody) {
+		return undefined as ValidatedData<ValidatorT>
 	}
 
 	const validationResult = (() => {
@@ -45,7 +50,7 @@ export const useRequestRawBody = <ValidatorT extends Validator<any>>(
 	})()
 
 	if (!validationResult.validated) {
-		throw new ValidationError('Failed raw body validation.')
+		throw new ValidationError(getFailedRawBodyValidationMessage(validator))
 	}
 	return validationResult.rehydratedValue as ValidatedData<ValidatorT>
 }
