@@ -1,4 +1,3 @@
-import { debugObject } from '../../../utils/printers'
 import { OpenApiManager } from '../../manager/OpenApiManager'
 import { EndpointData, ExposedModelData } from '../../types'
 import { generateOpenApiSpec } from '../generatorModule'

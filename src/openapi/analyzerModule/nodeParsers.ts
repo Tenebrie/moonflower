@@ -11,7 +11,6 @@ import {
 	TypeReferenceNode,
 } from 'ts-morph'
 
-import { debugNode } from '../../utils/printers'
 import { OpenApiManager } from '../manager/OpenApiManager'
 import { ShapeOfProperty, ShapeOfType, ShapeOfUnionEntry } from './types'
 
