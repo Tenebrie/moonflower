@@ -45,7 +45,7 @@ export const usePathParams = <
 	ValidatorsT extends Record<CleanUpPathParam<ParamsT[number]>, Omit<Validator<any>, 'optional'>>
 >(
 	ctx: ParameterizedContext & { parsedPathParams: ParamsT },
-	validators: Pick<ValidatorsT, CleanUpPathParam<ParamsT[number]>>
+	validators: ValidatorsT
 ): ValidatedData<ParamsT, TestTemplate, ValidatorsT> => {
 	const params = ctx.params
 	const expectedParams = keysOf(validators).map((name) => ({
