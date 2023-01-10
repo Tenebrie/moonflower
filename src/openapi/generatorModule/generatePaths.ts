@@ -9,6 +9,9 @@ export const generatePaths = (endpoints: EndpointData[], preferences: ApiDocsPre
 		{
 			get?: PathDefinition
 			post?: PathDefinition
+			put?: PathDefinition
+			patch?: PathDefinition
+			delete?: PathDefinition
 		}
 	> = {}
 
@@ -79,7 +82,10 @@ export const generatePaths = (endpoints: EndpointData[], preferences: ApiDocsPre
 			acceptedBodyTypes['application/x-www-form-urlencoded'] = content
 		}
 
-		const requestBody = endpoint.method === 'POST' ? { content: acceptedBodyTypes } : undefined
+		const requestsWithBody = ['POST', 'PATCH', 'PUT']
+		const requestBody = requestsWithBody.includes(endpoint.method)
+			? { content: acceptedBodyTypes }
+			: undefined
 
 		const responses: PathDefinition['responses'] = {}
 		endpoint.responses.forEach((response) => {
@@ -121,7 +127,7 @@ export const generatePaths = (endpoints: EndpointData[], preferences: ApiDocsPre
 		}
 
 		paths[path] = {
-			...paths[endpoint.path],
+			...paths[path],
 			[endpoint.method.toLowerCase()]: definition,
 		}
 	})

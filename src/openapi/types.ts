@@ -35,7 +35,7 @@ export type ExposedModelData = {
 }
 
 export type EndpointData = {
-	method: 'GET' | 'POST'
+	method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 	path: string
 	name?: string
 	summary?: string

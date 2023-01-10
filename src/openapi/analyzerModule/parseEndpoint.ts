@@ -14,17 +14,19 @@ import {
 } from './nodeParsers'
 
 export const parseEndpoint = (node: Node<ts.Node>) => {
-	const endpointMethod = node
+	const parsedEndpointMethod = node
 		.getFirstDescendantByKind(SyntaxKind.PropertyAccessExpression)!
 		.getText()
 		.split('.')[1]
 		.toUpperCase()
 
+	const endpointMethod = parsedEndpointMethod === 'DEL' ? 'DELETE' : parsedEndpointMethod
+
 	const endpointText = node.getFirstDescendantByKind(SyntaxKind.StringLiteral)!.getText() ?? ''
 	const endpointPath = endpointText.substring(1, endpointText.length - 1)
 
 	const endpointData: EndpointData = {
-		method: endpointMethod as 'GET' | 'POST',
+		method: endpointMethod as 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
 		path: endpointPath,
 		requestPathParams: [],
 		requestQuery: [],

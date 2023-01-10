@@ -11,7 +11,8 @@ type Props = {
 /**
  * Middleware to initialize the openApi engine.
  * Can be at any position in the middleware execution order.
- * @param props Paths to files relative to project root
+ * All files with routers or exposed models must be included in `props.sourceFilePaths`.
+ * @param props Paths to files to analyze, relative to project root.
  */
 export const initOpenApiEngine = (props: Props) => {
 	prepareOpenApiSpec(props.tsconfigPath, props.sourceFilePaths)

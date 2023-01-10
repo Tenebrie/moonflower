@@ -433,3 +433,19 @@ router.get('/test/af22e5ff-7cbf-4aa3-8ea9-fd538a747c01', (ctx) => {
 		}),
 	})
 })
+
+router.get('/test/e349c3c6-990b-4d97-9bde-f3bf133d2df7/:id', () => {
+	/* Empty */
+})
+
+router.post('/test/e349c3c6-990b-4d97-9bde-f3bf133d2df7/:id', () => {
+	/* Empty */
+})
+
+router.patch('/test/e349c3c6-990b-4d97-9bde-f3bf133d2df7/:id', () => {
+	/* Empty */
+})
+
+router.delete('/test/e349c3c6-990b-4d97-9bde-f3bf133d2df7/:id', () => {
+	/* Empty */
+})

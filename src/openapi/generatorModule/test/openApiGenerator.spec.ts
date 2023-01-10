@@ -596,4 +596,35 @@ describe('OpenApi Generator', () => {
 			},
 		})
 	})
+
+	it('generates correct spec for endpoint with multiple methods', () => {
+		const manager = createManagerWithEndpoints([
+			{
+				...minimalEndpointData,
+				method: 'GET',
+				path: '/test/path/:id',
+			},
+			{
+				...minimalEndpointData,
+				method: 'POST',
+				path: '/test/path/:id',
+			},
+			{
+				...minimalEndpointData,
+				method: 'PUT',
+				path: '/test/path/:id',
+			},
+			{
+				...minimalEndpointData,
+				method: 'DELETE',
+				path: '/test/path/:id',
+			},
+		])
+		const spec = generateOpenApiSpec(manager)
+
+		expect(spec.paths['/test/path/{id}'].get).not.toBe(undefined)
+		expect(spec.paths['/test/path/{id}'].post).not.toBe(undefined)
+		expect(spec.paths['/test/path/{id}'].put).not.toBe(undefined)
+		expect(spec.paths['/test/path/{id}'].delete).not.toBe(undefined)
+	})
 })

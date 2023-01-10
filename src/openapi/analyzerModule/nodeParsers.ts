@@ -11,6 +11,7 @@ import {
 	TypeReferenceNode,
 } from 'ts-morph'
 
+import { debugNode } from '../../utils/printers'
 import { OpenApiManager } from '../manager/OpenApiManager'
 import { ShapeOfProperty, ShapeOfType, ShapeOfUnionEntry } from './types'
 
@@ -281,6 +282,9 @@ export const getValidatorPropertyShape = (innerLiteralNode: Node): ShapeOfType['
 			return getValidatorPropertyShape(callExpressionArgument)
 		}
 
+		if (callExpressionArgument.getKind() === SyntaxKind.IntersectionType) {
+			return getValidatorPropertyShape(callExpressionArgument)
+		}
 		return 'unknown_3'
 	}
 

@@ -21,6 +21,15 @@ describe('OpenApi Analyzer', () => {
 			return endpoint
 		}
 
+		const analyzeMultiEndpointById = (id: string) => {
+			analysisResult = analyzeSourceFileEndpoints(dataFile, [`/test/${id}`])
+			const endpoints = analysisResult.filter((endpoint) => endpoint.path.startsWith(`/test/${id}`))
+			if (endpoints.length === 0) {
+				throw new Error(`No endpoint with id ${id} found!`)
+			}
+			return endpoints
+		}
+
 		beforeAll(() => {
 			const project = new Project({
 				tsConfigFilePath: path.resolve('./tsconfig.json'),
@@ -744,6 +753,18 @@ describe('OpenApi Analyzer', () => {
 
 			afterEach(() => {
 				OpenApiManager.getInstance().reset()
+			})
+		})
+
+		describe('when the same endpoint path has multiple methods', () => {
+			it('adds all to the spec', () => {
+				const endpoints = analyzeMultiEndpointById('e349c3c6-990b-4d97-9bde-f3bf133d2df7')
+
+				expect(endpoints.length).toEqual(4)
+				expect(endpoints[0].method).toEqual('GET')
+				expect(endpoints[1].method).toEqual('POST')
+				expect(endpoints[2].method).toEqual('PATCH')
+				expect(endpoints[3].method).toEqual('DELETE')
 			})
 		})
 	})
