@@ -72,11 +72,12 @@ export const getTypeReferenceShape = (node: TypeReferenceNode): ShapeOfType['sha
 }
 
 export const getRecursiveNodeShape = (nodeOrReference: Node): ShapeOfType['shape'] => {
-	if (OpenApiManager.getInstance().hasExposedModel(nodeOrReference.getText())) {
+	const typeName = nodeOrReference.getSymbol()?.getName()
+	if (typeName && OpenApiManager.getInstance().hasExposedModel(typeName)) {
 		return [
 			{
 				role: 'ref',
-				shape: nodeOrReference.getText(),
+				shape: typeName,
 				optional: false,
 			},
 		]
@@ -417,11 +418,12 @@ export const getProperTypeShape = (
 	atLocation: Node,
 	stack: Type[] = []
 ): ShapeOfType['shape'] => {
-	if (OpenApiManager.getInstance().hasExposedModel(typeOrPromise.getText())) {
+	const typeName = typeOrPromise.getAliasSymbol()?.getName()
+	if (typeName && OpenApiManager.getInstance().hasExposedModel(typeName)) {
 		return [
 			{
 				role: 'ref',
-				shape: typeOrPromise.getText(),
+				shape: typeName,
 				optional: false,
 			},
 		]
