@@ -264,6 +264,12 @@ router.get('/test/e8e5496b-11a0-41e3-a68d-f03d524e413c', (ctx) => {
 	})
 })
 
+router.get('/test/c9a2301c-babd-4512-935c-b9664803e720', (ctx) => {
+	useRequestBody(ctx, {
+		firstParam: OptionalParam(StringValidator),
+	})
+})
+
 router.get('/test/e1bedf55-6d3a-4c01-9c66-6ec74cc66c3b', () => {
 	return 'Hello world'
 })

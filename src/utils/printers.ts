@@ -1,12 +1,13 @@
 import { Node } from 'ts-morph'
+import * as util from 'util'
 
 export const debugNode = (node: Node | undefined) => {
-	console.info('Node:')
+	console.debug('Node:')
 	if (!node) {
-		console.info('Node is undefined')
+		console.debug('Node is undefined')
 		return
 	}
-	console.info({
+	console.debug({
 		kind: node.getKindName(),
 		text: node.getText(),
 	})
@@ -14,30 +15,28 @@ export const debugNode = (node: Node | undefined) => {
 }
 
 export const debugNodes = (nodes: Node[] | undefined) => {
-	console.info('Nodes:')
+	console.debug('Nodes:')
 	if (!nodes) {
-		console.info('Nodes are undefined')
+		console.debug('Nodes are undefined')
 		return
 	}
 	nodes.forEach((node) => debugNode(node))
 }
 
-export const debugNodeChildren = (node: Node) => {
-	console.info('Children:')
+export const debugNodeChildren = (node: Node | undefined) => {
+	console.debug('Children:')
 	if (!node) {
-		console.info('Node is undefined')
+		console.debug('Node is undefined')
 		return
 	}
 	const values = node.getChildren().map((child) => ({
 		kind: child.getKindName(),
 		text: child.getText(),
 	}))
-	console.info(values)
+	console.debug(values)
 }
 
 export const debugObject = (object: Record<any, any> | any) => {
-	// eslint-disable-next-line @typescript-eslint/no-var-requires
-	const util = require('util')
 	if (typeof object === 'object') {
 		console.debug(util.inspect(object, { showHidden: false, depth: null, colors: true }))
 	} else {

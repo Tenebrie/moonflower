@@ -468,6 +468,14 @@ describe('OpenApi Analyzer', () => {
 				expect(endpoint.objectBody[2].signature).toEqual('number')
 				expect(endpoint.objectBody[2].optional).toEqual(true)
 			})
+
+			it('parses optional validator correctly', () => {
+				const endpoint = analyzeEndpointById('c9a2301c-babd-4512-935c-b9664803e720')
+
+				expect(endpoint.objectBody[0].identifier).toEqual('firstParam')
+				expect(endpoint.objectBody[0].signature).toEqual('string')
+				expect(endpoint.objectBody[0].optional).toEqual(true)
+			})
 		})
 
 		describe('endpoint return value', () => {

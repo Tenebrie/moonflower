@@ -2,6 +2,7 @@ import * as path from 'path'
 import { Project, SourceFile } from 'ts-morph'
 
 import { analyzeSourceFileExposedModels } from '../../openapi/analyzerModule/analyzerModule'
+import { useExposeApiModel, useExposeNamedApiModels } from './useExposeApiModel'
 
 describe('useExposeApiModel', () => {
 	describe('when analyzing a test data file', () => {
@@ -30,6 +31,11 @@ describe('useExposeApiModel', () => {
 			}
 
 			dataFile = sourceFile
+		})
+
+		it('does not have side effects when invoked directly', () => {
+			useExposeApiModel()
+			useExposeNamedApiModels()
 		})
 
 		it('parses single expose model correctly', () => {

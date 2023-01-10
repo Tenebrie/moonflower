@@ -53,6 +53,21 @@ describe('useRequestRawBody', () => {
 		expect(test).toThrow('Missing request body (Any numeric value).')
 	})
 
+	it('fails validation for inline validator', () => {
+		const test = () => {
+			useRequestRawBody(
+				mockContext(),
+				RequiredParam({
+					rehydrate: (v) => Number(v),
+					validate: (v) => !Number.isNaN(v),
+				})
+			)
+		}
+
+		expect(test).toThrow(ValidationError)
+		expect(test).toThrow('Missing request body.')
+	})
+
 	it('passes prevalidation on valid parameter', () => {
 		const ctx = mockContextRawBody(mockContext(), 'valid')
 

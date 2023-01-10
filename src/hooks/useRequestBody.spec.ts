@@ -86,6 +86,17 @@ describe('useRequestBody', () => {
 		expect(test).toThrow("Missing body params: 'testParam'")
 	})
 
+	it('fails validation when no body is provided at all', () => {
+		const test = () => {
+			useRequestBody(mockContext(), {
+				testParam: NumberValidator,
+			})
+		}
+
+		expect(test).toThrow(ValidationError)
+		expect(test).toThrow("Missing body params: 'testParam'")
+	})
+
 	it('passes prevalidation on valid parameter', () => {
 		const ctx = mockContextBody(mockContext(), {
 			testParam: 'valid',
