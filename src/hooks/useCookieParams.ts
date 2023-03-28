@@ -1,43 +1,36 @@
 import { ParameterizedContext } from 'koa'
 
 import { ValidationError } from '../errors/UserFacingErrors'
-import { kebabToCamelCase, keysOf } from '../utils/object'
-import { CamelCase } from '../utils/TypeUtils'
-import {
-	getMissingParamMessage,
-	getValidationResultMessage as getValidationFailedMessage,
-} from '../utils/validationMessages'
+import { keysOf } from '../utils/object'
+import { getMissingParamMessage, getValidationResultMessage } from '../utils/validationMessages'
 import { Validator } from '../validators/types'
 
 type CheckIfOptional<T, B extends boolean | undefined> = B extends false ? T : T | undefined
 
-type HeaderToCamelCase<T> = T extends string ? CamelCase<Uncapitalize<T>> : T
-
 type ValidatedData<T extends Record<string, Validator<any>>> = {
-	[K in keyof T as HeaderToCamelCase<K>]: CheckIfOptional<ReturnType<T[K]['rehydrate']>, T[K]['optional']>
+	[K in keyof T]: CheckIfOptional<ReturnType<T[K]['rehydrate']>, T[K]['optional']>
 }
 
-export const useHeaderParams = <ValidatorsT extends Record<string, Validator<any>>>(
+export const useCookieParams = <ValidatorsT extends Record<string, Validator<any>>>(
 	ctx: ParameterizedContext,
 	validators: ValidatorsT
-) => {
-	const headers = ctx.headers
+): ValidatedData<ValidatorsT> => {
 	const params = keysOf(validators).map((name) => ({
-		name: name.toLowerCase(),
-		originalName: name,
+		name,
 		validator: validators[name],
+		value: ctx.cookies.get(name),
 	}))
 
-	const missingParams = params.filter((param) => !headers[param.name] && !param.validator.optional)
+	const missingParams = params.filter((param) => !param.value && !param.validator.optional)
 
 	if (missingParams.length > 0) {
 		throw new ValidationError(
-			`Missing headers: ${missingParams.map((param) => getMissingParamMessage(param)).join(', ')}`
+			`Missing cookie params: ${missingParams.map((param) => getMissingParamMessage(param)).join(', ')}`
 		)
 	}
 
 	const validationResults = params.map((param) => {
-		const paramValue = headers[param.name]
+		const paramValue = param.value
 
 		// Param is optional and is not provided - skip validation
 		if (paramValue === undefined) {
@@ -46,9 +39,8 @@ export const useHeaderParams = <ValidatorsT extends Record<string, Validator<any
 
 		try {
 			const validatorObject = param.validator
-			const prevalidatorSuccess =
-				!validatorObject.prevalidate || validatorObject.prevalidate(paramValue as string)
-			const rehydratedValue = validatorObject.rehydrate(paramValue as string)
+			const prevalidatorSuccess = !validatorObject.prevalidate || validatorObject.prevalidate(paramValue)
+			const rehydratedValue = validatorObject.rehydrate(paramValue)
 			const validatorSuccess = !validatorObject.validate || validatorObject.validate(rehydratedValue)
 			return {
 				param,
@@ -64,8 +56,8 @@ export const useHeaderParams = <ValidatorsT extends Record<string, Validator<any
 
 	if (failedValidations.length > 0) {
 		throw new ValidationError(
-			`Failed header validation: ${failedValidations
-				.map((result) => getValidationFailedMessage(result.param))
+			`Failed cookie param validation: ${failedValidations
+				.map((result) => getValidationResultMessage(result.param))
 				.join(', ')}`
 		)
 	}
@@ -74,10 +66,8 @@ export const useHeaderParams = <ValidatorsT extends Record<string, Validator<any
 
 	const returnValue: Record<string, unknown> = {}
 	successfulValidations.forEach((result) => {
-		returnValue[kebabToCamelCase(result.param.originalName)] = result.rehydratedValue
+		returnValue[result.param.name] = result.rehydratedValue
 	})
 
 	return returnValue as ValidatedData<ValidatorsT>
 }
-
-export const useRequestHeaders = useHeaderParams

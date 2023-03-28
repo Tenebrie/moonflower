@@ -1,6 +1,7 @@
 import * as Koa from 'koa'
 import * as httpMocks from 'node-mocks-http'
 
+import { keysOf } from './object'
 import { ExtractedRequestParams } from './TypeUtils'
 
 export interface MockContext<RequestBody = undefined> extends Koa.Context {
@@ -34,6 +35,28 @@ export const mockContextQuery = <Context extends Koa.ParameterizedContext>(
 	params: Record<string, string>
 ) => {
 	ctx.query = params
+	return ctx
+}
+
+export const mockContextCookies = <Context extends Koa.ParameterizedContext>(
+	ctx: Context,
+	params: Record<string, string | { value: string; expires?: Date }>
+) => {
+	const cookies = keysOf(params).map((name) => {
+		const cookieData = params[name]
+
+		return {
+			name,
+			value: typeof cookieData === 'string' ? cookieData : cookieData.value,
+			expires: typeof cookieData === 'string' ? undefined : cookieData.expires,
+		}
+	})
+	ctx.cookies = {
+		...ctx.cookies,
+		get: (name: string) => {
+			return cookies.find((cookie) => cookie.name === name)?.value || undefined
+		},
+	}
 	return ctx
 }
 
