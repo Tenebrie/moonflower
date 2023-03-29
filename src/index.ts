@@ -1,5 +1,7 @@
 export * from './errors/HttpErrorHandler'
 export * from './errors/UserFacingErrors'
+export * from './hooks/authentication/useAuth'
+export * from './hooks/authentication/useOptionalAuth'
 export * from './hooks/useApiEndpoint'
 export * from './hooks/useApiHeader'
 export * from './hooks/useCookieParams'
