@@ -12,8 +12,6 @@ This package is NOT FINISHED, use at your own risk.
 
 ## Planned features
 
-- `useCookies` hook to work with cookies
-- `useAuthentication` hook for native auth
 - Support for list query params
 - Proper support for router-level middleware
 - Ability to output spec as file
