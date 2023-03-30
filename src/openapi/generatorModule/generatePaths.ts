@@ -124,6 +124,7 @@ export const generatePaths = (endpoints: EndpointData[], preferences: ApiDocsPre
 				.concat(headerParams),
 			requestBody: requestBody,
 			responses: responses,
+			tags: endpoint.tags,
 		}
 
 		paths[path] = {

@@ -37,6 +37,7 @@ export const parseEndpoint = (node: Node<ts.Node>) => {
 		name: undefined,
 		summary: undefined,
 		description: undefined,
+		tags: undefined,
 	}
 
 	const warningData: {
@@ -48,7 +49,7 @@ export const parseEndpoint = (node: Node<ts.Node>) => {
 	try {
 		const entries = parseApiDocumentation(node)
 		entries.forEach((param) => {
-			endpointData[param.identifier] = param.value
+			endpointData[param.identifier] = param.value as string & string[]
 		})
 	} catch (err) {
 		warningData.push({

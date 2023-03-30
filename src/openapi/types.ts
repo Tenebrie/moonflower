@@ -14,6 +14,7 @@ export type PathDefinition = {
 	operationId?: string
 	parameters: PathParam[]
 	requestBody: any
+	tags?: string[]
 	responses: Record<
 		string,
 		{
@@ -40,6 +41,7 @@ export type EndpointData = {
 	name?: string
 	summary?: string
 	description?: string
+	tags?: string[]
 	requestPathParams: {
 		identifier: string
 		signature: string | ShapeOfType[]

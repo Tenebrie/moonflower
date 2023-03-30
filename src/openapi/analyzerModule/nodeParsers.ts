@@ -372,6 +372,9 @@ export const getValidatorPropertyStringValue = (
 		if (!targetValue) {
 			return ''
 		}
+		if (Array.isArray(targetValue.value)) {
+			return 'array'
+		}
 		return targetValue.value || ''
 	}
 
@@ -587,6 +590,15 @@ export const getProperTypeShape = (
 	return 'unknown_5'
 }
 
+const getLiteralValueOfNode = (node: Node): string | string[] | undefined => {
+	if (node.isKind(SyntaxKind.StringLiteral)) {
+		return node.getLiteralValue()
+	} else if (node.isKind(SyntaxKind.ArrayLiteralExpression)) {
+		return node.forEachChildAsArray().map((child) => getLiteralValueOfNode(child)) as string[]
+	}
+	return undefined
+}
+
 export const getValuesOfObjectLiteral = (objectLiteralNode: Node<ts.ObjectLiteralExpression>) => {
 	const syntaxListNode = objectLiteralNode.getFirstDescendantByKind(SyntaxKind.SyntaxList)!
 	const assignmentNodes = syntaxListNode.getChildrenOfKind(SyntaxKind.PropertyAssignment)!
@@ -595,15 +607,9 @@ export const getValuesOfObjectLiteral = (objectLiteralNode: Node<ts.ObjectLitera
 		const identifierNode = node.getFirstDescendantByKind(SyntaxKind.Identifier)!
 		const identifierName = identifierNode.getText()
 
-		const value = (() => {
-			const assignmentValueNode = node.getLastChild()!
-			const targetNode = findNodeImplementation(assignmentValueNode)
-
-			if (targetNode.isKind(SyntaxKind.StringLiteral)) {
-				return targetNode.getLiteralValue()
-			}
-			return undefined
-		})()
+		const assignmentValueNode = node.getLastChild()!
+		const targetNode = findNodeImplementation(assignmentValueNode)
+		const value = getLiteralValueOfNode(targetNode)
 
 		return {
 			identifier: identifierName,

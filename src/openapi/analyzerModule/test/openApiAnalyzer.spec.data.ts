@@ -19,6 +19,7 @@ router.get('/test/908c3e74-cf67-4ec7-a281-66a79f95d44d', () => {
 		name: 'Test endpoint name',
 		summary: 'Test endpoint summary',
 		description: 'Test endpoint description',
+		tags: ['one', 'two', 'three'],
 	})
 })
 

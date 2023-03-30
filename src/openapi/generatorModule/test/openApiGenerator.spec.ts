@@ -626,4 +626,18 @@ describe('OpenApi Generator', () => {
 		expect(spec.paths['/test/path/{id}'].put).not.toBe(undefined)
 		expect(spec.paths['/test/path/{id}'].delete).not.toBe(undefined)
 	})
+
+	it('generates correct spec for endpoint with tags', () => {
+		const manager = createManagerWithEndpoints([
+			{
+				...minimalEndpointData,
+				method: 'GET',
+				path: '/test/path/:id',
+				tags: ['one', 'two', 'three'],
+			},
+		])
+		const spec = generateOpenApiSpec(manager)
+
+		expect(spec.paths['/test/path/{id}'].get?.tags).toEqual(['one', 'two', 'three'])
+	})
 })

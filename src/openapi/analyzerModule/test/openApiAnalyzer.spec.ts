@@ -50,6 +50,7 @@ describe('OpenApi Analyzer', () => {
 				expect(endpoint.name).toEqual('Test endpoint name')
 				expect(endpoint.summary).toEqual('Test endpoint summary')
 				expect(endpoint.description).toEqual('Test endpoint description')
+				expect(endpoint.tags).toEqual(['one', 'two', 'three'])
 			})
 		})
 
