@@ -23,6 +23,24 @@ router.get('/test/908c3e74-cf67-4ec7-a281-66a79f95d44d', () => {
 	})
 })
 
+router.get('/test/f2473a55-0ac6-46a0-b3c6-aae060dbe0ab', () => {
+	const firstTag = 'one'
+	const secondTag = 'two'
+	useApiEndpoint({
+		tags: [firstTag, secondTag],
+	})
+})
+
+router.get('/test/b504a196-d31d-40a4-a901-38a0f34f6ea7', () => {
+	const tagContainer = {
+		firstTag: 'one',
+		secondTag: 'two',
+	}
+	useApiEndpoint({
+		tags: [tagContainer.firstTag, tagContainer.secondTag],
+	})
+})
+
 router.get('/test/bf6147f2-a1dc-4cc2-8327-e6f041f828bf/:firstParam/:secondParam/:optionalParam?', (ctx) => {
 	usePathParams(ctx, {
 		firstParam: PathParam({

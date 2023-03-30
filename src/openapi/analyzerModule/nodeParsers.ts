@@ -599,12 +599,16 @@ export const getProperTypeShape = (
 }
 
 const getLiteralValueOfNode = (node: Node): string | string[] | undefined => {
-	if (node.isKind(SyntaxKind.StringLiteral)) {
+	if (node.isKind(SyntaxKind.Identifier)) {
+		return getLiteralValueOfNode(findNodeImplementation(node))
+	} else if (node.isKind(SyntaxKind.StringLiteral)) {
 		return node.getLiteralValue()
 	} else if (node.isKind(SyntaxKind.ArrayLiteralExpression)) {
 		return node.forEachChildAsArray().map((child) => getLiteralValueOfNode(child)) as string[]
+	} else if (node.isKind(SyntaxKind.PropertyAccessExpression)) {
+		return getLiteralValueOfNode(findPropertyAssignmentValueNode(node))
 	}
-	return undefined
+	return 'unknown_6'
 }
 
 export const getValuesOfObjectLiteral = (objectLiteralNode: Node<ts.ObjectLiteralExpression>) => {

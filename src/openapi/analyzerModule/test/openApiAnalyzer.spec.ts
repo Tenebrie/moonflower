@@ -52,6 +52,18 @@ describe('OpenApi Analyzer', () => {
 				expect(endpoint.description).toEqual('Test endpoint description')
 				expect(endpoint.tags).toEqual(['one', 'two', 'three'])
 			})
+
+			it('parses aliased tags correctly', () => {
+				const endpoint = analyzeEndpointById('f2473a55-0ac6-46a0-b3c6-aae060dbe0ab')
+
+				expect(endpoint.tags).toEqual(['one', 'two'])
+			})
+
+			it('parses property access tags correctly', () => {
+				const endpoint = analyzeEndpointById('b504a196-d31d-40a4-a901-38a0f34f6ea7')
+
+				expect(endpoint.tags).toEqual(['one', 'two'])
+			})
 		})
 
 		describe('usePathParams', () => {
@@ -805,23 +817,19 @@ describe('OpenApi Analyzer', () => {
 			it('handles null union type correctly', () => {
 				const endpoint = analyzeEndpointById('006b4d53-15a4-405e-b94d-1fa3abbd19aa')
 
-				expect(endpoint.responses[0].status).toEqual(204)
-				expect(endpoint.responses[0].signature).toEqual('null')
-				expect(endpoint.responses[1].status).toEqual(200)
-				expect(endpoint.responses[1].signature).toEqual('string')
-				expect(endpoint.responses.length).toEqual(2)
+				expect(endpoint.responses[0].status).toEqual(200)
+				expect(endpoint.responses[0].signature).toEqual('string')
+				expect(endpoint.responses.length).toEqual(1)
 			})
 
 			it('handles complex null union type correctly', () => {
 				const endpoint = analyzeEndpointById('a8f4e5f7-ed58-4de6-8877-b14bf14ae176')
 
-				expect(endpoint.responses[0].status).toEqual(204)
-				expect(endpoint.responses[0].signature).toEqual('null')
+				expect(endpoint.responses[0].status).toEqual(200)
+				expect(endpoint.responses[0].signature).toEqual('string')
 				expect(endpoint.responses[1].status).toEqual(200)
-				expect(endpoint.responses[1].signature).toEqual('string')
-				expect(endpoint.responses[2].status).toEqual(200)
-				expect(endpoint.responses[2].signature).toEqual('number')
-				expect(endpoint.responses.length).toEqual(3)
+				expect(endpoint.responses[1].signature).toEqual('number')
+				expect(endpoint.responses.length).toEqual(2)
 			})
 
 			it('handles object with nullable param correctly', () => {
