@@ -377,6 +377,26 @@ router.post('/test/e3659429-1a05-4590-a5a6-dc80a30878e6', () => {
 	return ['foo', 'bar']
 })
 
+router.get('/test/9470a1f7-1781-43ea-aa32-4d7d71eddf4f', () => {
+	return 0 as unknown as { foo: string } & { bar: string }
+})
+
+router.get('/test/be7205a2-3bc3-490e-be25-988d7ab65f20', () => {
+	return 0 as unknown as ({ afoo: string } | { abar: string }) & ({ befoo: string } | { beebar: string })
+})
+
+router.get('/test/006b4d53-15a4-405e-b94d-1fa3abbd19aa', () => {
+	return '' as string | null
+})
+
+router.get('/test/a8f4e5f7-ed58-4de6-8877-b14bf14ae176', () => {
+	return '' as string | number | null
+})
+
+router.get('/test/b9fae12a-be41-4aef-9250-f6d67cd0aee6', () => {
+	return {} as { foo: string | null }
+})
+
 router.get('/test/66a075bc-c9d4-4622-8c04-e0a982a19fb0', (ctx) => {
 	type AnotherNamedParam = {
 		aaa: string

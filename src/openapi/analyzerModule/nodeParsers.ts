@@ -573,8 +573,8 @@ export const getProperTypeShape = (
 		const dedupedShapes = unfilteredShapes.filter(
 			(type, index, arr) => !arr.find((dup, dupIndex) => dup.shape === type.shape && dupIndex > index)
 		)
-		const hasUndefined = dedupedShapes.some((shape) => shape.shape === 'undefined')
-		const shapes = dedupedShapes.filter((shape) => shape.shape !== 'undefined')
+		const isNullable = dedupedShapes.some((shape) => shape.shape === 'undefined' || shape.shape === 'null')
+		const shapes = dedupedShapes.filter((shape) => shape.shape !== 'undefined' && shape.shape !== 'null')
 		if (shapes.length === 1) {
 			return shapes[0].shape
 		}
@@ -582,9 +582,17 @@ export const getProperTypeShape = (
 			{
 				role: 'union',
 				shape: shapes,
-				optional: hasUndefined,
+				optional: isNullable,
 			},
 		]
+	}
+
+	if (type.isIntersection()) {
+		const children = type.getIntersectionTypes()
+		const shapesOfChildren = children
+			.map((child) => getProperTypeShape(child, atLocation, nextStack))
+			.filter((shape) => typeof shape !== 'string') as ShapeOfProperty[][]
+		return shapesOfChildren.reduce<ShapeOfType[]>((total, current) => [...total, ...current], [])
 	}
 
 	return 'unknown_5'

@@ -261,10 +261,11 @@ const parseRequestResponse = (node: Node<ts.Node>): EndpointData['responses'] =>
 
 	const responseType = getProperTypeShape(actualType, node)
 
+	// TODO: Add support for response descriptions and errors
 	if (typeof responseType === 'string') {
 		return [
 			{
-				status: responseType === 'void' ? 204 : 200,
+				status: responseType === 'void' || responseType === 'null' ? 204 : 200,
 				signature: responseType,
 				description: '',
 				errorMessage: '',
@@ -276,7 +277,7 @@ const parseRequestResponse = (node: Node<ts.Node>): EndpointData['responses'] =>
 		if (typeof responseType[0].shape === 'string') {
 			return [
 				{
-					status: 200,
+					status: responseType[0].shape === 'void' || responseType[0].shape === 'null' ? 204 : 200,
 					signature: responseType[0].shape,
 					description: '',
 					errorMessage: '',
@@ -285,7 +286,7 @@ const parseRequestResponse = (node: Node<ts.Node>): EndpointData['responses'] =>
 		}
 
 		return responseType[0].shape.map((unionEntry) => ({
-			status: 200,
+			status: unionEntry.shape === 'void' || unionEntry.shape === 'null' ? 204 : 200,
 			signature: unionEntry.shape,
 			description: '',
 			errorMessage: '',

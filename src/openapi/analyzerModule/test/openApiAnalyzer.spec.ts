@@ -714,6 +714,130 @@ describe('OpenApi Analyzer', () => {
 				])
 				expect(endpoint.responses.length).toEqual(1)
 			})
+
+			it('parses intersection return type correctly', () => {
+				const endpoint = analyzeEndpointById('9470a1f7-1781-43ea-aa32-4d7d71eddf4f')
+
+				expect(endpoint.responses[0].status).toEqual(200)
+				expect(endpoint.responses[0].signature).toEqual([
+					{
+						role: 'property',
+						identifier: 'foo',
+						shape: 'string',
+						optional: false,
+					},
+					{
+						role: 'property',
+						identifier: 'bar',
+						shape: 'string',
+						optional: false,
+					},
+				])
+				expect(endpoint.responses.length).toEqual(1)
+			})
+
+			it('parses intersection of union return types correctly', () => {
+				const endpoint = analyzeEndpointById('be7205a2-3bc3-490e-be25-988d7ab65f20')
+
+				expect(endpoint.responses[0].status).toEqual(200)
+				expect(endpoint.responses[0].signature).toEqual([
+					{
+						identifier: 'afoo',
+						optional: false,
+						role: 'property',
+						shape: 'string',
+					},
+					{
+						identifier: 'befoo',
+						optional: false,
+						role: 'property',
+						shape: 'string',
+					},
+				])
+				expect(endpoint.responses[1].status).toEqual(200)
+				expect(endpoint.responses[1].signature).toEqual([
+					{
+						identifier: 'afoo',
+						optional: false,
+						role: 'property',
+						shape: 'string',
+					},
+					{
+						identifier: 'beebar',
+						optional: false,
+						role: 'property',
+						shape: 'string',
+					},
+				])
+				expect(endpoint.responses[2].status).toEqual(200)
+				expect(endpoint.responses[2].signature).toEqual([
+					{
+						identifier: 'abar',
+						optional: false,
+						role: 'property',
+						shape: 'string',
+					},
+					{
+						identifier: 'befoo',
+						optional: false,
+						role: 'property',
+						shape: 'string',
+					},
+				])
+				expect(endpoint.responses[3].status).toEqual(200)
+				expect(endpoint.responses[3].signature).toEqual([
+					{
+						identifier: 'abar',
+						optional: false,
+						role: 'property',
+						shape: 'string',
+					},
+					{
+						identifier: 'beebar',
+						optional: false,
+						role: 'property',
+						shape: 'string',
+					},
+				])
+				expect(endpoint.responses.length).toEqual(4)
+			})
+
+			it('handles null union type correctly', () => {
+				const endpoint = analyzeEndpointById('006b4d53-15a4-405e-b94d-1fa3abbd19aa')
+
+				expect(endpoint.responses[0].status).toEqual(204)
+				expect(endpoint.responses[0].signature).toEqual('null')
+				expect(endpoint.responses[1].status).toEqual(200)
+				expect(endpoint.responses[1].signature).toEqual('string')
+				expect(endpoint.responses.length).toEqual(2)
+			})
+
+			it('handles complex null union type correctly', () => {
+				const endpoint = analyzeEndpointById('a8f4e5f7-ed58-4de6-8877-b14bf14ae176')
+
+				expect(endpoint.responses[0].status).toEqual(204)
+				expect(endpoint.responses[0].signature).toEqual('null')
+				expect(endpoint.responses[1].status).toEqual(200)
+				expect(endpoint.responses[1].signature).toEqual('string')
+				expect(endpoint.responses[2].status).toEqual(200)
+				expect(endpoint.responses[2].signature).toEqual('number')
+				expect(endpoint.responses.length).toEqual(3)
+			})
+
+			it('handles object with nullable param correctly', () => {
+				const endpoint = analyzeEndpointById('b9fae12a-be41-4aef-9250-f6d67cd0aee6')
+
+				expect(endpoint.responses[0].status).toEqual(200)
+				expect(endpoint.responses[0].signature).toEqual([
+					{
+						identifier: 'foo',
+						optional: true,
+						role: 'property',
+						shape: 'string',
+					},
+				])
+				expect(endpoint.responses.length).toEqual(1)
+			})
 		})
 
 		describe('when using an exposed model', () => {

@@ -95,7 +95,7 @@ export const generatePaths = (endpoints: EndpointData[], preferences: ApiDocsPre
 
 			const responseSchema = getSchema(response.signature)
 			const content = (() => {
-				if ('type' in responseSchema && responseSchema.type === 'void') {
+				if ('type' in responseSchema && (responseSchema.type === 'void' || responseSchema.type === 'null')) {
 					return undefined
 				}
 
