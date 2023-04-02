@@ -640,4 +640,45 @@ describe('OpenApi Generator', () => {
 
 		expect(spec.paths['/test/path/{id}'].get?.tags).toEqual(['one', 'two', 'three'])
 	})
+
+	it('generates correct spec for endpoint that returns Date objects', () => {
+		const manager = createManagerWithEndpoints([
+			{
+				...minimalEndpointData,
+				responses: [
+					{
+						status: 200,
+						signature: [
+							{
+								identifier: 'foo',
+								optional: false,
+								role: 'property',
+								shape: 'Date',
+							},
+						],
+					},
+				],
+			},
+		])
+		const spec = generateOpenApiSpec(manager)
+
+		expect(spec.paths['/test/path'].get?.responses[200].content).toEqual({
+			'application/json': {
+				schema: {
+					oneOf: [
+						{
+							type: 'object',
+							properties: {
+								foo: {
+									type: 'string',
+									format: 'date-time',
+								},
+							},
+							required: ['foo'],
+						},
+					],
+				},
+			},
+		})
+	})
 })

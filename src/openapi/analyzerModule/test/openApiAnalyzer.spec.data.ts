@@ -415,6 +415,10 @@ router.get('/test/b9fae12a-be41-4aef-9250-f6d67cd0aee6', () => {
 	return {} as { foo: string | null }
 })
 
+router.get('/test/dba70b93-8e8f-4731-8869-285831d18fcb', () => {
+	return {} as { foo: Date }
+})
+
 router.get('/test/66a075bc-c9d4-4622-8c04-e0a982a19fb0', (ctx) => {
 	type AnotherNamedParam = {
 		aaa: string

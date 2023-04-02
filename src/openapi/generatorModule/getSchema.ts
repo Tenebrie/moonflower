@@ -18,6 +18,7 @@ export type SchemaType =
 	| { type: 'array'; items: SchemaType; minItems: number; maxItems: number }
 	| { type: 'object'; additionalProperties: SchemaType }
 	| { type: 'string'; enum: string[] }
+	| { type: 'string'; format: string }
 	| { type: 'number'; enum: string[] }
 	| { $ref: string }
 
@@ -28,6 +29,13 @@ export const getSchema = (shape: string | ShapeOfType[]): SchemaType => {
 
 	if (typeof shape === 'string' && shape === 'circular') {
 		return generateAny()
+	}
+
+	if (typeof shape === 'string' && shape === 'Date') {
+		return {
+			type: 'string',
+			format: 'date-time',
+		}
 	}
 
 	if (typeof shape === 'string') {

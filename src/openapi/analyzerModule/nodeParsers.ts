@@ -524,6 +524,9 @@ export const getProperTypeShape = (
 	}
 
 	if (type.isObject()) {
+		if (type.getText() === 'Date') {
+			return 'Date'
+		}
 		return type
 			.getProperties()
 			.map((prop) => {
