@@ -48,6 +48,18 @@ describe('useRequestBody', () => {
 		expect(params.testParam).toEqual(12)
 	})
 
+	it('passes validation on numeric zero parameter', () => {
+		const ctx = mockContextBody(mockContext(), {
+			testParam: 0,
+		})
+
+		const params = useRequestBody(ctx, {
+			testParam: NumberValidator,
+		})
+
+		expect(params.testParam).toEqual(0)
+	})
+
 	it('fails validation on invalid parameter', () => {
 		const test = () => {
 			const ctx = mockContextBody(mockContext(), {

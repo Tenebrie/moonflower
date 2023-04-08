@@ -33,7 +33,7 @@ export const useRequestBody = <ValidatorsT extends Record<string, Validator<any>
 	}))
 
 	const missingParams = params.filter(
-		(param) => !providedParams[param.name] && !validators[param.name].optional
+		(param) => providedParams[param.name] === undefined && !validators[param.name].optional
 	)
 
 	if (missingParams.length > 0) {
