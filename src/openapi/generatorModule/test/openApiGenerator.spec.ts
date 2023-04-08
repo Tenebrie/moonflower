@@ -681,4 +681,21 @@ describe('OpenApi Generator', () => {
 			},
 		})
 	})
+
+	it('does not include body if endpoint is not expecting a body', () => {
+		const manager = createManagerWithEndpoints([
+			{
+				...minimalEndpointData,
+				method: 'POST',
+			},
+		])
+		const spec = generateOpenApiSpec(manager)
+
+		expect(spec.paths['/test/path'].post).toEqual({
+			description: '',
+			parameters: [],
+			requestBody: undefined,
+			responses: {},
+		})
+	})
 })

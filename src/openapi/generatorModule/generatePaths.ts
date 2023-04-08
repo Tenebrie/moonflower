@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
+import { keysOf } from '../../utils/object'
 import { ApiDocsPreferences } from '../manager/OpenApiManager'
 import { EndpointData, PathDefinition } from '../types'
 import { getSchema } from './getSchema'
@@ -83,9 +84,10 @@ export const generatePaths = (endpoints: EndpointData[], preferences: ApiDocsPre
 		}
 
 		const requestsWithBody = ['POST', 'PATCH', 'PUT']
-		const requestBody = requestsWithBody.includes(endpoint.method)
-			? { content: acceptedBodyTypes }
-			: undefined
+		const requestBody =
+			requestsWithBody.includes(endpoint.method) && Object.keys(acceptedBodyTypes).length > 0
+				? { content: acceptedBodyTypes }
+				: undefined
 
 		const responses: PathDefinition['responses'] = {}
 		endpoint.responses.forEach((response) => {
