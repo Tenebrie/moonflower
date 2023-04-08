@@ -56,7 +56,7 @@ describe('OpenApi Generator', () => {
 		responses: [],
 	}
 
-	it('does not include responses field if no responses are available', () => {
+	it('includes empty content in response if no responses are available', () => {
 		const manager = createManagerWithEndpoints([
 			{
 				...minimalEndpointData,
@@ -70,7 +70,9 @@ describe('OpenApi Generator', () => {
 		])
 		const spec = generateOpenApiSpec(manager)
 
-		expect(spec.paths['/test/path'].get?.responses[204].content).toEqual(undefined)
+		expect(spec.paths['/test/path'].get?.responses[204].content).toEqual({
+			'application/json': {},
+		})
 	})
 
 	it('includes record response correctly', () => {

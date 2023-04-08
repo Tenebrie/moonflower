@@ -743,7 +743,7 @@ export const manyEndpointsResults = {
 				summary: 'Test endpoint summary',
 				description: 'Test endpoint description',
 				parameters: [],
-				responses: { '200': { description: '' } },
+				responses: { '200': { description: '', content: { 'application/json': {} } } },
 			},
 		},
 		'/test/bf6147f2-a1dc-4cc2-8327-e6f041f828bf/{firstParam}/{secondParam}/{optionalParam}': {
@@ -760,7 +760,7 @@ export const manyEndpointsResults = {
 						schema: { type: 'number' },
 					},
 				],
-				responses: { '200': { description: '' } },
+				responses: { '200': { description: '', content: { 'application/json': {} } } },
 			},
 		},
 		'/test/ef25ef5e-0f8f-4732-bf59-8825f94a5287/{firstParam}/{secondParam}/{optionalParam}': {
@@ -777,7 +777,7 @@ export const manyEndpointsResults = {
 						schema: { type: 'number' },
 					},
 				],
-				responses: { '200': { description: '' } },
+				responses: { '200': { description: '', content: { 'application/json': {} } } },
 			},
 		},
 		'/test/5ab5dd0d-b241-4378-bea1-a2dd696d699a/{firstParam}/{secondParam}': {
@@ -807,7 +807,7 @@ export const manyEndpointsResults = {
 						},
 					},
 				],
-				responses: { '200': { description: '' } },
+				responses: { '200': { description: '', content: { 'application/json': {} } } },
 			},
 		},
 		'/test/209df2a1-55f9-4859-bc31-3277547c7d88/{firstParam}/{secondParam}': {
@@ -829,7 +829,7 @@ export const manyEndpointsResults = {
 						schema: { type: 'object', properties: { foo: { type: 'string' } } },
 					},
 				],
-				responses: { '200': { description: '' } },
+				responses: { '200': { description: '', content: { 'application/json': {} } } },
 			},
 		},
 		'/test/89d961f1-7d36-4271-8bd3-665ee0992590/{firstParam}/{secondParam}': {
@@ -859,7 +859,7 @@ export const manyEndpointsResults = {
 						},
 					},
 				],
-				responses: { '200': { description: '' } },
+				responses: { '200': { description: '', content: { 'application/json': {} } } },
 			},
 		},
 		'/test/f89310d9-25ac-4005-93e4-614179d3bbd4': {
@@ -870,29 +870,57 @@ export const manyEndpointsResults = {
 					{ name: 'secondParam', in: 'query', description: '', required: false, schema: { type: 'boolean' } },
 					{ name: 'thirdParam', in: 'query', description: '', required: false, schema: { type: 'number' } },
 				],
-				responses: { '200': { description: '' } },
+				responses: { '200': { description: '', content: { 'application/json': {} } } },
 			},
 		},
 		'/test/6040cd01-a0c6-4b70-9901-b647f19b19a7': {
-			get: { description: '', parameters: [], responses: { '200': { description: '' } } },
+			get: {
+				description: '',
+				parameters: [],
+				responses: { '200': { description: '', content: { 'application/json': {} } } },
+			},
 		},
 		'/test/f3754325-6d9c-42b6-becf-4a9e72bd2c4e': {
-			get: { description: '', parameters: [], responses: { '200': { description: '' } } },
+			get: {
+				description: '',
+				parameters: [],
+				responses: { '200': { description: '', content: { 'application/json': {} } } },
+			},
 		},
 		'/test/1ab973ff-9937-4e2d-b432-ff43a9df42cb': {
-			get: { description: '', parameters: [], responses: { '200': { description: '' } } },
+			get: {
+				description: '',
+				parameters: [],
+				responses: { '200': { description: '', content: { 'application/json': {} } } },
+			},
 		},
 		'/test/f74f6003-2aba-4f8c-855e-c0149f4217b7': {
-			get: { description: '', parameters: [], responses: { '200': { description: '' } } },
+			get: {
+				description: '',
+				parameters: [],
+				responses: { '200': { description: '', content: { 'application/json': {} } } },
+			},
 		},
 		'/test/e8e5496b-11a0-41e3-a68d-f03d524e413c': {
-			get: { description: '', parameters: [], responses: { '200': { description: '' } } },
+			get: {
+				description: '',
+				parameters: [],
+				responses: { '200': { description: '', content: { 'application/json': {} } } },
+			},
 		},
 		'/test/7268be93-ce90-44b1-9a2f-8b286d7aae67': {
-			get: { description: '', parameters: [], responses: { '200': { description: '' } } },
+			get: {
+				description: '',
+				parameters: [],
+				responses: { '200': { description: '', content: { 'application/json': {} } } },
+			},
 		},
 		'/test/185c6075-a0f4-4607-af81-b51923f5866f': {
-			get: { description: '', parameters: [], responses: { '200': { description: '' } } },
+			get: {
+				description: '',
+				parameters: [],
+				responses: { '200': { description: '', content: { 'application/json': {} } } },
+			},
 		},
 		'/test/e1bedf55-6d3a-4c01-9c66-6ec74cc66c3b': {
 			get: {
@@ -1088,7 +1116,11 @@ export const manyEndpointsResults = {
 			},
 		},
 		'/test/196f2937-e369-435f-b239-62eaacaa6fbd': {
-			get: { description: '', parameters: [], responses: { '204': { description: '' } } },
+			get: {
+				description: '',
+				parameters: [],
+				responses: { '204': { description: '', content: { 'application/json': {} } } },
+			},
 		},
 	},
 	components: { schemas: {} },
