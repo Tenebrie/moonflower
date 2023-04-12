@@ -1,4 +1,5 @@
 import {
+	BigIntValidator,
 	BooleanValidator,
 	NumberValidator,
 	OptionalParam,
@@ -58,6 +59,55 @@ describe('useQueryParams', () => {
 
 		expect(test).toThrow(ValidationError)
 		expect(test).toThrow("Failed query param validation: 'testParam'")
+	})
+
+	it('passes validation on large number', () => {
+		const reallyBigNumber = `1${Array(100)
+			.fill('0')
+			.reduce((total, current) => total + current, '')}`
+		const ctx = mockContextQuery(mockContext(), {
+			testParam: reallyBigNumber,
+		})
+
+		const params = useQueryParams(ctx, {
+			testParam: NumberValidator,
+		})
+
+		expect(params.testParam).toEqual(1e100)
+	})
+
+	it('fails validation on number being too large', () => {
+		const test = () => {
+			const reallyBigNumber = `1${Array(500)
+				.fill('0')
+				.reduce((total, current) => total + current, '')}`
+			const ctx = mockContextQuery(mockContext(), {
+				testParam: reallyBigNumber,
+			})
+
+			useQueryParams(ctx, {
+				testParam: NumberValidator,
+			})
+		}
+
+		expect(test).toThrow(ValidationError)
+		expect(test).toThrow("Failed query param validation: 'testParam'")
+	})
+
+	it('passes validation on very large biging', () => {
+		const reallyBigNumber = `1${Array(1000)
+			.fill('0')
+			.reduce((total, current) => total + current, '')}`
+		const ctx = mockContextQuery(mockContext(), {
+			testParam: reallyBigNumber,
+		})
+
+		const params = useQueryParams(ctx, {
+			testParam: BigIntValidator,
+		})
+
+		const expectedBigInt = BigInt(reallyBigNumber)
+		expect(params.testParam).toEqual(expectedBigInt)
 	})
 
 	it('passes validation when optional parameter is not provided', () => {

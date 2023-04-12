@@ -488,6 +488,10 @@ export const getProperTypeShape = (
 		return 'number'
 	}
 
+	if (type.getText() === 'bigint') {
+		return 'bigint'
+	}
+
 	if (type.isTuple()) {
 		return [
 			{

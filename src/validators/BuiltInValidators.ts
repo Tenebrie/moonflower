@@ -19,7 +19,12 @@ export const StringValidator = BuiltInValidatorParam({
 })
 export const NumberValidator = BuiltInValidatorParam({
 	rehydrate: (v) => Number(v),
-	validate: (v) => !Number.isNaN(v),
+	validate: (v) => Number.isFinite(v) && !Number.isNaN(v),
+	description: 'Any numeric value',
+	errorMessage: 'Must be a valid number',
+})
+export const BigIntValidator = BuiltInValidatorParam({
+	rehydrate: (v) => BigInt(v),
 	description: 'Any numeric value',
 	errorMessage: 'Must be a valid number',
 })

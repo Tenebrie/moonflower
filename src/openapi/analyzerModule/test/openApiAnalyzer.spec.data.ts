@@ -9,7 +9,12 @@ import { useQueryParams } from '../../../hooks/useQueryParams'
 import { useRequestBody } from '../../../hooks/useRequestBody'
 import { useRequestRawBody } from '../../../hooks/useRequestRawBody'
 import { Router } from '../../../router/Router'
-import { BooleanValidator, NumberValidator, StringValidator } from '../../../validators/BuiltInValidators'
+import {
+	BigIntValidator,
+	BooleanValidator,
+	NumberValidator,
+	StringValidator,
+} from '../../../validators/BuiltInValidators'
 import { OptionalParam, PathParam, RequiredParam } from '../../../validators/ParamWrappers'
 
 const router = new Router()
@@ -289,6 +294,12 @@ router.get('/test/c9a2301c-babd-4512-935c-b9664803e720', (ctx) => {
 	})
 })
 
+router.get('/test/b3b9aec9-f58e-4c4b-8cf6-ca2fe11c5331', (ctx) => {
+	useRequestBody(ctx, {
+		firstParam: RequiredParam(BigIntValidator),
+	})
+})
+
 router.get('/test/e1bedf55-6d3a-4c01-9c66-6ec74cc66c3b', () => {
 	return 'Hello world'
 })
@@ -417,6 +428,10 @@ router.get('/test/b9fae12a-be41-4aef-9250-f6d67cd0aee6', () => {
 
 router.get('/test/dba70b93-8e8f-4731-8869-285831d18fcb', () => {
 	return {} as { foo: Date }
+})
+
+router.get('/test/79207cfa-916a-4474-9d98-45196d2451b5', () => {
+	return {} as { foo: bigint }
 })
 
 router.get('/test/66a075bc-c9d4-4622-8c04-e0a982a19fb0', (ctx) => {

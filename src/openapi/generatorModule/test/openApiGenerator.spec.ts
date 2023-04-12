@@ -75,6 +75,34 @@ describe('OpenApi Generator', () => {
 		})
 	})
 
+	it('handles bigint type correctly', () => {
+		const manager = createManagerWithEndpoints([
+			{
+				...minimalEndpointData,
+				responses: [
+					{
+						status: 200,
+						signature: 'bigint',
+					},
+				],
+			},
+		])
+		const spec = generateOpenApiSpec(manager)
+
+		expect(spec.paths['/test/path'].get?.responses[200].content).toEqual({
+			'application/json': {
+				schema: {
+					oneOf: [
+						{
+							type: 'string',
+							format: 'bigint',
+						},
+					],
+				},
+			},
+		})
+	})
+
 	it('includes record response correctly', () => {
 		const manager = createManagerWithEndpoints([
 			{

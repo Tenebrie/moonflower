@@ -54,4 +54,10 @@ router.get('/test/error/badrequest', () => {
 	throw new BadRequestError('Test error')
 })
 
+router.get('/test/get/bigint', () => {
+	return {
+		foo: BigInt(100),
+	}
+})
+
 export const TestAppRouter = router

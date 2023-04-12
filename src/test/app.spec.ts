@@ -66,6 +66,12 @@ describe('TestAppRouter', () => {
 		expect(response.status).toBe(400)
 		expect(response.text).toBe(JSON.stringify({ status: 400, reason: 'Bad Request', message: 'Test error' }))
 	})
+
+	it('handles bigint return value correctly', async () => {
+		const response = await request(app.callback()).get('/test/get/bigint')
+		expect(response.status).toBe(200)
+		expect(response.text).toBe(JSON.stringify({ foo: '100' }))
+	})
 })
 
 describe('OpenApiRouter', () => {

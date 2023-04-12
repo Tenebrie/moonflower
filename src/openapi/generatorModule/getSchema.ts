@@ -38,6 +38,13 @@ export const getSchema = (shape: string | ShapeOfType[]): SchemaType => {
 		}
 	}
 
+	if (typeof shape === 'string' && shape === 'bigint') {
+		return {
+			type: 'string',
+			format: 'bigint',
+		}
+	}
+
 	if (typeof shape === 'string') {
 		return {
 			type: shape,

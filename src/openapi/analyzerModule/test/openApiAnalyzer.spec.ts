@@ -498,6 +498,13 @@ describe('OpenApi Analyzer', () => {
 				expect(endpoint.objectBody[0].signature).toEqual('string')
 				expect(endpoint.objectBody[0].optional).toEqual(true)
 			})
+
+			it('parses validator with bigint correctly', () => {
+				const endpoint = analyzeEndpointById('b3b9aec9-f58e-4c4b-8cf6-ca2fe11c5331')
+
+				expect(endpoint.objectBody[0].identifier).toEqual('firstParam')
+				expect(endpoint.objectBody[0].signature).toEqual('bigint')
+			})
 		})
 
 		describe('endpoint return value', () => {
@@ -857,6 +864,21 @@ describe('OpenApi Analyzer', () => {
 						optional: false,
 						role: 'property',
 						shape: 'Date',
+					},
+				])
+				expect(endpoint.responses.length).toEqual(1)
+			})
+
+			it('handles object with bigint param correctly', () => {
+				const endpoint = analyzeEndpointById('79207cfa-916a-4474-9d98-45196d2451b5')
+
+				expect(endpoint.responses[0].status).toEqual(200)
+				expect(endpoint.responses[0].signature).toEqual([
+					{
+						identifier: 'foo',
+						optional: false,
+						role: 'property',
+						shape: 'bigint',
 					},
 				])
 				expect(endpoint.responses.length).toEqual(1)

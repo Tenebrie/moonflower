@@ -4,6 +4,7 @@ import * as Koa from 'koa'
 
 import { OpenApiManager } from '../openapi/manager/OpenApiManager'
 import { ExtractedRequestParams } from '../utils/TypeUtils'
+import { responseValueToJson } from './responseValueToJson'
 
 type Props = {
 	skipOpenApiAnalysis: boolean
@@ -31,7 +32,7 @@ export class Router<StateT = Koa.DefaultState, ContextT = Koa.DefaultContext> {
 		return this.koaRouter.get(path, async (ctx) => {
 			// @ts-ignore
 			const responseValue = await callback(ctx, undefined)
-			ctx.body = responseValue
+			ctx.body = responseValueToJson(responseValue)
 		})
 	}
 
@@ -42,7 +43,7 @@ export class Router<StateT = Koa.DefaultState, ContextT = Koa.DefaultContext> {
 		return this.koaRouter.post(path, async (ctx) => {
 			// @ts-ignore
 			const responseValue = await callback(ctx, undefined)
-			ctx.body = responseValue
+			ctx.body = responseValueToJson(responseValue)
 		})
 	}
 
@@ -53,7 +54,7 @@ export class Router<StateT = Koa.DefaultState, ContextT = Koa.DefaultContext> {
 		return this.koaRouter.put(path, async (ctx) => {
 			// @ts-ignore
 			const responseValue = await callback(ctx, undefined)
-			ctx.body = responseValue
+			ctx.body = responseValueToJson(responseValue)
 		})
 	}
 
@@ -64,7 +65,7 @@ export class Router<StateT = Koa.DefaultState, ContextT = Koa.DefaultContext> {
 		return this.koaRouter.delete(path, async (ctx) => {
 			// @ts-ignore
 			const responseValue = await callback(ctx, undefined)
-			ctx.body = responseValue
+			ctx.body = responseValueToJson(responseValue)
 		})
 	}
 
@@ -75,7 +76,7 @@ export class Router<StateT = Koa.DefaultState, ContextT = Koa.DefaultContext> {
 		return this.koaRouter.del(path, async (ctx) => {
 			// @ts-ignore
 			const responseValue = await callback(ctx, undefined)
-			ctx.body = responseValue
+			ctx.body = responseValueToJson(responseValue)
 		})
 	}
 
@@ -86,7 +87,7 @@ export class Router<StateT = Koa.DefaultState, ContextT = Koa.DefaultContext> {
 		return this.koaRouter.patch(path, async (ctx) => {
 			// @ts-ignore
 			const responseValue = await callback(ctx, undefined)
-			ctx.body = responseValue
+			ctx.body = responseValueToJson(responseValue)
 		})
 	}
 
