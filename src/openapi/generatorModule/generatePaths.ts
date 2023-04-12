@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
+import { keysOf } from '../../utils/object'
 import { ApiDocsPreferences } from '../manager/OpenApiManager'
 import { EndpointData, PathDefinition } from '../types'
 import { getSchema } from './getSchema'
@@ -92,14 +93,12 @@ export const generatePaths = (endpoints: EndpointData[], preferences: ApiDocsPre
 		endpoint.responses.forEach((response) => {
 			const status = String(response.status)
 
-			const existingSchemas = responses[status]?.['content']['application/json']['schema']?.['oneOf'] ?? []
+			const existingSchemas = responses[status]?.['content']?.['application/json']['schema']['oneOf'] ?? []
 
 			const responseSchema = getSchema(response.signature)
 			const content = (() => {
 				if ('type' in responseSchema && (responseSchema.type === 'void' || responseSchema.type === 'null')) {
-					return {
-						'application/json': {},
-					}
+					return undefined
 				}
 
 				return {

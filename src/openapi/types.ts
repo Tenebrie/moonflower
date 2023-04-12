@@ -19,9 +19,9 @@ export type PathDefinition = {
 		string,
 		{
 			description: string
-			content: {
+			content?: {
 				'application/json': {
-					schema?: {
+					schema: {
 						oneOf: SchemaType[]
 					}
 				}
