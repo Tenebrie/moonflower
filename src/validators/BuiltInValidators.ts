@@ -1,7 +1,8 @@
+import { ValidationError } from '../errors/UserFacingErrors'
 import { BuiltInValidatorParam } from './InternalParamWrappers'
 
 export const EmailValidator = BuiltInValidatorParam({
-	rehydrate: (v) => v,
+	rehydrate: (v) => String(v),
 	validate: (v) => v.includes('@'),
 	description: "A string containing an '@' sign",
 	errorMessage: "Must include an '@' sign",
@@ -24,12 +25,17 @@ export const NumberValidator = BuiltInValidatorParam({
 	errorMessage: 'Must be a valid number',
 })
 export const BigIntValidator = BuiltInValidatorParam({
-	rehydrate: (v) => BigInt(v),
+	rehydrate: (v) => {
+		if (v === null) {
+			throw new ValidationError('Encountered an unexpected null value')
+		}
+		return BigInt(v)
+	},
 	description: 'Any numeric value',
 	errorMessage: 'Must be a valid number',
 })
 export const NonEmptyStringValidator = BuiltInValidatorParam({
-	rehydrate: (v) => v,
+	rehydrate: (v) => String(v),
 	validate: (v) => v.length > 0,
 	description: 'Any string value with at least one character',
 	errorMessage: 'Must be a string with at least one character',

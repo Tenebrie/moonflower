@@ -23,7 +23,7 @@ describe('useHeaderParams', () => {
 			'number-header': NumberValidator,
 			'boolean-header': BooleanValidator,
 			'object-header': RequiredParam<{ foo: string; bar: string }>({
-				rehydrate: (v) => JSON.parse(v),
+				rehydrate: (v) => JSON.parse(String(v)),
 			}),
 		})
 
@@ -136,7 +136,7 @@ describe('useHeaderParams', () => {
 
 			useHeaderParams(ctx, {
 				'test-header': RequiredParam<{ foo: 'aaa' }>({
-					rehydrate: (v) => JSON.parse(v),
+					rehydrate: (v) => JSON.parse(String(v)),
 				}),
 			})
 		}

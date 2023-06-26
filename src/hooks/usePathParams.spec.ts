@@ -23,7 +23,7 @@ describe('usePathParams', () => {
 			numberParam: NumberValidator,
 			booleanParam: BooleanValidator,
 			objectParam: RequiredParam<{ foo: string; bar: string }>({
-				rehydrate: (v) => JSON.parse(v),
+				rehydrate: (v) => JSON.parse(String(v)),
 			}),
 		})
 
@@ -111,7 +111,7 @@ describe('usePathParams', () => {
 
 			usePathParams(ctx, {
 				testParam: PathParam<{ foo: 'aaa' }>({
-					rehydrate: (v) => JSON.parse(v),
+					rehydrate: (v) => JSON.parse(String(v)),
 				}),
 			})
 		}

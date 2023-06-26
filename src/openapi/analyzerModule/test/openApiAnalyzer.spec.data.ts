@@ -71,10 +71,10 @@ router.get('/test/ef25ef5e-0f8f-4732-bf59-8825f94a5287/:firstParam/:secondParam/
 router.get('/test/5ab5dd0d-b241-4378-bea1-a2dd696d699a/:firstParam/:secondParam', (ctx) => {
 	usePathParams(ctx, {
 		firstParam: PathParam({
-			rehydrate: (v) => JSON.parse(v) as { foo: string; bar: string },
+			rehydrate: (v) => JSON.parse(String(v)) as { foo: string; bar: string },
 		}),
 		secondParam: PathParam<{ foo: string; bar: string }>({
-			rehydrate: (v) => JSON.parse(v),
+			rehydrate: (v) => JSON.parse(String(v)),
 		}),
 	})
 })
@@ -82,10 +82,10 @@ router.get('/test/5ab5dd0d-b241-4378-bea1-a2dd696d699a/:firstParam/:secondParam'
 router.get('/test/209df2a1-55f9-4859-bc31-3277547c7d88/:firstParam/:secondParam', (ctx) => {
 	usePathParams(ctx, {
 		firstParam: PathParam({
-			rehydrate: (v) => JSON.parse(v) as { foo?: string },
+			rehydrate: (v) => JSON.parse(String(v)) as { foo?: string },
 		}),
 		secondParam: PathParam<{ foo: string | undefined }>({
-			rehydrate: (v) => JSON.parse(v),
+			rehydrate: (v) => JSON.parse(String(v)),
 		}),
 	})
 })
@@ -93,10 +93,10 @@ router.get('/test/209df2a1-55f9-4859-bc31-3277547c7d88/:firstParam/:secondParam'
 router.get('/test/89d961f1-7d36-4271-8bd3-665ee0992590/:firstParam/:secondParam', (ctx) => {
 	usePathParams(ctx, {
 		firstParam: PathParam({
-			rehydrate: (v) => JSON.parse(v) as { foo: string | number },
+			rehydrate: (v) => JSON.parse(String(v)) as { foo: string | number },
 		}),
 		secondParam: PathParam<{ foo: string | number }>({
-			rehydrate: (v) => JSON.parse(v),
+			rehydrate: (v) => JSON.parse(String(v)),
 		}),
 	})
 })
@@ -156,7 +156,7 @@ router.get('/test/d8b07b26-5202-434c-9ff6-3fe792dad40f', (ctx) => {
 
 	useQueryParams(ctx, {
 		foo: RequiredParam<TupleType>({
-			rehydrate: (v) => JSON.parse(v),
+			rehydrate: (v) => JSON.parse(String(v)),
 		}),
 	})
 })
@@ -217,7 +217,7 @@ router.get('/test/6040cd01-a0c6-4b70-9901-b647f19b19a7', (ctx) => {
 	useRequestRawBody(
 		ctx,
 		RequiredParam<{ foo: string; bar?: number }>({
-			rehydrate: (v) => JSON.parse(v),
+			rehydrate: (v) => JSON.parse(String(v)),
 		})
 	)
 })
@@ -226,7 +226,7 @@ router.get('/test/f3754325-6d9c-42b6-becf-4a9e72bd2c4e', (ctx) => {
 	useRequestRawBody(
 		ctx,
 		RequiredParam({
-			rehydrate: (v) => JSON.parse(v) as { foo: string; bar?: number },
+			rehydrate: (v) => JSON.parse(String(v)) as { foo: string; bar?: number },
 		})
 	)
 })
@@ -235,7 +235,7 @@ router.get('/test/1ab973ff-9937-4e2d-b432-ff43a9df42cb', (ctx) => {
 	useRequestRawBody(
 		ctx,
 		OptionalParam({
-			rehydrate: (v) => JSON.parse(v) as { foo: string; bar?: number },
+			rehydrate: (v) => JSON.parse(String(v)) as { foo: string; bar?: number },
 		})
 	)
 })
@@ -346,7 +346,7 @@ router.get('/test/666b9ed1-62db-447a-80a7-8f35ec50ab02', async () => {
 router.get('/test/97bb5db8-1871-4c1d-998e-a724c04c5741', (ctx) => {
 	const query = useQueryParams(ctx, {
 		firstParam: RequiredParam({
-			rehydrate: (v) => v,
+			rehydrate: (v) => String(v),
 		}),
 		secondParam: OptionalParam({
 			rehydrate: (v) => v === '1',
@@ -366,7 +366,7 @@ router.get('/test/97bb5db8-1871-4c1d-998e-a724c04c5741', (ctx) => {
 router.get('/test/4188ebf2-eae6-4994-8732-c7f43d4da861', (ctx) => {
 	const query = useQueryParams(ctx, {
 		firstParam: RequiredParam({
-			rehydrate: (v) => v,
+			rehydrate: (v) => String(v),
 		}),
 		secondParam: OptionalParam({
 			rehydrate: (v) => v === '1',
@@ -452,7 +452,7 @@ router.get('/test/66a075bc-c9d4-4622-8c04-e0a982a19fb0', (ctx) => {
 
 	useQueryParams(ctx, {
 		foo: RequiredParam({
-			rehydrate: (v) => JSON.parse(v) as NamedParam,
+			rehydrate: (v) => JSON.parse(String(v)) as NamedParam,
 		}),
 	})
 })
@@ -483,7 +483,7 @@ useExposeNamedApiModels<{
 router.get('/test/e917e982-b5ce-4a8f-804e-13466e7a00a2', (ctx) => {
 	useQueryParams(ctx, {
 		foo: RequiredParam({
-			rehydrate: (v) => JSON.parse(v) as FooBarObject,
+			rehydrate: (v) => JSON.parse(String(v)) as FooBarObject,
 		}),
 	})
 })
@@ -491,7 +491,7 @@ router.get('/test/e917e982-b5ce-4a8f-804e-13466e7a00a2', (ctx) => {
 router.get('/test/af22e5ff-7cbf-4aa3-8ea9-fd538a747c01', (ctx) => {
 	useQueryParams(ctx, {
 		foo: RequiredParam<FooBarObject>({
-			rehydrate: (v) => JSON.parse(v),
+			rehydrate: (v) => JSON.parse(String(v)),
 		}),
 	})
 })

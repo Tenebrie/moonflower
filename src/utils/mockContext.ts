@@ -70,7 +70,7 @@ export const mockContextHeaders = <Context extends Koa.ParameterizedContext>(
 
 export const mockContextBody = <Context extends Koa.ParameterizedContext>(
 	ctx: Context,
-	params: Record<string, string | number | boolean | object>
+	params: Record<string, string | number | boolean | object | null>
 ) => {
 	ctx.request.body = params
 	ctx.request.rawBody = JSON.stringify(params)

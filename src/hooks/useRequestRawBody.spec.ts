@@ -11,7 +11,7 @@ describe('useRequestRawBody', () => {
 		const params = useRequestRawBody(
 			ctx,
 			RequiredParam<{ foo: string; bar: string }>({
-				rehydrate: (v) => JSON.parse(v),
+				rehydrate: (v) => JSON.parse(String(v)),
 			})
 		)
 
@@ -106,7 +106,7 @@ describe('useRequestRawBody', () => {
 			useRequestRawBody(
 				ctx,
 				RequiredParam<{ foo: 'aaa' }>({
-					rehydrate: (v) => JSON.parse(v),
+					rehydrate: (v) => JSON.parse(String(v)),
 				})
 			)
 		}

@@ -26,7 +26,7 @@ describe('useRequestBody', () => {
 			numberParam: NumberValidator,
 			booleanParam: BooleanValidator,
 			objectParam: RequiredParam<{ foo: string; bar: string }>({
-				rehydrate: (v) => JSON.parse(v),
+				rehydrate: (v) => JSON.parse(String(v)),
 			}),
 		})
 
@@ -150,7 +150,7 @@ describe('useRequestBody', () => {
 
 			useRequestBody(ctx, {
 				testParam: RequiredParam<{ foo: 'aaa' }>({
-					rehydrate: (v) => JSON.parse(v),
+					rehydrate: (v) => JSON.parse(String(v)),
 				}),
 			})
 		}
