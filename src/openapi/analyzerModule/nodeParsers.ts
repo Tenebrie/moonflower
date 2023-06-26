@@ -123,6 +123,12 @@ export const getRecursiveNodeShape = (nodeOrReference: Node): ShapeOfType['shape
 		return 'number'
 	}
 
+	// BigInt literal
+	const bigIntNode = node.asKind(SyntaxKind.BigIntKeyword) || node.asKind(SyntaxKind.BigIntLiteral)
+	if (bigIntNode) {
+		return 'bigint'
+	}
+
 	// Type literal
 	const typeLiteralNode = node.asKind(SyntaxKind.TypeLiteral)
 	if (typeLiteralNode) {

@@ -434,6 +434,10 @@ router.get('/test/79207cfa-916a-4474-9d98-45196d2451b5', () => {
 	return {} as { foo: bigint }
 })
 
+router.get('/test/19207cfa-916a-4474-9d98-45196d2451b6', () => {
+	return { foo: BigInt(2) }
+})
+
 router.get('/test/66a075bc-c9d4-4622-8c04-e0a982a19fb0', (ctx) => {
 	type AnotherNamedParam = {
 		aaa: string

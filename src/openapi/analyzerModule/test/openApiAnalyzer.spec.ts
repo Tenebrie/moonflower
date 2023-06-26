@@ -883,6 +883,21 @@ describe('OpenApi Analyzer', () => {
 				])
 				expect(endpoint.responses.length).toEqual(1)
 			})
+
+			it('handles object with inferred bigint param correctly', () => {
+				const endpoint = analyzeEndpointById('19207cfa-916a-4474-9d98-45196d2451b6')
+
+				expect(endpoint.responses[0].status).toEqual(200)
+				expect(endpoint.responses[0].signature).toEqual([
+					{
+						identifier: 'foo',
+						optional: false,
+						role: 'property',
+						shape: 'bigint',
+					},
+				])
+				expect(endpoint.responses.length).toEqual(1)
+			})
 		})
 
 		describe('when using an exposed model', () => {
