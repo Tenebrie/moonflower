@@ -8,7 +8,7 @@ This package is NOT FINISHED, use at your own risk.
 - React hooks inspired backend REST API
 - Fully type-safe definitions for path, query and header params, request body and response
 - Minimal boilerplate code
-- Out-of-the-box OpenAPI 3.0.3 spec generation
+- Out-of-the-box OpenAPI 3.1.0 spec generation
 
 ## Planned features
 
@@ -21,7 +21,6 @@ This package is NOT FINISHED, use at your own risk.
 - Support for multipart form data
 
 ## Known issues
-- `null` type may appear in spec
 - Exported models are referenced by name only, leading to potential name collisions and invalid spec
 
 # Hooks

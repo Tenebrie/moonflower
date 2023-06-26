@@ -734,7 +734,7 @@ export const manyEndpointsData: EndpointData[] = [
 ]
 
 export const manyEndpointsResults = {
-	openapi: '3.0.3',
+	openapi: '3.1.0',
 	info: { title: 'Default title', version: '1.0.0' },
 	paths: {
 		'/test/908c3e74-cf67-4ec7-a281-66a79f95d44d': {

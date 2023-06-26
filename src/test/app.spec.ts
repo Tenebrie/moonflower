@@ -79,7 +79,7 @@ describe('OpenApiRouter', () => {
 		const response = await request(app.callback()).get('/api-json')
 		expect(response.status).toBe(200)
 		const responseJson = JSON.parse(response.text) as ReturnType<typeof generateOpenApiSpec>
-		expect(responseJson.openapi).toBe('3.0.3')
+		expect(responseJson.openapi).toBe('3.1.0')
 		expect(responseJson.paths['/test/hello']).toEqual({
 			get: {
 				description: '',

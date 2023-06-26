@@ -7,7 +7,7 @@ export const generateOpenApiSpec = (manager: OpenApiManager) => {
 	const endpoints = manager.getEndpoints()
 
 	return {
-		openapi: '3.0.3',
+		openapi: '3.1.0',
 		info: {
 			title: header.title,
 			description: header.description,
