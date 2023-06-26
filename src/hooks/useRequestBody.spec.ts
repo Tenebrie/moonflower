@@ -75,6 +75,21 @@ describe('useRequestBody', () => {
 		expect(test).toThrow("Failed body param validation: 'testParam'")
 	})
 
+	it('passes validation for nullable parameter', () => {
+		const ctx = mockContextBody(mockContext(), {
+			testParam: null,
+		})
+
+		const params = useRequestBody(ctx, {
+			testParam: RequiredParam({
+				rehydrate: (v) => v,
+				validate: (v) => v === null,
+			}),
+		})
+
+		expect(params.testParam).toEqual(null)
+	})
+
 	it('passes validation when optional parameter is not provided', () => {
 		const ctx = mockContextBody(mockContext(), {})
 

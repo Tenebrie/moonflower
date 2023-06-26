@@ -51,7 +51,14 @@ export const useRequestBody = <ValidatorsT extends Record<string, Validator<any>
 		}
 
 		try {
-			const convertedValue = typeof paramValue === 'object' ? JSON.stringify(paramValue) : String(paramValue)
+			const convertedValue = (() => {
+				if (paramValue === null) {
+					return null
+				} else if (typeof paramValue === 'object') {
+					return JSON.stringify(paramValue)
+				}
+				return String(paramValue)
+			})()
 			const validatorObject = param.validator
 			const prevalidatorSuccess = !validatorObject.prevalidate || validatorObject.prevalidate(convertedValue)
 			const rehydratedValue = validatorObject.rehydrate(convertedValue)
