@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { keysOf } from '../../utils/object'
 import { ApiDocsPreferences } from '../manager/OpenApiManager'
 import { EndpointData, PathDefinition } from '../types'
 import { getSchema } from './getSchema'

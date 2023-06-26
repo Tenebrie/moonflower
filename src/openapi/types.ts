@@ -32,7 +32,7 @@ export type PathDefinition = {
 
 export type ExposedModelData = {
 	name: string
-	shape: string | ShapeOfType[]
+	shape: string | null | ShapeOfType[]
 }
 
 export type EndpointData = {

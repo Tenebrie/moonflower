@@ -1,3 +1,4 @@
+import { debugObject } from '../../../utils/printers'
 import { OpenApiManager } from '../../manager/OpenApiManager'
 import { EndpointData, ExposedModelData } from '../../types'
 import { generateOpenApiSpec } from '../generatorModule'
@@ -621,6 +622,47 @@ describe('OpenApi Generator', () => {
 				minItems: 3,
 				maxItems: 3,
 			},
+		})
+	})
+
+	it('generates correct spec for nullable value', () => {
+		const manager = createManagerWithEndpoints([
+			{
+				...minimalEndpointData,
+				requestQuery: [
+					{
+						identifier: 'foo',
+						optional: true,
+						signature: [
+							{
+								role: 'union',
+								optional: false,
+								shape: [
+									{
+										role: 'union_entry',
+										shape: 'null',
+										optional: false,
+									},
+									{
+										role: 'union_entry',
+										shape: 'string',
+										optional: false,
+									},
+								],
+							},
+						],
+					},
+				],
+			},
+		])
+		const spec = generateOpenApiSpec(manager)
+
+		expect(spec.paths['/test/path'].get?.parameters[0]).toEqual({
+			name: 'foo',
+			in: 'query',
+			description: '',
+			required: false,
+			schema: { oneOf: [{ type: null }, { type: 'string' }] },
 		})
 	})
 

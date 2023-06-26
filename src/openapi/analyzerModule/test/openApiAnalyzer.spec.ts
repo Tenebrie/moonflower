@@ -278,7 +278,7 @@ describe('OpenApi Analyzer', () => {
 						shape: [
 							{
 								role: 'union_entry',
-								shape: "'null'",
+								shape: 'null',
 								optional: false,
 							},
 							{
@@ -848,8 +848,8 @@ describe('OpenApi Analyzer', () => {
 			it('handles null union type correctly', () => {
 				const endpoint = analyzeEndpointById('006b4d53-15a4-405e-b94d-1fa3abbd19aa')
 
-				expect(endpoint.responses[0].status).toEqual(200)
-				expect(endpoint.responses[0].signature).toEqual("'null'")
+				expect(endpoint.responses[0].status).toEqual(204)
+				expect(endpoint.responses[0].signature).toEqual('null')
 				expect(endpoint.responses[1].status).toEqual(200)
 				expect(endpoint.responses[1].signature).toEqual('string')
 				expect(endpoint.responses.length).toEqual(2)
@@ -858,8 +858,8 @@ describe('OpenApi Analyzer', () => {
 			it('handles complex null union type correctly', () => {
 				const endpoint = analyzeEndpointById('a8f4e5f7-ed58-4de6-8877-b14bf14ae176')
 
-				expect(endpoint.responses[0].status).toEqual(200)
-				expect(endpoint.responses[0].signature).toEqual("'null'")
+				expect(endpoint.responses[0].status).toEqual(204)
+				expect(endpoint.responses[0].signature).toEqual('null')
 				expect(endpoint.responses[1].status).toEqual(200)
 				expect(endpoint.responses[1].signature).toEqual('string')
 				expect(endpoint.responses[2].status).toEqual(200)
@@ -883,7 +883,7 @@ describe('OpenApi Analyzer', () => {
 								shape: [
 									{
 										role: 'union_entry',
-										shape: "'null'",
+										shape: 'null',
 										optional: false,
 									},
 									{

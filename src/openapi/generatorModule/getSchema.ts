@@ -11,6 +11,7 @@ import {
 
 export type SchemaType =
 	| { type: string }
+	| { type: null }
 	| { type: string; properties: Record<string, SchemaType>; required: string[] }
 	| { oneOf: SchemaType[] }
 	| { allOf: SchemaType[] }
@@ -22,13 +23,23 @@ export type SchemaType =
 	| { type: 'number'; enum: string[] }
 	| { $ref: string }
 
-export const getSchema = (shape: string | ShapeOfType[]): SchemaType => {
+export const getSchema = (shape: string | null | ShapeOfType[]): SchemaType => {
+	if (shape === null) {
+		return { type: null }
+	}
+
 	if (typeof shape === 'string' && shape === 'any') {
 		return generateAny()
 	}
 
 	if (typeof shape === 'string' && shape === 'circular') {
 		return generateAny()
+	}
+
+	if (typeof shape === 'string' && shape === 'null') {
+		return {
+			type: null,
+		}
 	}
 
 	if (typeof shape === 'string' && shape === 'Date') {

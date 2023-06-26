@@ -455,7 +455,7 @@ export const getProperTypeShape = (
 	}
 
 	if (type.isNull()) {
-		return "'null'"
+		return 'null'
 	}
 
 	if (type.isUndefined()) {
