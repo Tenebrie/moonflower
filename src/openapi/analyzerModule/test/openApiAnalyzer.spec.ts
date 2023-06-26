@@ -269,6 +269,30 @@ describe('OpenApi Analyzer', () => {
 				expect(endpoint.responses.length).toEqual(1)
 			})
 
+			it('parses null query type correctly', () => {
+				const endpoint = analyzeEndpointById('2c5483d3-7b21-421a-92a8-34e54a008b82')
+
+				expect(endpoint.requestQuery[0].signature).toEqual([
+					{
+						role: 'union',
+						shape: [
+							{
+								role: 'union_entry',
+								shape: "'null'",
+								optional: false,
+							},
+							{
+								role: 'union_entry',
+								shape: 'string',
+								optional: false,
+							},
+						],
+						optional: false,
+					},
+				])
+				expect(endpoint.responses.length).toEqual(1)
+			})
+
 			it('parses enum query type correctly', () => {
 				const endpoint = analyzeEndpointById('724a56ef-32f9-4c59-b22c-60bd33e45242')
 
@@ -825,18 +849,22 @@ describe('OpenApi Analyzer', () => {
 				const endpoint = analyzeEndpointById('006b4d53-15a4-405e-b94d-1fa3abbd19aa')
 
 				expect(endpoint.responses[0].status).toEqual(200)
-				expect(endpoint.responses[0].signature).toEqual('string')
-				expect(endpoint.responses.length).toEqual(1)
+				expect(endpoint.responses[0].signature).toEqual("'null'")
+				expect(endpoint.responses[1].status).toEqual(200)
+				expect(endpoint.responses[1].signature).toEqual('string')
+				expect(endpoint.responses.length).toEqual(2)
 			})
 
 			it('handles complex null union type correctly', () => {
 				const endpoint = analyzeEndpointById('a8f4e5f7-ed58-4de6-8877-b14bf14ae176')
 
 				expect(endpoint.responses[0].status).toEqual(200)
-				expect(endpoint.responses[0].signature).toEqual('string')
+				expect(endpoint.responses[0].signature).toEqual("'null'")
 				expect(endpoint.responses[1].status).toEqual(200)
-				expect(endpoint.responses[1].signature).toEqual('number')
-				expect(endpoint.responses.length).toEqual(2)
+				expect(endpoint.responses[1].signature).toEqual('string')
+				expect(endpoint.responses[2].status).toEqual(200)
+				expect(endpoint.responses[2].signature).toEqual('number')
+				expect(endpoint.responses.length).toEqual(3)
 			})
 
 			it('handles object with nullable param correctly', () => {
@@ -848,7 +876,24 @@ describe('OpenApi Analyzer', () => {
 						identifier: 'foo',
 						optional: true,
 						role: 'property',
-						shape: 'string',
+						shape: [
+							{
+								role: 'union',
+								optional: false,
+								shape: [
+									{
+										role: 'union_entry',
+										shape: "'null'",
+										optional: false,
+									},
+									{
+										role: 'union_entry',
+										shape: 'string',
+										optional: false,
+									},
+								],
+							},
+						],
 					},
 				])
 				expect(endpoint.responses.length).toEqual(1)

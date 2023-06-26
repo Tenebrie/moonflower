@@ -49,7 +49,7 @@ router.get('/test/b504a196-d31d-40a4-a901-38a0f34f6ea7', () => {
 router.get('/test/bf6147f2-a1dc-4cc2-8327-e6f041f828bf/:firstParam/:secondParam/:optionalParam?', (ctx) => {
 	usePathParams(ctx, {
 		firstParam: PathParam({
-			rehydrate: (v) => v,
+			rehydrate: (v) => String(v),
 		}),
 		secondParam: PathParam({
 			rehydrate: (v) => v === '1',
@@ -104,7 +104,7 @@ router.get('/test/89d961f1-7d36-4271-8bd3-665ee0992590/:firstParam/:secondParam'
 router.get('/test/f89310d9-25ac-4005-93e4-614179d3bbd4', (ctx) => {
 	useQueryParams(ctx, {
 		firstParam: RequiredParam({
-			rehydrate: (v) => v,
+			rehydrate: (v) => String(v),
 		}),
 		secondParam: OptionalParam({
 			rehydrate: (v) => v === '1',
@@ -123,6 +123,14 @@ router.post('/test/7c51de80-1ff1-4511-b0d3-8a75c296c507', (ctx) => {
 	})
 })
 
+router.get('/test/2c5483d3-7b21-421a-92a8-34e54a008b82', (ctx) => {
+	useQueryParams(ctx, {
+		foo: RequiredParam({
+			rehydrate: (v) => v,
+		}),
+	})
+})
+
 router.get('/test/724a56ef-32f9-4c59-b22c-60bd33e45242', (ctx) => {
 	useQueryParams(ctx, {
 		foo: RequiredParam({
@@ -134,7 +142,7 @@ router.get('/test/724a56ef-32f9-4c59-b22c-60bd33e45242', (ctx) => {
 router.get('/test/2b9a53fa-4418-4303-9202-3f8e46f73aed', (ctx) => {
 	useQueryParams(ctx, {
 		foo: RequiredParam({
-			rehydrate: (v) => v,
+			rehydrate: (v) => String(v),
 			description: 'Test description',
 		}),
 	})
@@ -143,7 +151,7 @@ router.get('/test/2b9a53fa-4418-4303-9202-3f8e46f73aed', (ctx) => {
 router.get('/test/685ac7fb-18ee-4ace-b68e-a6ee354ad4db', (ctx) => {
 	useQueryParams(ctx, {
 		foo: RequiredParam({
-			rehydrate: (v) => v,
+			rehydrate: (v) => String(v),
 			errorMessage: 'Test error message',
 		}),
 	})
@@ -164,7 +172,7 @@ router.get('/test/d8b07b26-5202-434c-9ff6-3fe792dad40f', (ctx) => {
 router.get('/test/03c247cb-96c0-4748-bb6a-9569c7bdb436', (ctx) => {
 	useHeaderParams(ctx, {
 		firstParam: RequiredParam({
-			rehydrate: (v) => v,
+			rehydrate: (v) => String(v),
 		}),
 		secondParam: OptionalParam({
 			rehydrate: (v) => v === '1',
@@ -178,7 +186,7 @@ router.get('/test/03c247cb-96c0-4748-bb6a-9569c7bdb436', (ctx) => {
 router.get('/test/e563aa37-803e-4b79-a3e8-af0d01d024ae', (ctx) => {
 	useHeaderParams(ctx, {
 		'header-with-dashes': RequiredParam({
-			rehydrate: (v) => v,
+			rehydrate: (v) => String(v),
 		}),
 	})
 })
@@ -186,7 +194,7 @@ router.get('/test/e563aa37-803e-4b79-a3e8-af0d01d024ae', (ctx) => {
 router.get('/test/a3e79aaa-2d0f-4481-9226-a10904e76354', (ctx) => {
 	useHeaderParams(ctx, {
 		foo: RequiredParam({
-			rehydrate: (v) => v,
+			rehydrate: (v) => String(v),
 			description: 'Test description',
 		}),
 	})
@@ -195,7 +203,7 @@ router.get('/test/a3e79aaa-2d0f-4481-9226-a10904e76354', (ctx) => {
 router.get('/test/219c5c4e-1558-4d0b-85be-9753dfc14083', (ctx) => {
 	useHeaderParams(ctx, {
 		foo: RequiredParam({
-			rehydrate: (v) => v,
+			rehydrate: (v) => String(v),
 			errorMessage: 'Test error message',
 		}),
 	})
@@ -248,7 +256,7 @@ router.get('/test/54768e53-4094-4e2e-96bf-8891235f264b', (ctx) => {
 	useRequestRawBody(
 		ctx,
 		RequiredParam({
-			rehydrate: (v) => v,
+			rehydrate: (v) => String(v),
 			description: 'Test description',
 			errorMessage: 'Test error message',
 		})
@@ -259,7 +267,7 @@ router.get('/test/87a1470c-3fec-492a-bc4c-ff35fc95524a', (ctx) => {
 	useRequestRawBody(
 		ctx,
 		RequiredParam({
-			rehydrate: (v) => v,
+			rehydrate: (v) => String(v),
 			description: 'Test description',
 			errorMessage: 'Test error message',
 		})
@@ -277,7 +285,7 @@ router.get('/test/2fbc419b-2f1c-4782-9113-ef4125dd813b', (ctx) => {
 router.get('/test/e8e5496b-11a0-41e3-a68d-f03d524e413c', (ctx) => {
 	useRequestBody(ctx, {
 		firstParam: RequiredParam({
-			rehydrate: (v) => v,
+			rehydrate: (v) => String(v),
 		}),
 		secondParam: OptionalParam({
 			rehydrate: (v) => v === '1',
@@ -460,7 +468,7 @@ router.get('/test/66a075bc-c9d4-4622-8c04-e0a982a19fb0', (ctx) => {
 router.get('/test/39669151-c529-4bcd-86a5-a10de7834104/:foo', (ctx) => {
 	const { foo } = usePathParams(ctx, {
 		foo: RequiredParam({
-			rehydrate: (v) => v,
+			rehydrate: (v) => String(v),
 		}),
 	})
 	foo

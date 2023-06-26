@@ -141,7 +141,7 @@ describe('useQueryParams', () => {
 		const params = useQueryParams(ctx, {
 			testParam: RequiredParam({
 				prevalidate: (v) => v === 'valid',
-				rehydrate: (v) => v,
+				rehydrate: (v) => String(v),
 			}),
 		})
 
@@ -157,7 +157,7 @@ describe('useQueryParams', () => {
 			useQueryParams(ctx, {
 				testParam: RequiredParam({
 					prevalidate: (v) => v === 'valid',
-					rehydrate: (v) => v,
+					rehydrate: (v) => String(v),
 				}),
 			})
 		}
@@ -192,7 +192,7 @@ describe('useQueryParams', () => {
 			useQueryParams(ctx, {
 				testParam: RequiredParam({
 					prevalidate: (v) => v === 'valid',
-					rehydrate: (v) => v,
+					rehydrate: (v) => String(v),
 					description: 'Description',
 					errorMessage: 'Error message',
 				}),
@@ -212,7 +212,7 @@ describe('useQueryParams', () => {
 			useQueryParams(ctx, {
 				testParam: RequiredParam({
 					prevalidate: (v) => v === 'valid',
-					rehydrate: (v) => v,
+					rehydrate: (v) => String(v),
 					description: 'Description',
 				}),
 			})

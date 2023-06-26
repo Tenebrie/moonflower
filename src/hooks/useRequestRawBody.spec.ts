@@ -75,7 +75,7 @@ describe('useRequestRawBody', () => {
 			ctx,
 			RequiredParam({
 				prevalidate: (v) => v === 'valid',
-				rehydrate: (v) => v,
+				rehydrate: (v) => String(v),
 			})
 		)
 
@@ -90,7 +90,7 @@ describe('useRequestRawBody', () => {
 				ctx,
 				RequiredParam({
 					prevalidate: (v) => v === 'valid',
-					rehydrate: (v) => v,
+					rehydrate: (v) => String(v),
 				})
 			)
 		}
@@ -123,7 +123,7 @@ describe('useRequestRawBody', () => {
 				ctx,
 				RequiredParam({
 					prevalidate: (v) => v === 'valid',
-					rehydrate: (v) => v,
+					rehydrate: (v) => String(v),
 					description: 'Description',
 					errorMessage: 'Error message',
 				})
@@ -142,7 +142,7 @@ describe('useRequestRawBody', () => {
 				ctx,
 				RequiredParam({
 					prevalidate: (v) => v === 'valid',
-					rehydrate: (v) => v,
+					rehydrate: (v) => String(v),
 					description: 'Description',
 				})
 			)

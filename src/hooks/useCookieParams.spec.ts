@@ -91,7 +91,7 @@ describe('useCookieParams', () => {
 		const params = useCookieParams(ctx, {
 			testParam: RequiredParam({
 				prevalidate: (v) => v === 'valid',
-				rehydrate: (v) => v,
+				rehydrate: (v) => String(v),
 			}),
 		})
 
@@ -107,7 +107,7 @@ describe('useCookieParams', () => {
 			useCookieParams(ctx, {
 				testParam: RequiredParam({
 					prevalidate: (v) => v === 'valid',
-					rehydrate: (v) => v,
+					rehydrate: (v) => String(v),
 				}),
 			})
 		}
@@ -142,7 +142,7 @@ describe('useCookieParams', () => {
 			useCookieParams(ctx, {
 				testParam: RequiredParam({
 					prevalidate: (v) => v === 'valid',
-					rehydrate: (v) => v,
+					rehydrate: (v) => String(v),
 					description: 'Description',
 					errorMessage: 'Error message',
 				}),
@@ -162,7 +162,7 @@ describe('useCookieParams', () => {
 			useCookieParams(ctx, {
 				testParam: RequiredParam({
 					prevalidate: (v) => v === 'valid',
-					rehydrate: (v) => v,
+					rehydrate: (v) => String(v),
 					description: 'Description',
 				}),
 			})

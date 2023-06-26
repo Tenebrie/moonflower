@@ -103,7 +103,7 @@ describe('useHeaderParams', () => {
 		const params = useHeaderParams(ctx, {
 			'test-header': RequiredParam({
 				prevalidate: (v) => v === 'valid',
-				rehydrate: (v) => v,
+				rehydrate: (v) => String(v),
 			}),
 		})
 
@@ -119,7 +119,7 @@ describe('useHeaderParams', () => {
 			useHeaderParams(ctx, {
 				'test-header': RequiredParam({
 					prevalidate: (v) => v === 'valid',
-					rehydrate: (v) => v,
+					rehydrate: (v) => String(v),
 				}),
 			})
 		}
@@ -154,7 +154,7 @@ describe('useHeaderParams', () => {
 			useHeaderParams(ctx, {
 				'test-header': RequiredParam({
 					prevalidate: (v) => v === 'valid',
-					rehydrate: (v) => v,
+					rehydrate: (v) => String(v),
 					description: 'Description',
 					errorMessage: 'Error message',
 				}),
@@ -174,7 +174,7 @@ describe('useHeaderParams', () => {
 			useHeaderParams(ctx, {
 				'test-header': RequiredParam({
 					prevalidate: (v) => v === 'valid',
-					rehydrate: (v) => v,
+					rehydrate: (v) => String(v),
 					description: 'Description',
 				}),
 			})

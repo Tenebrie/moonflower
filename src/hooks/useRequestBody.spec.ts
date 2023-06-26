@@ -117,7 +117,7 @@ describe('useRequestBody', () => {
 		const params = useRequestBody(ctx, {
 			testParam: RequiredParam({
 				prevalidate: (v) => v === 'valid',
-				rehydrate: (v) => v,
+				rehydrate: (v) => String(v),
 			}),
 		})
 
@@ -133,7 +133,7 @@ describe('useRequestBody', () => {
 			useRequestBody(ctx, {
 				testParam: RequiredParam({
 					prevalidate: (v) => v === 'valid',
-					rehydrate: (v) => v,
+					rehydrate: (v) => String(v),
 				}),
 			})
 		}
@@ -168,7 +168,7 @@ describe('useRequestBody', () => {
 			useRequestBody(ctx, {
 				testParam: RequiredParam({
 					prevalidate: (v) => v === 'valid',
-					rehydrate: (v) => v,
+					rehydrate: (v) => String(v),
 					description: 'Description',
 					errorMessage: 'Error message',
 				}),
@@ -188,7 +188,7 @@ describe('useRequestBody', () => {
 			useRequestBody(ctx, {
 				testParam: RequiredParam({
 					prevalidate: (v) => v === 'valid',
-					rehydrate: (v) => v,
+					rehydrate: (v) => String(v),
 					description: 'Description',
 				}),
 			})

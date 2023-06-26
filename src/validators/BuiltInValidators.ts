@@ -13,14 +13,37 @@ export const BooleanValidator = BuiltInValidatorParam({
 	description: 'Any boolean value',
 	errorMessage: "Must be '0', '1', 'false' or 'true'",
 })
+export const NullableBooleanValidator = BuiltInValidatorParam({
+	prevalidate: (v) => v === '0' || v === '1' || v === 'false' || v === 'true' || v === null,
+	rehydrate: (v) => v === '1' || v === 'true' || v === null,
+	description: 'Any boolean value',
+	errorMessage: "Must be '0', '1', 'false' or 'true'",
+})
 export const StringValidator = BuiltInValidatorParam({
-	rehydrate: (v) => v,
+	rehydrate: (v) => String(v),
 	description: 'Any string value',
 	errorMessage: 'Must be a valid string',
+})
+export const NullableStringValidator = BuiltInValidatorParam({
+	rehydrate: (v) => v,
+	description: 'Any string or null value',
+	errorMessage: 'Must be a valid string or null',
+})
+export const NonEmptyStringValidator = BuiltInValidatorParam({
+	rehydrate: (v) => String(v),
+	validate: (v) => v.length > 0,
+	description: 'Any string value with at least one character',
+	errorMessage: 'Must be a string with at least one character',
 })
 export const NumberValidator = BuiltInValidatorParam({
 	rehydrate: (v) => Number(v),
 	validate: (v) => Number.isFinite(v) && !Number.isNaN(v),
+	description: 'Any numeric value',
+	errorMessage: 'Must be a valid number',
+})
+export const NullableNumberValidator = BuiltInValidatorParam({
+	rehydrate: (v) => (v === null ? null : Number(v)),
+	validate: (v) => v === null || (Number.isFinite(v) && !Number.isNaN(v)),
 	description: 'Any numeric value',
 	errorMessage: 'Must be a valid number',
 })
@@ -34,9 +57,8 @@ export const BigIntValidator = BuiltInValidatorParam({
 	description: 'Any numeric value',
 	errorMessage: 'Must be a valid number',
 })
-export const NonEmptyStringValidator = BuiltInValidatorParam({
-	rehydrate: (v) => String(v),
-	validate: (v) => v.length > 0,
-	description: 'Any string value with at least one character',
-	errorMessage: 'Must be a string with at least one character',
+export const NullableBigIntValidator = BuiltInValidatorParam({
+	rehydrate: (v) => (v === null ? null : BigInt(v)),
+	description: 'Any numeric value',
+	errorMessage: 'Must be a valid number',
 })

@@ -455,7 +455,7 @@ export const getProperTypeShape = (
 	}
 
 	if (type.isNull()) {
-		return 'null'
+		return "'null'"
 	}
 
 	if (type.isUndefined()) {
@@ -586,8 +586,8 @@ export const getProperTypeShape = (
 		const dedupedShapes = unfilteredShapes.filter(
 			(type, index, arr) => !arr.find((dup, dupIndex) => dup.shape === type.shape && dupIndex > index)
 		)
-		const isNullable = dedupedShapes.some((shape) => shape.shape === 'undefined' || shape.shape === 'null')
-		const shapes = dedupedShapes.filter((shape) => shape.shape !== 'undefined' && shape.shape !== 'null')
+		const isNullable = dedupedShapes.some((shape) => shape.shape === 'undefined')
+		const shapes = dedupedShapes.filter((shape) => shape.shape !== 'undefined')
 		if (shapes.length === 1) {
 			return shapes[0].shape
 		}

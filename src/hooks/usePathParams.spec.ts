@@ -78,7 +78,7 @@ describe('usePathParams', () => {
 		const params = usePathParams(ctx, {
 			testParam: PathParam({
 				prevalidate: (v) => v === 'valid',
-				rehydrate: (v) => v,
+				rehydrate: (v) => String(v),
 			}),
 		})
 
@@ -94,7 +94,7 @@ describe('usePathParams', () => {
 			usePathParams(ctx, {
 				testParam: PathParam({
 					prevalidate: (v) => v === 'valid',
-					rehydrate: (v) => v,
+					rehydrate: (v) => String(v),
 				}),
 			})
 		}
@@ -129,7 +129,7 @@ describe('usePathParams', () => {
 			usePathParams(ctx, {
 				testParam: PathParam({
 					prevalidate: (v) => v === 'valid',
-					rehydrate: (v) => v,
+					rehydrate: (v) => String(v),
 					description: 'Description',
 					errorMessage: 'Error message',
 				}),
@@ -149,7 +149,7 @@ describe('usePathParams', () => {
 			usePathParams(ctx, {
 				testParam: PathParam({
 					prevalidate: (v) => v === 'valid',
-					rehydrate: (v) => v,
+					rehydrate: (v) => String(v),
 					description: 'Description',
 				}),
 			})
