@@ -26,7 +26,9 @@ export class Router<StateT = Koa.DefaultState, ContextT = Koa.DefaultContext> {
 		return this
 	}
 
-	public with<ResponseTypeT extends Record<string, any>>(middleware: (ctx: ContextT) => ResponseTypeT) {
+	public with<ResponseTypeT extends Record<string, any>>(
+		middleware: (ctx: Koa.ParameterizedContext<ContextT>) => ResponseTypeT
+	) {
 		type AugmentedData = ResponseTypeT extends Promise<any> ? Awaited<ResponseTypeT> : ResponseTypeT
 		this.koaRouter.use(async (ctx, next) => {
 			// @ts-ignore
