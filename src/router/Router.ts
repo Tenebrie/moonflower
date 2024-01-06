@@ -22,73 +22,93 @@ export class Router<StateT = Koa.DefaultState, ContextT = Koa.DefaultContext> {
 
 	public use(...middleware: Array<KoaRouter.Middleware<StateT, ContextT>>) {
 		// @ts-ignore
-		return this.koaRouter.use(...middleware)
+		this.koaRouter.use(...middleware)
+		return this
+	}
+
+	public with<ResponseTypeT extends Record<string, any>>(middleware: (ctx: ContextT) => ResponseTypeT) {
+		type AugmentedData = ResponseTypeT extends Promise<any> ? Awaited<ResponseTypeT> : ResponseTypeT
+		this.koaRouter.use(async (ctx, next) => {
+			// @ts-ignore
+			const userData = await Promise.resolve(middleware(ctx))
+			Object.keys(userData).forEach((key) => {
+				ctx[key] = userData[key]
+			})
+			await next()
+		})
+		return this as Router<StateT, ContextT & AugmentedData>
 	}
 
 	public get<P extends string>(
 		path: P,
 		callback: KoaRouter.Middleware<StateT, ContextT & ExtractedRequestParams<P>>
 	) {
-		return this.koaRouter.get(path, async (ctx) => {
+		this.koaRouter.get(path, async (ctx) => {
 			// @ts-ignore
 			const responseValue = await callback(ctx, undefined)
 			ctx.body = responseValueToJson(responseValue)
 		})
+		return this
 	}
 
 	public post<P extends string>(
 		path: P,
 		callback: KoaRouter.Middleware<StateT, ContextT & ExtractedRequestParams<P>>
 	) {
-		return this.koaRouter.post(path, async (ctx) => {
+		this.koaRouter.post(path, async (ctx) => {
 			// @ts-ignore
 			const responseValue = await callback(ctx, undefined)
 			ctx.body = responseValueToJson(responseValue)
 		})
+		return this
 	}
 
 	public put<P extends string>(
 		path: P,
 		callback: KoaRouter.Middleware<StateT, ContextT & ExtractedRequestParams<P>>
 	) {
-		return this.koaRouter.put(path, async (ctx) => {
+		this.koaRouter.put(path, async (ctx) => {
 			// @ts-ignore
 			const responseValue = await callback(ctx, undefined)
 			ctx.body = responseValueToJson(responseValue)
 		})
+		return this
 	}
 
 	public delete<P extends string>(
 		path: P,
 		callback: KoaRouter.Middleware<StateT, ContextT & ExtractedRequestParams<P>>
 	) {
-		return this.koaRouter.delete(path, async (ctx) => {
+		this.koaRouter.delete(path, async (ctx) => {
 			// @ts-ignore
 			const responseValue = await callback(ctx, undefined)
 			ctx.body = responseValueToJson(responseValue)
 		})
+		return this
 	}
 
 	public del<P extends string>(
 		path: P,
 		callback: KoaRouter.Middleware<StateT, ContextT & ExtractedRequestParams<P>>
 	) {
-		return this.koaRouter.del(path, async (ctx) => {
+		this.koaRouter.del(path, async (ctx) => {
 			// @ts-ignore
 			const responseValue = await callback(ctx, undefined)
 			ctx.body = responseValueToJson(responseValue)
 		})
+		return this
 	}
 
 	public patch<P extends string>(
 		path: P,
 		callback: KoaRouter.Middleware<StateT, ContextT & ExtractedRequestParams<P>>
 	) {
-		return this.koaRouter.patch(path, async (ctx) => {
+		this.koaRouter.patch(path, async (ctx) => {
 			// @ts-ignore
 			const responseValue = await callback(ctx, undefined)
 			ctx.body = responseValueToJson(responseValue)
 		})
+		return this
 	}
 
 	public routes() {

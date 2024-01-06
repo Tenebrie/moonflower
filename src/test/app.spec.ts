@@ -72,6 +72,12 @@ describe('TestAppRouter', () => {
 		expect(response.status).toBe(200)
 		expect(response.text).toBe(JSON.stringify({ foo: '100' }))
 	})
+
+	it('includes middleware data from context', async () => {
+		const response = await request(app.callback()).get('/test/get/middleware-data')
+		expect(response.status).toBe(200)
+		expect(response.text).toBe(JSON.stringify({ user: { id: '123' } }))
+	})
 })
 
 describe('OpenApiRouter', () => {

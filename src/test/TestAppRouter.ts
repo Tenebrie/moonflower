@@ -8,6 +8,13 @@ import {
 } from '..'
 
 const router = new Router()
+	.use((_, next) => next())
+	.with(() => {
+		const user = { id: '123' }
+		return {
+			user,
+		}
+	})
 
 router.get('/test/hello', () => {
 	return {
@@ -57,6 +64,12 @@ router.get('/test/error/badrequest', () => {
 router.get('/test/get/bigint', () => {
 	return {
 		foo: BigInt(100),
+	}
+})
+
+router.get('/test/get/middleware-data', (ctx) => {
+	return {
+		user: ctx.user,
 	}
 })
 
