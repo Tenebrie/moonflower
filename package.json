@@ -10,7 +10,7 @@
 	"bin": "cli/entry.cjs",
 	"scripts": {
 		"prepublish": "tsc -p .",
-		"build": "tsc -p ./tsconfig.build.json",
+		"build": "rm -rf dist && tsc -p ./tsconfig.build.json",
 		"lint": "eslint src/",
 		"lint-fix": "eslint src/ --fix",
 		"test": "vitest",
