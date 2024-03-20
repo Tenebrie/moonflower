@@ -6,7 +6,7 @@ import { getProperTypeShape } from './nodeParsers'
 import { ShapeOfProperty } from './types'
 
 export const parseExposedModel = (node: Node<ts.Node>): ExposedModelData => {
-	if (node.isKind(SyntaxKind.TypeReference)) {
+	if (node.isKind(SyntaxKind.TypeReference) || node.isKind(SyntaxKind.TypeQuery)) {
 		const identifierNode = node.getFirstChildByKind(SyntaxKind.Identifier)!
 		const modelName = identifierNode.getText()
 		const modelShape = getProperTypeShape(node.getType(), node, [])

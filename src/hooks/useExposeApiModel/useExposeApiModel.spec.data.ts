@@ -36,3 +36,13 @@ type ModelWithComplexRecord = {
 	key: Record<NumberBase, NumberBase>
 }
 useExposeApiModel<ModelWithComplexRecord>()
+
+const modelAsObject = {
+	foo: '123',
+	bar: 123,
+}
+useExposeApiModel<typeof modelAsObject>
+
+useExposeNamedApiModels<{
+	RenamedModelAsObject: typeof modelAsObject
+}>

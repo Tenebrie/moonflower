@@ -23,6 +23,23 @@ export type ApiDocsPreferences = {
 	allowOptionalPathParams: boolean
 }
 
+export type ApiAnalysisStats = {
+	explicitRouterFiles: {
+		path: string
+		routers: {
+			name: string
+			endpoints: string[]
+		}[]
+	}[]
+	discoveredRouterFiles: {
+		path: string
+		routers: {
+			name: string
+			endpoints: string[]
+		}[]
+	}[]
+}
+
 export class OpenApiManager {
 	private static instance: OpenApiManager | null = null
 
@@ -33,7 +50,8 @@ export class OpenApiManager {
 		private apiDocsHeader: ApiDocsHeader,
 		private exposedModels: ExposedModelData[],
 		private endpoints: EndpointData[],
-		private preferences: ApiDocsPreferences
+		private preferences: ApiDocsPreferences,
+		private stats: ApiAnalysisStats
 	) {}
 
 	public isReady(): boolean {
@@ -87,6 +105,17 @@ export class OpenApiManager {
 		return this
 	}
 
+	public getStats() {
+		return this.stats
+	}
+
+	public setStats(stats: ApiAnalysisStats) {
+		this.stats = {
+			...stats,
+		}
+		return this
+	}
+
 	public getRouters(): readonly Router[] {
 		return this.registeredRouters
 	}
@@ -112,6 +141,10 @@ export class OpenApiManager {
 				[],
 				{
 					allowOptionalPathParams: false,
+				},
+				{
+					discoveredRouterFiles: [],
+					explicitRouterFiles: [],
 				}
 			)
 		}

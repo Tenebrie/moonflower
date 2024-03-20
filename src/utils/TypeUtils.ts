@@ -39,3 +39,13 @@ export type CamelCase<S extends string> = S extends `${infer P1}_${infer P2}${in
 export type KeysToCamelCase<T> = {
 	[K in keyof T as CamelCase<string & K>]: T[K] extends Record<any, any> ? KeysToCamelCase<T[K]> : T[K]
 }
+
+type RemoveLeadingColon<S extends string> = S['length'] extends 0 ? never : SplitStringBy<S, ':'>[1]
+type RemoveTrailingQuestion<S extends string> = S['length'] extends 0 ? never : SplitStringBy<S, '?'>[0]
+export type CleanUpPathParam<S> = S extends string
+	? //@ts-ignore
+	  RemoveLeadingColon<RemoveTrailingQuestion<S>> extends string
+		? //@ts-ignore
+		  RemoveLeadingColon<RemoveTrailingQuestion<S>>
+		: ''
+	: never

@@ -611,7 +611,7 @@ export const getProperTypeShape = (
 	return 'unknown_5'
 }
 
-const getLiteralValueOfNode = (node: Node): string | string[] | undefined => {
+const getLiteralValueOfNode = (node: Node): string | string[] | unknown[] => {
 	if (node.isKind(SyntaxKind.Identifier)) {
 		return getLiteralValueOfNode(findNodeImplementation(node))
 	} else if (node.isKind(SyntaxKind.StringLiteral)) {
@@ -620,6 +620,8 @@ const getLiteralValueOfNode = (node: Node): string | string[] | undefined => {
 		return node.forEachChildAsArray().map((child) => getLiteralValueOfNode(child)) as string[]
 	} else if (node.isKind(SyntaxKind.PropertyAccessExpression)) {
 		return getLiteralValueOfNode(findPropertyAssignmentValueNode(node))
+	} else if (node.isKind(SyntaxKind.ObjectLiteralExpression)) {
+		return getValuesOfObjectLiteral(node)
 	}
 	return 'unknown_6'
 }

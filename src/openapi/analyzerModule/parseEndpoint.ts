@@ -13,7 +13,7 @@ import {
 	getValuesOfObjectLiteral,
 } from './nodeParsers'
 
-export const parseEndpoint = (node: Node<ts.Node>) => {
+export const parseEndpoint = (node: Node<ts.Node>, sourceFilePath: string) => {
 	const parsedEndpointMethod = node
 		.getFirstDescendantByKind(SyntaxKind.PropertyAccessExpression)!
 		.getText()
@@ -28,6 +28,7 @@ export const parseEndpoint = (node: Node<ts.Node>) => {
 	const endpointData: EndpointData = {
 		method: endpointMethod as 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
 		path: endpointPath,
+		sourceFilePath,
 		requestPathParams: [],
 		requestQuery: [],
 		requestHeaders: [],

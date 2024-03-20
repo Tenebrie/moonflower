@@ -4,6 +4,7 @@ export const manyEndpointsData: EndpointData[] = [
 	{
 		method: 'GET',
 		path: '/test/908c3e74-cf67-4ec7-a281-66a79f95d44d',
+		sourceFilePath: '/root/test',
 		requestPathParams: [],
 		requestQuery: [],
 		requestHeaders: [],
@@ -17,6 +18,7 @@ export const manyEndpointsData: EndpointData[] = [
 	{
 		method: 'GET',
 		path: '/test/bf6147f2-a1dc-4cc2-8327-e6f041f828bf/:firstParam/:secondParam/:optionalParam?',
+		sourceFilePath: '/root/test',
 		requestPathParams: [
 			{
 				identifier: 'firstParam',
@@ -46,6 +48,7 @@ export const manyEndpointsData: EndpointData[] = [
 	{
 		method: 'GET',
 		path: '/test/ef25ef5e-0f8f-4732-bf59-8825f94a5287/:firstParam/:secondParam/:optionalParam?',
+		sourceFilePath: '/root/test',
 		requestPathParams: [
 			{
 				identifier: 'firstParam',
@@ -75,6 +78,7 @@ export const manyEndpointsData: EndpointData[] = [
 	{
 		method: 'GET',
 		path: '/test/5ab5dd0d-b241-4378-bea1-a2dd696d699a/:firstParam/:secondParam',
+		sourceFilePath: '/root/test',
 		requestPathParams: [
 			{
 				identifier: 'firstParam',
@@ -125,6 +129,7 @@ export const manyEndpointsData: EndpointData[] = [
 	{
 		method: 'GET',
 		path: '/test/209df2a1-55f9-4859-bc31-3277547c7d88/:firstParam/:secondParam',
+		sourceFilePath: '/root/test',
 		requestPathParams: [
 			{
 				identifier: 'firstParam',
@@ -163,6 +168,7 @@ export const manyEndpointsData: EndpointData[] = [
 	{
 		method: 'GET',
 		path: '/test/89d961f1-7d36-4271-8bd3-665ee0992590/:firstParam/:secondParam',
+		sourceFilePath: '/root/test',
 		requestPathParams: [
 			{
 				identifier: 'firstParam',
@@ -235,6 +241,7 @@ export const manyEndpointsData: EndpointData[] = [
 	{
 		method: 'GET',
 		path: '/test/f89310d9-25ac-4005-93e4-614179d3bbd4',
+		sourceFilePath: '/root/test',
 		requestPathParams: [],
 		requestQuery: [
 			{
@@ -260,6 +267,7 @@ export const manyEndpointsData: EndpointData[] = [
 	{
 		method: 'GET',
 		path: '/test/6040cd01-a0c6-4b70-9901-b647f19b19a7',
+		sourceFilePath: '/root/test',
 		requestPathParams: [],
 		requestQuery: [],
 		requestHeaders: [],
@@ -289,6 +297,7 @@ export const manyEndpointsData: EndpointData[] = [
 	{
 		method: 'GET',
 		path: '/test/f3754325-6d9c-42b6-becf-4a9e72bd2c4e',
+		sourceFilePath: '/root/test',
 		requestPathParams: [],
 		requestQuery: [],
 		requestHeaders: [],
@@ -318,6 +327,7 @@ export const manyEndpointsData: EndpointData[] = [
 	{
 		method: 'GET',
 		path: '/test/1ab973ff-9937-4e2d-b432-ff43a9df42cb',
+		sourceFilePath: '/root/test',
 		requestPathParams: [],
 		requestQuery: [],
 		requestHeaders: [],
@@ -347,6 +357,7 @@ export const manyEndpointsData: EndpointData[] = [
 	{
 		method: 'GET',
 		path: '/test/f74f6003-2aba-4f8c-855e-c0149f4217b7',
+		sourceFilePath: '/root/test',
 		requestPathParams: [],
 		requestQuery: [],
 		requestHeaders: [],
@@ -360,6 +371,7 @@ export const manyEndpointsData: EndpointData[] = [
 	{
 		method: 'GET',
 		path: '/test/e8e5496b-11a0-41e3-a68d-f03d524e413c',
+		sourceFilePath: '/root/test',
 		requestPathParams: [],
 		requestQuery: [],
 		requestHeaders: [],
@@ -385,6 +397,7 @@ export const manyEndpointsData: EndpointData[] = [
 	{
 		method: 'GET',
 		path: '/test/7268be93-ce90-44b1-9a2f-8b286d7aae67',
+		sourceFilePath: '/root/test',
 		requestPathParams: [],
 		requestQuery: [],
 		requestHeaders: [],
@@ -410,6 +423,7 @@ export const manyEndpointsData: EndpointData[] = [
 	{
 		method: 'GET',
 		path: '/test/185c6075-a0f4-4607-af81-b51923f5866f',
+		sourceFilePath: '/root/test',
 		requestPathParams: [],
 		requestQuery: [],
 		requestHeaders: [],
@@ -435,6 +449,7 @@ export const manyEndpointsData: EndpointData[] = [
 	{
 		method: 'GET',
 		path: '/test/e1bedf55-6d3a-4c01-9c66-6ec74cc66c3b',
+		sourceFilePath: '/root/test',
 		requestPathParams: [],
 		requestQuery: [],
 		requestHeaders: [],
@@ -448,6 +463,7 @@ export const manyEndpointsData: EndpointData[] = [
 	{
 		method: 'GET',
 		path: '/test/78ad5fba-f4e2-4924-b28a-23e39dd146f7',
+		sourceFilePath: '/root/test',
 		requestPathParams: [],
 		requestQuery: [],
 		requestHeaders: [],
@@ -465,6 +481,7 @@ export const manyEndpointsData: EndpointData[] = [
 	{
 		method: 'GET',
 		path: '/test/c542cb10-538c-44eb-8d13-5111e273ead0',
+		sourceFilePath: '/root/test',
 		requestPathParams: [],
 		requestQuery: [],
 		requestHeaders: [],
@@ -496,6 +513,7 @@ export const manyEndpointsData: EndpointData[] = [
 	{
 		method: 'GET',
 		path: '/test/03888127-6b97-42df-b429-87a6588ab2a4',
+		sourceFilePath: '/root/test',
 		requestPathParams: [],
 		requestQuery: [],
 		requestHeaders: [],
@@ -527,6 +545,7 @@ export const manyEndpointsData: EndpointData[] = [
 	{
 		method: 'GET',
 		path: '/test/b73347dc-c16f-4272-95b4-bf1716bf9c14',
+		sourceFilePath: '/root/test',
 		requestPathParams: [],
 		requestQuery: [],
 		requestHeaders: [],
@@ -574,6 +593,7 @@ export const manyEndpointsData: EndpointData[] = [
 	{
 		method: 'GET',
 		path: '/test/666b9ed1-62db-447a-80a7-8f35ec50ab02',
+		sourceFilePath: '/root/test',
 		requestPathParams: [],
 		requestQuery: [],
 		requestHeaders: [],
@@ -599,6 +619,7 @@ export const manyEndpointsData: EndpointData[] = [
 	{
 		method: 'GET',
 		path: '/test/97bb5db8-1871-4c1d-998e-a724c04c5741',
+		sourceFilePath: '/root/test',
 		requestPathParams: [],
 		requestQuery: [
 			{
@@ -648,6 +669,7 @@ export const manyEndpointsData: EndpointData[] = [
 	{
 		method: 'GET',
 		path: '/test/4188ebf2-eae6-4994-8732-c7f43d4da861',
+		sourceFilePath: '/root/test',
 		requestPathParams: [],
 		requestQuery: [
 			{
@@ -708,6 +730,7 @@ export const manyEndpointsData: EndpointData[] = [
 	{
 		method: 'GET',
 		path: '/test/32f18a25-2408-46cf-9519-f9a8d855bf84',
+		sourceFilePath: '/root/test',
 		requestPathParams: [],
 		requestQuery: [],
 		requestHeaders: [],
@@ -721,6 +744,7 @@ export const manyEndpointsData: EndpointData[] = [
 	{
 		method: 'GET',
 		path: '/test/196f2937-e369-435f-b239-62eaacaa6fbd',
+		sourceFilePath: '/root/test',
 		requestPathParams: [],
 		requestQuery: [],
 		requestHeaders: [],

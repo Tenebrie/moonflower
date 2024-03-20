@@ -1,4 +1,3 @@
-import { debugObject } from '../../../utils/printers'
 import { OpenApiManager } from '../../manager/OpenApiManager'
 import { EndpointData, ExposedModelData } from '../../types'
 import { generateOpenApiSpec } from '../generatorModule'
@@ -15,6 +14,10 @@ describe('OpenApi Generator', () => {
 			endpoints,
 			{
 				allowOptionalPathParams: false,
+			},
+			{
+				discoveredRouterFiles: [],
+				explicitRouterFiles: [],
 			}
 		)
 	}
@@ -29,6 +32,10 @@ describe('OpenApi Generator', () => {
 			endpoints,
 			{
 				allowOptionalPathParams: false,
+			},
+			{
+				discoveredRouterFiles: [],
+				explicitRouterFiles: [],
 			}
 		)
 	}
@@ -43,6 +50,10 @@ describe('OpenApi Generator', () => {
 			[],
 			{
 				allowOptionalPathParams: false,
+			},
+			{
+				discoveredRouterFiles: [],
+				explicitRouterFiles: [],
 			}
 		)
 	}
@@ -55,6 +66,7 @@ describe('OpenApi Generator', () => {
 		requestHeaders: [],
 		objectBody: [],
 		responses: [],
+		sourceFilePath: '/root/test',
 	}
 
 	it('does not include responses field if no responses are available', () => {

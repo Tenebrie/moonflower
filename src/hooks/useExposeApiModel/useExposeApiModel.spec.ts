@@ -1,12 +1,10 @@
-import * as path from 'path'
-import { Project, SourceFile } from 'ts-morph'
-
 import { analyzeSourceFileExposedModels } from '../../openapi/analyzerModule/analyzerModule'
+import { loadTestData } from '../../utils/loadTestData'
 import { useExposeApiModel, useExposeNamedApiModels } from './useExposeApiModel'
 
 describe('useExposeApiModel', () => {
 	describe('when analyzing a test data file', () => {
-		let dataFile: SourceFile
+		const dataFile = loadTestData('useExposeApiModel.spec.data.ts')
 		let analysisResult: ReturnType<typeof analyzeSourceFileExposedModels>
 
 		const analyzeModelByName = (name: string) => {
@@ -19,19 +17,6 @@ describe('useExposeApiModel', () => {
 			}
 			return exposedModel
 		}
-
-		beforeAll(() => {
-			const project = new Project({
-				tsConfigFilePath: path.resolve('./tsconfig.json'),
-			})
-
-			const sourceFile = project.getSourceFile('useExposeApiModel.spec.data.ts')
-			if (!sourceFile) {
-				throw new Error('Test data file not found')
-			}
-
-			dataFile = sourceFile
-		})
 
 		it('does not have side effects when invoked directly', () => {
 			useExposeApiModel()
@@ -350,6 +335,50 @@ describe('useExposeApiModel', () => {
 								optional: false,
 							},
 						],
+						optional: false,
+					},
+				],
+			})
+		})
+
+		it('parses model defined with typeof expression', () => {
+			const modelWithRecord = analyzeModelByName('modelAsObject')
+
+			expect(modelWithRecord).toEqual({
+				name: 'modelAsObject',
+				shape: [
+					{
+						role: 'property',
+						identifier: 'foo',
+						shape: 'string',
+						optional: false,
+					},
+					{
+						role: 'property',
+						identifier: 'bar',
+						shape: 'number',
+						optional: false,
+					},
+				],
+			})
+		})
+
+		it('parses named model defined with typeof expression', () => {
+			const modelWithRecord = analyzeModelByName('RenamedModelAsObject')
+
+			expect(modelWithRecord).toEqual({
+				name: 'RenamedModelAsObject',
+				shape: [
+					{
+						role: 'property',
+						identifier: 'foo',
+						shape: 'string',
+						optional: false,
+					},
+					{
+						role: 'property',
+						identifier: 'bar',
+						shape: 'number',
 						optional: false,
 					},
 				],

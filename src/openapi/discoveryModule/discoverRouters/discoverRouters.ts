@@ -1,31 +1,18 @@
 import { SourceFile, SyntaxKind } from 'ts-morph'
 
+import { Router } from '../../../router/Router'
+import { nameOf } from '../../../utils/nameOf'
+import { discoverImportedName } from '../discoverImports/discoverImports'
+
 export const discoverRouters = (sourceFile: SourceFile) => {
-	const importDeclarations = sourceFile.getDescendantsOfKind(SyntaxKind.ImportDeclaration)
-	const routerClassName = importDeclarations
-		.filter((declaration) => {
-			// declaration
-			const importPathNode = declaration.getLastChildByKind(SyntaxKind.StringLiteral)
-			if (!importPathNode) {
-				return false
-			}
+	const routerClassName = discoverImportedName({
+		sourceFile,
+		originalName: nameOf(Router),
+	})
 
-			const importPath = importPathNode.getText()
-
-			return /tenebrie-framework/.test(importPath) || /\..+\/[Rr]outer/.test(importPath)
-		})
-		.map((declaration) => {
-			const routerImport = declaration
-				.getDescendantsOfKind(SyntaxKind.ImportSpecifier)
-				.filter((i) => i.getFirstChildByKind(SyntaxKind.Identifier)?.getText() === 'Router')[0]
-
-			if (!routerImport) {
-				return null
-			}
-
-			return routerImport.getLastChildByKindOrThrow(SyntaxKind.Identifier).getText()
-		})
-		.filter((declaration): declaration is NonNullable<typeof declaration> => declaration !== null)[0]
+	if (!routerClassName) {
+		return { named: [], anonymous: [] }
+	}
 
 	const routers = sourceFile
 		.getDescendantsOfKind(SyntaxKind.NewExpression)

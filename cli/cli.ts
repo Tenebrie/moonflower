@@ -6,6 +6,7 @@ import { hideBin } from 'yargs/helpers'
 import { prepareOpenApiSpec } from '../src/openapi/analyzerModule/analyzerModule'
 import { generateOpenApiSpec } from '../src/openapi/generatorModule'
 import { OpenApiManager } from '../src/openapi/manager/OpenApiManager'
+import { debugObject } from '../src/utils/printers'
 
 yargs(hideBin(process.argv))
 	.showHelpOnFail(true)
@@ -30,6 +31,7 @@ yargs(hideBin(process.argv))
 		handler(argv: ArgumentsCamelCase<{ targetPath: string; tsConfigPath?: string }>) {
 			if (fs.existsSync(argv.targetPath)) {
 				console.error(`[Error] File already exists at ${argv.targetPath}`)
+				return
 			}
 
 			if (argv.tsConfigPath && !fs.existsSync(argv.tsConfigPath)) {
@@ -40,7 +42,11 @@ yargs(hideBin(process.argv))
 			prepareOpenApiSpec({
 				tsconfigPath: argv.tsConfigPath ?? 'tsconfig.json',
 			})
-			const spec = generateOpenApiSpec(OpenApiManager.getInstance())
+
+			const manager = OpenApiManager.getInstance()
+			debugObject(manager.getStats())
+
+			const spec = generateOpenApiSpec(manager)
 			fs.writeFileSync(argv.targetPath, JSON.stringify(spec))
 		},
 	})

@@ -38,6 +38,7 @@ export type ExposedModelData = {
 export type EndpointData = {
 	method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 	path: string
+	sourceFilePath: string
 	name?: string
 	summary?: string
 	description?: string

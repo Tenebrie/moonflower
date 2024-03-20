@@ -2,13 +2,15 @@ import * as path from 'path'
 import { SourceFile, SyntaxKind } from 'ts-morph'
 import { Project } from 'ts-morph'
 
+import { discoverImportedName } from '../discoveryModule/discoverImports/discoverImports'
 import {
 	DiscoveredSourceFile,
 	discoverRouterFiles,
 } from '../discoveryModule/discoverRouterFiles/discoverRouterFiles'
 import { discoverRouters } from '../discoveryModule/discoverRouters/discoverRouters'
-import { OpenApiManager } from '../manager/OpenApiManager'
+import { ApiDocsHeader, OpenApiManager } from '../manager/OpenApiManager'
 import { EndpointData, ExposedModelData } from '../types'
+import { getValuesOfObjectLiteral } from './nodeParsers'
 import { parseEndpoint } from './parseEndpoint'
 import { parseExposedModel, parseNamedExposedModels } from './parseExposedModels'
 
@@ -37,19 +39,19 @@ export const prepareOpenApiSpec = ({ tsconfigPath, sourceFilePaths, sourceFileDi
 		tsConfigFilePath: path.resolve(tsconfigPath),
 	})
 
-	const filesToAnalyze = (() => {
+	const { explicitRouters, discoveredRouterFiles, allSourceFiles } = (() => {
 		const sourceFilesToAdd = sourceFilePaths ?? []
 		const resolvedSourceFilePaths = sourceFilesToAdd.map((filepath) => path.resolve(filepath))
 		const sourceFiles = resolvedSourceFilePaths.map((filePath) => project.getSourceFileOrThrow(filePath))
-		const manuallyAddedRouters = sourceFiles.flatMap((file) => ({
+		const explicitRouters = sourceFiles.flatMap((file) => ({
 			fileName: file.getFilePath(),
 			sourceFile: file,
 			routers: discoverRouters(file),
 		}))
 
-		const discoveredRouters = (() => {
+		const { discoveredRouterFiles, discoveredSourceFiles } = (() => {
 			if (sourceFileDiscovery === false) {
-				return []
+				return { discoveredRouterFiles: [], discoveredSourceFiles: [] }
 			}
 
 			return discoverRouterFiles({
@@ -58,17 +60,53 @@ export const prepareOpenApiSpec = ({ tsconfigPath, sourceFilePaths, sourceFileDi
 			})
 		})()
 
-		return manuallyAddedRouters.reduce(
-			(acc, current) => (acc.some((r) => r.fileName === current.fileName) ? acc : acc.concat(current)),
-			discoveredRouters
+		const allSourceFiles = sourceFiles.reduce(
+			(acc, current) =>
+				acc.some((r) => r.getFilePath() === current.getFilePath()) ? acc : acc.concat(current),
+			discoveredSourceFiles
 		)
+
+		return { explicitRouters, discoveredRouterFiles, allSourceFiles }
 	})()
 
-	const exposedModels = filesToAnalyze.flatMap((file) => analyzeSourceFileExposedModels(file.sourceFile))
+	const filesToAnalyze = explicitRouters.reduce(
+		(acc, current) => (acc.some((r) => r.fileName === current.fileName) ? acc : acc.concat(current)),
+		discoveredRouterFiles
+	)
+
+	const apiHeaders = allSourceFiles
+		.flatMap((file) => analyzeSourceFileApiHeader(file))
+		.filter((headers) => !!headers)
+	if (apiHeaders.length > 0 && apiHeaders[0]) {
+		openApiManager.setHeader(apiHeaders[0])
+	}
+
+	const exposedModels = allSourceFiles.flatMap((file) => analyzeSourceFileExposedModels(file))
 
 	openApiManager.setExposedModels(exposedModels)
 
 	const endpoints = filesToAnalyze.flatMap((file) => analyzeSourceFileEndpoints(file))
+
+	openApiManager.setStats({
+		discoveredRouterFiles: discoveredRouterFiles.map((file) => ({
+			path: file.fileName,
+			routers: file.routers.named.map((r) => ({
+				name: r,
+				endpoints: endpoints
+					.filter((e) => e.sourceFilePath === file.fileName)
+					.map((e) => `${e.method.toUpperCase()} ${e.path}`),
+			})),
+		})),
+		explicitRouterFiles: explicitRouters.map((file) => ({
+			path: file.fileName,
+			routers: file.routers.named.map((r) => ({
+				name: r,
+				endpoints: endpoints
+					.filter((e) => e.sourceFilePath === file.fileName)
+					.map((e) => `${e.method.toUpperCase()} ${e.path}`),
+			})),
+		})),
+	})
 
 	openApiManager.setEndpoints(endpoints)
 	openApiManager.markAsReady()
@@ -93,27 +131,76 @@ export const analyzeSourceFileEndpoints = (
 					return
 				}
 
-				endpoints.push(parseEndpoint(node))
+				endpoints.push(parseEndpoint(node, file.fileName))
 			}
 		})
 	})
 	return endpoints
 }
 
+export const analyzeSourceFileApiHeader = (sourceFile: SourceFile): ApiDocsHeader | null => {
+	const nameOfUseApiHeader = discoverImportedName({
+		sourceFile,
+		originalName: 'useApiHeader',
+	})
+
+	if (!nameOfUseApiHeader) {
+		return null
+	}
+
+	const node = sourceFile
+		.forEachChildAsArray()
+		.filter((node) => node.isKind(SyntaxKind.ExpressionStatement))
+		.find((node) => nameOfUseApiHeader && node.getText().startsWith(nameOfUseApiHeader))
+
+	if (!node) {
+		return null
+	}
+
+	const targetNode = node.getFirstDescendantByKindOrThrow(SyntaxKind.ObjectLiteralExpression)
+	const values = getValuesOfObjectLiteral(targetNode)
+
+	const collapseObject = (v: string | string[] | typeof values): any => {
+		if (typeof v === 'string') {
+			return v
+		}
+		if (Array.isArray(v) && v.every((value) => typeof value === 'string')) {
+			return v
+		}
+
+		return v.reduce((acc, current) => {
+			if (typeof current === 'string') {
+				return acc
+			}
+			return {
+				...acc,
+				[current.identifier]: collapseObject(current.value as string[]),
+			}
+		}, {})
+	}
+	return collapseObject(values)
+}
+
 export const analyzeSourceFileExposedModels = (sourceFile: SourceFile): ExposedModelData[] => {
 	const models: ExposedModelData[] = []
+
+	const nameOfUseExposeApiModel = discoverImportedName({
+		sourceFile,
+		originalName: 'useExposeApiModel',
+	})
+
+	const nameOfUseExposeNamedApiModels = discoverImportedName({
+		sourceFile,
+		originalName: 'useExposeNamedApiModels',
+	})
 
 	sourceFile
 		.forEachChildAsArray()
 		.filter((node) => node.isKind(SyntaxKind.ExpressionStatement))
 		.map((node) => {
-			if (node.getText().startsWith('useExposeApiModel')) {
+			if (nameOfUseExposeApiModel && node.getText().startsWith(nameOfUseExposeApiModel)) {
 				const callExpressionNode = node.getFirstChild()
 				const syntaxListChildren = callExpressionNode?.getChildrenOfKind(SyntaxKind.SyntaxList) || []
-				if (syntaxListChildren.length < 2) {
-					console.error('Missing type argument in useExposeApiModel')
-					return
-				}
 
 				const firstChild = syntaxListChildren[0].getFirstChild()
 				if (!firstChild) {
@@ -124,13 +211,9 @@ export const analyzeSourceFileExposedModels = (sourceFile: SourceFile): ExposedM
 				return
 			}
 
-			if (node.getText().startsWith('useExposeNamedApiModels')) {
+			if (nameOfUseExposeNamedApiModels && node.getText().startsWith(nameOfUseExposeNamedApiModels)) {
 				const callExpressionNode = node.getFirstChild()
 				const syntaxListChildren = callExpressionNode?.getChildrenOfKind(SyntaxKind.SyntaxList) || []
-				if (syntaxListChildren.length < 2) {
-					console.error('Missing type argument in useExposeApiModel')
-					return
-				}
 
 				const firstChild = syntaxListChildren[0].getFirstChild()
 				if (!firstChild) {

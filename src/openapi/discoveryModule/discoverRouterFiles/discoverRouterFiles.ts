@@ -4,7 +4,7 @@ import { Project } from 'ts-morph'
 
 import { discoverRouters } from '../discoverRouters/discoverRouters'
 
-export type DiscoveredSourceFile = ReturnType<typeof discoverRouterFiles>[number]
+export type DiscoveredSourceFile = ReturnType<typeof discoverRouterFiles>['discoveredRouterFiles'][number]
 
 export const discoverRouterFiles = ({
 	targetPath,
@@ -16,7 +16,7 @@ export const discoverRouterFiles = ({
 	excludedFiles?: (string | RegExp)[]
 }) => {
 	if (!fs.existsSync(targetPath)) {
-		return []
+		return { discoveredRouterFiles: [], discoveredSourceFiles: [] }
 	}
 
 	const usersExcludedFiles = (excludedFiles ?? []).map((value) =>
@@ -43,13 +43,24 @@ export const discoverRouterFiles = ({
 		tsConfigFilePath: tsConfigPath,
 	})
 
-	const routersInFiles = files
+	const allSourceFiles = files
 		.map((fileName) => {
 			const filePath = path.resolve(targetPath, fileName)
-			const sourceFile = project.getSourceFile(filePath)
-			if (!sourceFile) {
-				return null
+			return {
+				fileName,
+				sourceFile: project.getSourceFile(filePath),
 			}
+		})
+		.filter(
+			(
+				file
+			): file is Omit<typeof file, 'sourceFile'> & { sourceFile: NonNullable<typeof file['sourceFile']> } =>
+				!!file.sourceFile
+		)
+
+	const routersInFiles = allSourceFiles
+		.map((file) => {
+			const { fileName, sourceFile } = file
 			const routers = discoverRouters(sourceFile)
 			if (routers.named.length === 0 && routers.anonymous.length === 0) {
 				return null
@@ -62,5 +73,8 @@ export const discoverRouterFiles = ({
 		})
 		.filter((file): file is NonNullable<typeof file> => file !== null)
 
-	return routersInFiles
+	return {
+		discoveredRouterFiles: routersInFiles,
+		discoveredSourceFiles: allSourceFiles.map((file) => file.sourceFile),
+	}
 }

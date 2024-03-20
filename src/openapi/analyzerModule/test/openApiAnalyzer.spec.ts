@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import * as path from 'path'
-import { Project, SourceFile, SyntaxKind } from 'ts-morph'
+import { Project, SyntaxKind } from 'ts-morph'
 
 import { loadTestData } from '../../../utils/loadTestData'
 import { StringValidator } from '../../../validators/BuiltInValidators'

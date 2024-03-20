@@ -2,7 +2,7 @@ import { ParameterizedContext } from 'koa'
 
 import { ValidationError } from '../errors/UserFacingErrors'
 import { keysOf } from '../utils/object'
-import { SplitStringBy } from '../utils/TypeUtils'
+import { CleanUpPathParam } from '../utils/TypeUtils'
 import { getValidationResultMessage } from '../utils/validationMessages'
 import { Validator } from '../validators/types'
 
@@ -24,14 +24,6 @@ type ValidatedData<
 		TestTemplate[K]['original']
 	>
 }
-
-type RemoveLeadingColon<S extends string> = S['length'] extends 0 ? never : SplitStringBy<S, ':'>[1]
-type RemoveTrailingQuestion<S extends string> = S['length'] extends 0 ? never : SplitStringBy<S, '?'>[0]
-type CleanUpPathParam<S> = S extends string
-	? RemoveLeadingColon<RemoveTrailingQuestion<S>> extends string
-		? RemoveLeadingColon<RemoveTrailingQuestion<S>>
-		: ''
-	: never
 
 export const usePathParams = <
 	ParamsT extends string[],
