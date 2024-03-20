@@ -6,7 +6,12 @@ import { hideBin } from 'yargs/helpers'
 import { prepareOpenApiSpec } from '../src/openapi/analyzerModule/analyzerModule'
 import { generateOpenApiSpec } from '../src/openapi/generatorModule'
 import { OpenApiManager } from '../src/openapi/manager/OpenApiManager'
-import { debugObject } from '../src/utils/printers'
+import { printAnalysisStats } from './prettyprint'
+
+const originalConsole = console.info
+console.info = (message, ...args) => {
+	originalConsole(`${message}`, ...args)
+}
 
 yargs(hideBin(process.argv))
 	.showHelpOnFail(true)
@@ -44,7 +49,7 @@ yargs(hideBin(process.argv))
 			})
 
 			const manager = OpenApiManager.getInstance()
-			debugObject(manager.getStats())
+			printAnalysisStats(manager.getStats())
 
 			const spec = generateOpenApiSpec(manager)
 			fs.writeFileSync(argv.targetPath, JSON.stringify(spec))
