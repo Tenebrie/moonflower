@@ -7,15 +7,8 @@ export const generateOpenApiSpec = (manager: OpenApiManager) => {
 	const endpoints = manager.getEndpoints()
 
 	return {
-		openapi: '3.1.0',
-		info: {
-			title: header.title,
-			description: header.description,
-			termsOfService: header.termsOfService,
-			contact: header.contact,
-			license: header.license,
-			version: header.version,
-		},
+		openapi: '3.1.0' as const,
+		info: header,
 		paths: generatePaths(endpoints, manager.getPreferences()),
 		components: {
 			schemas: generateComponentSchemas(manager.getExposedModels()),

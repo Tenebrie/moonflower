@@ -27,7 +27,7 @@ describe('useExposeApiModel', () => {
 
 			const sourceFile = project.getSourceFile('useExposeApiModel.spec.data.ts')
 			if (!sourceFile) {
-				throw new Error('Where file?')
+				throw new Error('Test data file not found')
 			}
 
 			dataFile = sourceFile

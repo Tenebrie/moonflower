@@ -1,10 +1,11 @@
 import { Project } from 'ts-morph'
 import * as util from 'util'
+import { vi } from 'vitest'
 
 import { debugNode, debugNodeChildren, debugNodes, debugObject } from './printers'
 
 describe('printer utilities', () => {
-	const consoleMock = jest.fn()
+	const consoleMock = vi.fn()
 
 	beforeEach(() => {
 		consoleMock.mockClear()

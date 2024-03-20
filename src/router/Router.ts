@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import * as KoaRouter from '@koa/router'
-import * as Koa from 'koa'
+import KoaRouter from '@koa/router'
+import Koa from 'koa'
 
 import { OpenApiManager } from '../openapi/manager/OpenApiManager'
 import { ExtractedRequestParams } from '../utils/TypeUtils'
@@ -16,7 +16,7 @@ export class Router<StateT = Koa.DefaultState, ContextT = Koa.DefaultContext> {
 	public constructor(props: Props = { skipOpenApiAnalysis: false }) {
 		if (!props.skipOpenApiAnalysis) {
 			const openApiManager = OpenApiManager.getInstance()
-			openApiManager.registerRouter(this)
+			openApiManager.registerRouters([this])
 		}
 	}
 

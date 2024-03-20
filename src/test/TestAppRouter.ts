@@ -2,12 +2,12 @@ import {
 	BadRequestError,
 	EmailValidator,
 	NonEmptyStringValidator,
-	Router,
 	UnauthorizedError,
 	useQueryParams,
 } from '..'
+import { Router as RenamedRouter } from '../router/Router'
 
-const router = new Router()
+const myRouter = new RenamedRouter()
 	.use((_, next) => next())
 	.with(() => {
 		const user = { id: '123' }
@@ -16,13 +16,13 @@ const router = new Router()
 		}
 	})
 
-router.get('/test/hello', () => {
+myRouter.get('/test/hello', () => {
 	return {
 		greeting: 'hello world',
 	}
 })
 
-router.get('/test/query', (ctx) => {
+myRouter.get('/test/query', (ctx) => {
 	const { email, string } = useQueryParams(ctx, {
 		email: EmailValidator,
 		string: NonEmptyStringValidator,
@@ -33,44 +33,44 @@ router.get('/test/query', (ctx) => {
 	}
 })
 
-router.post('/test/post', () => {
+myRouter.post('/test/post', () => {
 	return 'post response'
 })
 
-router.del('/test/del', () => {
+myRouter.del('/test/del', () => {
 	// Empty
 })
 
-router.delete('/test/delete', () => {
+myRouter.delete('/test/delete', () => {
 	// Empty
 })
 
-router.patch('/test/patch', () => {
+myRouter.patch('/test/patch', () => {
 	return 'patch response'
 })
 
-router.get('/test/error/generic', () => {
+myRouter.get('/test/error/generic', () => {
 	throw new Error('Generic error')
 })
 
-router.get('/test/error/unauthorized', () => {
+myRouter.get('/test/error/unauthorized', () => {
 	throw new UnauthorizedError('Test error')
 })
 
-router.get('/test/error/badrequest', () => {
+myRouter.get('/test/error/badrequest', () => {
 	throw new BadRequestError('Test error')
 })
 
-router.get('/test/get/bigint', () => {
+myRouter.get('/test/get/bigint', () => {
 	return {
 		foo: BigInt(100),
 	}
 })
 
-router.get('/test/get/middleware-data', (ctx) => {
+myRouter.get('/test/get/middleware-data', (ctx) => {
 	return {
 		user: ctx.user,
 	}
 })
 
-export const TestAppRouter = router
+export const TestAppRouter = myRouter

@@ -50,14 +50,17 @@ export class OpenApiManager {
 
 	public setExposedModels(models: ExposedModelData[]) {
 		this.exposedModels = models
+		return this
 	}
 
 	public setEndpoints(endpoints: EndpointData[]) {
 		this.endpoints = endpoints
+		return this
 	}
 
 	public markAsReady() {
 		this.isInitialized = true
+		return this
 	}
 
 	public getHeader(): ApiDocsHeader {
@@ -66,6 +69,7 @@ export class OpenApiManager {
 
 	public setHeader(docs: ApiDocsHeader) {
 		this.apiDocsHeader = docs
+		return this
 	}
 
 	public getEndpoints() {
@@ -80,14 +84,16 @@ export class OpenApiManager {
 		this.preferences = {
 			...preferences,
 		}
+		return this
 	}
 
 	public getRouters(): readonly Router[] {
 		return this.registeredRouters
 	}
 
-	public registerRouter(router: Router<any, any>) {
-		this.registeredRouters.push(router)
+	public registerRouters(routers: Router<any, any>[]) {
+		routers.forEach((r) => this.registeredRouters.push(r))
+		return this
 	}
 
 	public reset() {

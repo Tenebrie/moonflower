@@ -1,4 +1,5 @@
-import * as request from 'supertest'
+import request from 'supertest'
+import { vi } from 'vitest'
 
 import { generateOpenApiSpec } from '../openapi/generatorModule/generatorModule'
 import { app } from './app'
@@ -48,7 +49,7 @@ describe('TestAppRouter', () => {
 
 	it('rethrows a generic error', async () => {
 		const consoleError = console.error
-		console.error = jest.fn()
+		console.error = vi.fn()
 		const response = await request(app.callback()).get('/test/error/generic')
 		expect(response.status).toBe(500)
 		expect(response.text).toBe('Internal Server Error')

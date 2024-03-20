@@ -1,12 +1,7 @@
-import * as Koa from 'koa'
+import Koa from 'koa'
 
 import { prepareOpenApiSpec } from './analyzerModule/analyzerModule'
 import { OpenApiRouter } from './router/OpenApiRouter'
-
-type Props = {
-	tsconfigPath: string
-	sourceFilePaths: string[]
-}
 
 /**
  * Middleware to initialize the openApi engine.
@@ -14,8 +9,8 @@ type Props = {
  * All files with routers or exposed models must be included in `props.sourceFilePaths`.
  * @param props Paths to files to analyze, relative to project root.
  */
-export const initOpenApiEngine = (props: Props) => {
-	prepareOpenApiSpec(props.tsconfigPath, props.sourceFilePaths)
+export const initOpenApiEngine = (props: Parameters<typeof prepareOpenApiSpec>[0]) => {
+	prepareOpenApiSpec(props)
 
 	const builtInRoutes = OpenApiRouter.routes()
 	const builtInAllowedMethods = OpenApiRouter.allowedMethods()

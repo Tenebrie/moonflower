@@ -1,5 +1,5 @@
 import Koa from 'koa'
-import * as bodyParser from 'koa-bodyparser'
+import bodyParser from 'koa-bodyparser'
 
 import { HttpErrorHandler, initOpenApiEngine } from '..'
 import { TestAppRouter } from './TestAppRouter'
@@ -18,6 +18,7 @@ app
 	.use(
 		initOpenApiEngine({
 			tsconfigPath: './tsconfig.json',
+			sourceFileDiscovery: false,
 			sourceFilePaths: ['./src/test/TestAppRouter.ts'],
 		})
 	)

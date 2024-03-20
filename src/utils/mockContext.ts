@@ -1,4 +1,4 @@
-import * as Koa from 'koa'
+import Koa from 'koa'
 import * as httpMocks from 'node-mocks-http'
 
 import { keysOf } from './object'

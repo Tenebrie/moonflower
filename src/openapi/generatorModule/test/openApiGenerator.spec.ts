@@ -657,8 +657,6 @@ describe('OpenApi Generator', () => {
 		])
 		const spec = generateOpenApiSpec(manager)
 
-		console.log(JSON.stringify(spec))
-
 		expect(spec.paths['/test/path'].get?.parameters[0]).toEqual({
 			name: 'foo',
 			in: 'query',

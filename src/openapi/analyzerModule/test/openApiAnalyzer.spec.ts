@@ -2,18 +2,27 @@
 import * as path from 'path'
 import { Project, SourceFile, SyntaxKind } from 'ts-morph'
 
+import { loadTestData } from '../../../utils/loadTestData'
 import { StringValidator } from '../../../validators/BuiltInValidators'
+import { discoverRouters } from '../../discoveryModule/discoverRouters/discoverRouters'
 import { OpenApiManager } from '../../manager/OpenApiManager'
 import { analyzeSourceFileEndpoints } from '../analyzerModule'
 import { getValidatorPropertyShape, getValidatorPropertyStringValue } from '../nodeParsers'
 
 describe('OpenApi Analyzer', () => {
 	describe('when analyzing a test data file', () => {
-		let dataFile: SourceFile
+		const dataFile = loadTestData('openApiAnalyzer.spec.data.ts')
 		let analysisResult: ReturnType<typeof analyzeSourceFileEndpoints>
 
 		const analyzeEndpointById = (id: string) => {
-			analysisResult = analyzeSourceFileEndpoints(dataFile, [`/test/${id}`])
+			analysisResult = analyzeSourceFileEndpoints(
+				{
+					fileName: 'test',
+					sourceFile: dataFile,
+					routers: discoverRouters(dataFile),
+				},
+				[`/test/${id}`]
+			)
 			const endpoint = analysisResult.find((endpoint) => endpoint.path.startsWith(`/test/${id}`))
 			if (!endpoint) {
 				throw new Error(`No endpoint with id ${id} found!`)
@@ -22,26 +31,20 @@ describe('OpenApi Analyzer', () => {
 		}
 
 		const analyzeMultiEndpointById = (id: string) => {
-			analysisResult = analyzeSourceFileEndpoints(dataFile, [`/test/${id}`])
+			analysisResult = analyzeSourceFileEndpoints(
+				{
+					fileName: 'test',
+					sourceFile: dataFile,
+					routers: discoverRouters(dataFile),
+				},
+				[`/test/${id}`]
+			)
 			const endpoints = analysisResult.filter((endpoint) => endpoint.path.startsWith(`/test/${id}`))
 			if (endpoints.length === 0) {
 				throw new Error(`No endpoint with id ${id} found!`)
 			}
 			return endpoints
 		}
-
-		beforeAll(() => {
-			const project = new Project({
-				tsConfigFilePath: path.resolve('./tsconfig.json'),
-			})
-
-			const sourceFile = project.getSourceFile('openApiAnalyzer.spec.data.ts')
-			if (!sourceFile) {
-				throw new Error('Where file?')
-			}
-
-			dataFile = sourceFile
-		})
 
 		describe('useApiEndpoint', () => {
 			it('parses useApiEndpoint values correctly', () => {

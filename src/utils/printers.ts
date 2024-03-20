@@ -14,13 +14,17 @@ export const debugNode = (node: Node | undefined) => {
 	debugNodeChildren(node)
 }
 
-export const debugNodes = (nodes: Node[] | undefined) => {
+export const debugNodes = (nodes: Node | Node[] | undefined) => {
 	console.debug('Nodes:')
 	if (!nodes) {
 		console.debug('Nodes are undefined')
 		return
 	}
-	nodes.forEach((node) => debugNode(node))
+	if (Array.isArray(nodes)) {
+		nodes.forEach((node) => debugNode(node))
+	} else {
+		debugNode(nodes)
+	}
 }
 
 export const debugNodeChildren = (node: Node | undefined) => {
