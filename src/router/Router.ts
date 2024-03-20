@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import * as KoaRouter from '@koa/router'
-import * as Koa from 'koa'
+import KoaRouter from '@koa/router'
+import Koa from 'koa'
 
 import { OpenApiManager } from '../openapi/manager/OpenApiManager'
 import { ExtractedRequestParams } from '../utils/TypeUtils'
