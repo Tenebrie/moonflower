@@ -20,7 +20,7 @@ type ValidatedData<
 	ValidatorsT extends Record<TestTemplate[number]['cleaned'], Omit<Validator<any>, 'optional'>>
 > = {
 	[K in keyof TestTemplate as K extends `${number}` ? TestTemplate[K]['cleaned'] : never]: CheckIfOptional<
-		ReturnType<TestTemplate[K]['callback']['rehydrate']>,
+		ReturnType<TestTemplate[K]['callback']['parse']>,
 		TestTemplate[K]['original']
 	>
 }
@@ -56,12 +56,12 @@ export const usePathParams = <
 		try {
 			const validatorObject = param.validator
 			const prevalidatorSuccess = !validatorObject.prevalidate || validatorObject.prevalidate(paramValue)
-			const rehydratedValue = validatorObject.rehydrate(paramValue)
-			const validatorSuccess = !validatorObject.validate || validatorObject.validate(rehydratedValue)
+			const parsedValue = validatorObject.parse(paramValue)
+			const validatorSuccess = !validatorObject.validate || validatorObject.validate(parsedValue)
 			return {
 				param,
 				validated: prevalidatorSuccess && validatorSuccess,
-				rehydratedValue,
+				parsedValue,
 			}
 		} catch (error) {
 			return { param, validated: false }
@@ -82,7 +82,7 @@ export const usePathParams = <
 
 	const returnValue: Record<string, unknown> = {}
 	successfulValidations.forEach((result) => {
-		returnValue[result.param.name] = result.rehydratedValue
+		returnValue[result.param.name] = result.parsedValue
 	})
 
 	return returnValue as ValidatedData<ParamsT, TestTemplate, ValidatorsT>

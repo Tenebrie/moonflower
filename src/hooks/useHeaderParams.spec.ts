@@ -10,7 +10,7 @@ import {
 import { mockContext, mockContextHeaders } from '../utils/mockContext'
 
 describe('useHeaderParams', () => {
-	it('rehydrates params correctly', () => {
+	it('parses params correctly', () => {
 		const ctx = mockContextHeaders(mockContext(), {
 			'string-header': 'test_string',
 			'number-header': '12',
@@ -23,7 +23,7 @@ describe('useHeaderParams', () => {
 			'number-header': NumberValidator,
 			'boolean-header': BooleanValidator,
 			'object-header': RequiredParam<{ foo: string; bar: string }>({
-				rehydrate: (v) => JSON.parse(String(v)),
+				parse: (v) => JSON.parse(String(v)),
 			}),
 		})
 
@@ -33,7 +33,7 @@ describe('useHeaderParams', () => {
 		expect(params.objectHeader).toEqual({ foo: 'aaa', bar: 'bbb' })
 	})
 
-	it('rehydrates camelCase params with camelCase headers correctly', () => {
+	it('parses camelCase params with camelCase headers correctly', () => {
 		const ctx = mockContextHeaders(mockContext(), {
 			stringheader: 'test_string',
 		})
@@ -103,7 +103,7 @@ describe('useHeaderParams', () => {
 		const params = useHeaderParams(ctx, {
 			'test-header': RequiredParam({
 				prevalidate: (v) => v === 'valid',
-				rehydrate: (v) => String(v),
+				parse: (v) => String(v),
 			}),
 		})
 
@@ -119,7 +119,7 @@ describe('useHeaderParams', () => {
 			useHeaderParams(ctx, {
 				'test-header': RequiredParam({
 					prevalidate: (v) => v === 'valid',
-					rehydrate: (v) => String(v),
+					parse: (v) => String(v),
 				}),
 			})
 		}
@@ -128,7 +128,7 @@ describe('useHeaderParams', () => {
 		expect(test).toThrow("Failed header validation: 'test-header'")
 	})
 
-	it('fails prevalidation on rehydrate error', () => {
+	it('fails prevalidation on parse error', () => {
 		const test = () => {
 			const ctx = mockContextHeaders(mockContext(), {
 				'test-header': 'not a json',
@@ -136,7 +136,7 @@ describe('useHeaderParams', () => {
 
 			useHeaderParams(ctx, {
 				'test-header': RequiredParam<{ foo: 'aaa' }>({
-					rehydrate: (v) => JSON.parse(String(v)),
+					parse: (v) => JSON.parse(String(v)),
 				}),
 			})
 		}
@@ -154,7 +154,7 @@ describe('useHeaderParams', () => {
 			useHeaderParams(ctx, {
 				'test-header': RequiredParam({
 					prevalidate: (v) => v === 'valid',
-					rehydrate: (v) => String(v),
+					parse: (v) => String(v),
 					description: 'Description',
 					errorMessage: 'Error message',
 				}),
@@ -174,7 +174,7 @@ describe('useHeaderParams', () => {
 			useHeaderParams(ctx, {
 				'test-header': RequiredParam({
 					prevalidate: (v) => v === 'valid',
-					rehydrate: (v) => String(v),
+					parse: (v) => String(v),
 					description: 'Description',
 				}),
 			})

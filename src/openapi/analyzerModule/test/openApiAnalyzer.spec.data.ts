@@ -49,13 +49,13 @@ router.get('/test/b504a196-d31d-40a4-a901-38a0f34f6ea7', () => {
 router.get('/test/bf6147f2-a1dc-4cc2-8327-e6f041f828bf/:firstParam/:secondParam/:optionalParam?', (ctx) => {
 	usePathParams(ctx, {
 		firstParam: PathParam({
-			rehydrate: (v) => String(v),
+			parse: (v) => String(v),
 		}),
 		secondParam: PathParam({
-			rehydrate: (v) => v === '1',
+			parse: (v) => v === '1',
 		}),
 		optionalParam: PathParam({
-			rehydrate: (v) => Number(v),
+			parse: (v) => Number(v),
 		}),
 	})
 })
@@ -71,10 +71,10 @@ router.get('/test/ef25ef5e-0f8f-4732-bf59-8825f94a5287/:firstParam/:secondParam/
 router.get('/test/5ab5dd0d-b241-4378-bea1-a2dd696d699a/:firstParam/:secondParam', (ctx) => {
 	usePathParams(ctx, {
 		firstParam: PathParam({
-			rehydrate: (v) => JSON.parse(String(v)) as { foo: string; bar: string },
+			parse: (v) => JSON.parse(String(v)) as { foo: string; bar: string },
 		}),
 		secondParam: PathParam<{ foo: string; bar: string }>({
-			rehydrate: (v) => JSON.parse(String(v)),
+			parse: (v) => JSON.parse(String(v)),
 		}),
 	})
 })
@@ -82,10 +82,10 @@ router.get('/test/5ab5dd0d-b241-4378-bea1-a2dd696d699a/:firstParam/:secondParam'
 router.get('/test/209df2a1-55f9-4859-bc31-3277547c7d88/:firstParam/:secondParam', (ctx) => {
 	usePathParams(ctx, {
 		firstParam: PathParam({
-			rehydrate: (v) => JSON.parse(String(v)) as { foo?: string },
+			parse: (v) => JSON.parse(String(v)) as { foo?: string },
 		}),
 		secondParam: PathParam<{ foo: string | undefined }>({
-			rehydrate: (v) => JSON.parse(String(v)),
+			parse: (v) => JSON.parse(String(v)),
 		}),
 	})
 })
@@ -93,10 +93,10 @@ router.get('/test/209df2a1-55f9-4859-bc31-3277547c7d88/:firstParam/:secondParam'
 router.get('/test/89d961f1-7d36-4271-8bd3-665ee0992590/:firstParam/:secondParam', (ctx) => {
 	usePathParams(ctx, {
 		firstParam: PathParam({
-			rehydrate: (v) => JSON.parse(String(v)) as { foo: string | number },
+			parse: (v) => JSON.parse(String(v)) as { foo: string | number },
 		}),
 		secondParam: PathParam<{ foo: string | number }>({
-			rehydrate: (v) => JSON.parse(String(v)),
+			parse: (v) => JSON.parse(String(v)),
 		}),
 	})
 })
@@ -104,13 +104,13 @@ router.get('/test/89d961f1-7d36-4271-8bd3-665ee0992590/:firstParam/:secondParam'
 router.get('/test/f89310d9-25ac-4005-93e4-614179d3bbd4', (ctx) => {
 	useQueryParams(ctx, {
 		firstParam: RequiredParam({
-			rehydrate: (v) => String(v),
+			parse: (v) => String(v),
 		}),
 		secondParam: OptionalParam({
-			rehydrate: (v) => v === '1',
+			parse: (v) => v === '1',
 		}),
 		thirdParam: OptionalParam({
-			rehydrate: (v) => Number(v),
+			parse: (v) => Number(v),
 		}),
 	})
 })
@@ -118,7 +118,7 @@ router.get('/test/f89310d9-25ac-4005-93e4-614179d3bbd4', (ctx) => {
 router.post('/test/7c51de80-1ff1-4511-b0d3-8a75c296c507', (ctx) => {
 	useQueryParams(ctx, {
 		foo: RequiredParam<'dec' | 'hex' | 'bin'>({
-			rehydrate: (v) => v as 'dec' | 'hex' | 'bin',
+			parse: (v) => v as 'dec' | 'hex' | 'bin',
 		}),
 	})
 })
@@ -126,7 +126,7 @@ router.post('/test/7c51de80-1ff1-4511-b0d3-8a75c296c507', (ctx) => {
 router.get('/test/2c5483d3-7b21-421a-92a8-34e54a008b82', (ctx) => {
 	useQueryParams(ctx, {
 		foo: RequiredParam({
-			rehydrate: (v) => v,
+			parse: (v) => v,
 		}),
 	})
 })
@@ -134,7 +134,7 @@ router.get('/test/2c5483d3-7b21-421a-92a8-34e54a008b82', (ctx) => {
 router.get('/test/724a56ef-32f9-4c59-b22c-60bd33e45242', (ctx) => {
 	useQueryParams(ctx, {
 		foo: RequiredParam({
-			rehydrate: (v) => v as 'hello world',
+			parse: (v) => v as 'hello world',
 		}),
 	})
 })
@@ -142,7 +142,7 @@ router.get('/test/724a56ef-32f9-4c59-b22c-60bd33e45242', (ctx) => {
 router.get('/test/2b9a53fa-4418-4303-9202-3f8e46f73aed', (ctx) => {
 	useQueryParams(ctx, {
 		foo: RequiredParam({
-			rehydrate: (v) => String(v),
+			parse: (v) => String(v),
 			description: 'Test description',
 		}),
 	})
@@ -151,7 +151,7 @@ router.get('/test/2b9a53fa-4418-4303-9202-3f8e46f73aed', (ctx) => {
 router.get('/test/685ac7fb-18ee-4ace-b68e-a6ee354ad4db', (ctx) => {
 	useQueryParams(ctx, {
 		foo: RequiredParam({
-			rehydrate: (v) => String(v),
+			parse: (v) => String(v),
 			errorMessage: 'Test error message',
 		}),
 	})
@@ -164,7 +164,7 @@ router.get('/test/d8b07b26-5202-434c-9ff6-3fe792dad40f', (ctx) => {
 
 	useQueryParams(ctx, {
 		foo: RequiredParam<TupleType>({
-			rehydrate: (v) => JSON.parse(String(v)),
+			parse: (v) => JSON.parse(String(v)),
 		}),
 	})
 })
@@ -172,13 +172,13 @@ router.get('/test/d8b07b26-5202-434c-9ff6-3fe792dad40f', (ctx) => {
 router.get('/test/03c247cb-96c0-4748-bb6a-9569c7bdb436', (ctx) => {
 	useHeaderParams(ctx, {
 		firstParam: RequiredParam({
-			rehydrate: (v) => String(v),
+			parse: (v) => String(v),
 		}),
 		secondParam: OptionalParam({
-			rehydrate: (v) => v === '1',
+			parse: (v) => v === '1',
 		}),
 		thirdParam: OptionalParam({
-			rehydrate: (v) => Number(v),
+			parse: (v) => Number(v),
 		}),
 	})
 })
@@ -186,7 +186,7 @@ router.get('/test/03c247cb-96c0-4748-bb6a-9569c7bdb436', (ctx) => {
 router.get('/test/e563aa37-803e-4b79-a3e8-af0d01d024ae', (ctx) => {
 	useHeaderParams(ctx, {
 		'header-with-dashes': RequiredParam({
-			rehydrate: (v) => String(v),
+			parse: (v) => String(v),
 		}),
 	})
 })
@@ -194,7 +194,7 @@ router.get('/test/e563aa37-803e-4b79-a3e8-af0d01d024ae', (ctx) => {
 router.get('/test/a3e79aaa-2d0f-4481-9226-a10904e76354', (ctx) => {
 	useHeaderParams(ctx, {
 		foo: RequiredParam({
-			rehydrate: (v) => String(v),
+			parse: (v) => String(v),
 			description: 'Test description',
 		}),
 	})
@@ -203,7 +203,7 @@ router.get('/test/a3e79aaa-2d0f-4481-9226-a10904e76354', (ctx) => {
 router.get('/test/219c5c4e-1558-4d0b-85be-9753dfc14083', (ctx) => {
 	useHeaderParams(ctx, {
 		foo: RequiredParam({
-			rehydrate: (v) => String(v),
+			parse: (v) => String(v),
 			errorMessage: 'Test error message',
 		}),
 	})
@@ -225,7 +225,7 @@ router.get('/test/6040cd01-a0c6-4b70-9901-b647f19b19a7', (ctx) => {
 	useRequestRawBody(
 		ctx,
 		RequiredParam<{ foo: string; bar?: number }>({
-			rehydrate: (v) => JSON.parse(String(v)),
+			parse: (v) => JSON.parse(String(v)),
 		})
 	)
 })
@@ -234,7 +234,7 @@ router.get('/test/f3754325-6d9c-42b6-becf-4a9e72bd2c4e', (ctx) => {
 	useRequestRawBody(
 		ctx,
 		RequiredParam({
-			rehydrate: (v) => JSON.parse(String(v)) as { foo: string; bar?: number },
+			parse: (v) => JSON.parse(String(v)) as { foo: string; bar?: number },
 		})
 	)
 })
@@ -243,7 +243,7 @@ router.get('/test/1ab973ff-9937-4e2d-b432-ff43a9df42cb', (ctx) => {
 	useRequestRawBody(
 		ctx,
 		OptionalParam({
-			rehydrate: (v) => JSON.parse(String(v)) as { foo: string; bar?: number },
+			parse: (v) => JSON.parse(String(v)) as { foo: string; bar?: number },
 		})
 	)
 })
@@ -256,7 +256,7 @@ router.get('/test/54768e53-4094-4e2e-96bf-8891235f264b', (ctx) => {
 	useRequestRawBody(
 		ctx,
 		RequiredParam({
-			rehydrate: (v) => String(v),
+			parse: (v) => String(v),
 			description: 'Test description',
 			errorMessage: 'Test error message',
 		})
@@ -267,7 +267,7 @@ router.get('/test/87a1470c-3fec-492a-bc4c-ff35fc95524a', (ctx) => {
 	useRequestRawBody(
 		ctx,
 		RequiredParam({
-			rehydrate: (v) => String(v),
+			parse: (v) => String(v),
 			description: 'Test description',
 			errorMessage: 'Test error message',
 		})
@@ -285,13 +285,13 @@ router.get('/test/2fbc419b-2f1c-4782-9113-ef4125dd813b', (ctx) => {
 router.get('/test/e8e5496b-11a0-41e3-a68d-f03d524e413c', (ctx) => {
 	useRequestBody(ctx, {
 		firstParam: RequiredParam({
-			rehydrate: (v) => String(v),
+			parse: (v) => String(v),
 		}),
 		secondParam: OptionalParam({
-			rehydrate: (v) => v === '1',
+			parse: (v) => v === '1',
 		}),
 		thirdParam: OptionalParam({
-			rehydrate: (v) => Number(v),
+			parse: (v) => Number(v),
 		}),
 	})
 })
@@ -354,13 +354,13 @@ router.get('/test/666b9ed1-62db-447a-80a7-8f35ec50ab02', async () => {
 router.get('/test/97bb5db8-1871-4c1d-998e-a724c04c5741', (ctx) => {
 	const query = useQueryParams(ctx, {
 		firstParam: RequiredParam({
-			rehydrate: (v) => String(v),
+			parse: (v) => String(v),
 		}),
 		secondParam: OptionalParam({
-			rehydrate: (v) => v === '1',
+			parse: (v) => v === '1',
 		}),
 		thirdParam: OptionalParam({
-			rehydrate: (v) => Number(v),
+			parse: (v) => Number(v),
 		}),
 	})
 
@@ -374,13 +374,13 @@ router.get('/test/97bb5db8-1871-4c1d-998e-a724c04c5741', (ctx) => {
 router.get('/test/4188ebf2-eae6-4994-8732-c7f43d4da861', (ctx) => {
 	const query = useQueryParams(ctx, {
 		firstParam: RequiredParam({
-			rehydrate: (v) => String(v),
+			parse: (v) => String(v),
 		}),
 		secondParam: OptionalParam({
-			rehydrate: (v) => v === '1',
+			parse: (v) => v === '1',
 		}),
 		thirdParam: OptionalParam({
-			rehydrate: (v) => Number(v),
+			parse: (v) => Number(v),
 		}),
 	})
 
@@ -460,7 +460,7 @@ router.get('/test/66a075bc-c9d4-4622-8c04-e0a982a19fb0', (ctx) => {
 
 	useQueryParams(ctx, {
 		foo: RequiredParam({
-			rehydrate: (v) => JSON.parse(String(v)) as NamedParam,
+			parse: (v) => JSON.parse(String(v)) as NamedParam,
 		}),
 	})
 })
@@ -468,7 +468,7 @@ router.get('/test/66a075bc-c9d4-4622-8c04-e0a982a19fb0', (ctx) => {
 router.get('/test/39669151-c529-4bcd-86a5-a10de7834104/:foo', (ctx) => {
 	const { foo } = usePathParams(ctx, {
 		foo: RequiredParam({
-			rehydrate: (v) => String(v),
+			parse: (v) => String(v),
 		}),
 	})
 	foo
@@ -491,7 +491,7 @@ useExposeNamedApiModels<{
 router.get('/test/e917e982-b5ce-4a8f-804e-13466e7a00a2', (ctx) => {
 	useQueryParams(ctx, {
 		foo: RequiredParam({
-			rehydrate: (v) => JSON.parse(String(v)) as FooBarObject,
+			parse: (v) => JSON.parse(String(v)) as FooBarObject,
 		}),
 	})
 })
@@ -499,7 +499,7 @@ router.get('/test/e917e982-b5ce-4a8f-804e-13466e7a00a2', (ctx) => {
 router.get('/test/af22e5ff-7cbf-4aa3-8ea9-fd538a747c01', (ctx) => {
 	useQueryParams(ctx, {
 		foo: RequiredParam<FooBarObject>({
-			rehydrate: (v) => JSON.parse(String(v)),
+			parse: (v) => JSON.parse(String(v)),
 		}),
 	})
 })

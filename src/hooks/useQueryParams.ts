@@ -8,7 +8,7 @@ import { Validator } from '../validators/types'
 type CheckIfOptional<T, B extends boolean | undefined> = B extends false ? T : T | undefined
 
 type ValidatedData<T extends Record<string, Validator<any>>> = {
-	[K in keyof T]: CheckIfOptional<ReturnType<T[K]['rehydrate']>, T[K]['optional']>
+	[K in keyof T]: CheckIfOptional<ReturnType<T[K]['parse']>, T[K]['optional']>
 }
 
 export const useQueryParams = <ValidatorsT extends Record<string, Validator<any>>>(
@@ -40,12 +40,12 @@ export const useQueryParams = <ValidatorsT extends Record<string, Validator<any>
 		try {
 			const validatorObject = param.validator
 			const prevalidatorSuccess = !validatorObject.prevalidate || validatorObject.prevalidate(paramValue)
-			const rehydratedValue = validatorObject.rehydrate(paramValue)
-			const validatorSuccess = !validatorObject.validate || validatorObject.validate(rehydratedValue)
+			const parsedValue = validatorObject.parse(paramValue)
+			const validatorSuccess = !validatorObject.validate || validatorObject.validate(parsedValue)
 			return {
 				param,
 				validated: prevalidatorSuccess && validatorSuccess,
-				rehydratedValue,
+				parsedValue,
 			}
 		} catch (error) {
 			return { param, validated: false }
@@ -66,7 +66,7 @@ export const useQueryParams = <ValidatorsT extends Record<string, Validator<any>
 
 	const returnValue: Record<string, unknown> = {}
 	successfulValidations.forEach((result) => {
-		returnValue[result.param.name] = result.rehydratedValue
+		returnValue[result.param.name] = result.parsedValue
 	})
 
 	return returnValue as ValidatedData<ValidatorsT>

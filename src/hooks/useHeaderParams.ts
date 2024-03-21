@@ -14,7 +14,7 @@ type CheckIfOptional<T, B extends boolean | undefined> = B extends false ? T : T
 type HeaderToCamelCase<T> = T extends string ? CamelCase<Uncapitalize<T>> : T
 
 type ValidatedData<T extends Record<string, Validator<any>>> = {
-	[K in keyof T as HeaderToCamelCase<K>]: CheckIfOptional<ReturnType<T[K]['rehydrate']>, T[K]['optional']>
+	[K in keyof T as HeaderToCamelCase<K>]: CheckIfOptional<ReturnType<T[K]['parse']>, T[K]['optional']>
 }
 
 export const useHeaderParams = <ValidatorsT extends Record<string, Validator<any>>>(
@@ -48,12 +48,12 @@ export const useHeaderParams = <ValidatorsT extends Record<string, Validator<any
 			const validatorObject = param.validator
 			const prevalidatorSuccess =
 				!validatorObject.prevalidate || validatorObject.prevalidate(paramValue as string)
-			const rehydratedValue = validatorObject.rehydrate(paramValue as string)
-			const validatorSuccess = !validatorObject.validate || validatorObject.validate(rehydratedValue)
+			const parsedValue = validatorObject.parse(paramValue as string)
+			const validatorSuccess = !validatorObject.validate || validatorObject.validate(parsedValue)
 			return {
 				param,
 				validated: prevalidatorSuccess && validatorSuccess,
-				rehydratedValue,
+				parsedValue,
 			}
 		} catch (error) {
 			return { param, validated: false }
@@ -74,7 +74,7 @@ export const useHeaderParams = <ValidatorsT extends Record<string, Validator<any
 
 	const returnValue: Record<string, unknown> = {}
 	successfulValidations.forEach((result) => {
-		returnValue[kebabToCamelCase(result.param.originalName)] = result.rehydratedValue
+		returnValue[kebabToCamelCase(result.param.originalName)] = result.parsedValue
 	})
 
 	return returnValue as ValidatedData<ValidatorsT>

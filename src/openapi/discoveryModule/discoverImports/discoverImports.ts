@@ -18,7 +18,7 @@ export const discoverImportedName = ({ sourceFile, originalName }: Props): strin
 			const importPath = importPathNode.getText()
 
 			return (
-				/tenebrie-framework/.test(importPath) ||
+				/moonflower/.test(importPath) ||
 				process.env.NODE_ENV === 'test' ||
 				process.env.NODE_ENV === 'development'
 			)

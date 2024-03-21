@@ -10,7 +10,7 @@ import {
 import { mockContext, mockContextBody } from '../utils/mockContext'
 
 describe('useRequestBody', () => {
-	it('rehydrates params correctly', () => {
+	it('parses params correctly', () => {
 		const ctx = mockContextBody(mockContext(), {
 			stringParam: 'test_string',
 			numberParam: '12',
@@ -26,7 +26,7 @@ describe('useRequestBody', () => {
 			numberParam: NumberValidator,
 			booleanParam: BooleanValidator,
 			objectParam: RequiredParam<{ foo: string; bar: string }>({
-				rehydrate: (v) => JSON.parse(String(v)),
+				parse: (v) => JSON.parse(String(v)),
 			}),
 		})
 
@@ -82,7 +82,7 @@ describe('useRequestBody', () => {
 
 		const params = useRequestBody(ctx, {
 			testParam: RequiredParam({
-				rehydrate: (v) => v,
+				parse: (v) => v,
 				validate: (v) => v === null,
 			}),
 		})
@@ -132,7 +132,7 @@ describe('useRequestBody', () => {
 		const params = useRequestBody(ctx, {
 			testParam: RequiredParam({
 				prevalidate: (v) => v === 'valid',
-				rehydrate: (v) => String(v),
+				parse: (v) => String(v),
 			}),
 		})
 
@@ -148,7 +148,7 @@ describe('useRequestBody', () => {
 			useRequestBody(ctx, {
 				testParam: RequiredParam({
 					prevalidate: (v) => v === 'valid',
-					rehydrate: (v) => String(v),
+					parse: (v) => String(v),
 				}),
 			})
 		}
@@ -157,7 +157,7 @@ describe('useRequestBody', () => {
 		expect(test).toThrow("Failed body param validation: 'testParam'")
 	})
 
-	it('fails prevalidation on rehydrate error', () => {
+	it('fails prevalidation on parse error', () => {
 		const test = () => {
 			const ctx = mockContextBody(mockContext(), {
 				testParam: 'not a json',
@@ -165,7 +165,7 @@ describe('useRequestBody', () => {
 
 			useRequestBody(ctx, {
 				testParam: RequiredParam<{ foo: 'aaa' }>({
-					rehydrate: (v) => JSON.parse(String(v)),
+					parse: (v) => JSON.parse(String(v)),
 				}),
 			})
 		}
@@ -183,7 +183,7 @@ describe('useRequestBody', () => {
 			useRequestBody(ctx, {
 				testParam: RequiredParam({
 					prevalidate: (v) => v === 'valid',
-					rehydrate: (v) => String(v),
+					parse: (v) => String(v),
 					description: 'Description',
 					errorMessage: 'Error message',
 				}),
@@ -203,7 +203,7 @@ describe('useRequestBody', () => {
 			useRequestBody(ctx, {
 				testParam: RequiredParam({
 					prevalidate: (v) => v === 'valid',
-					rehydrate: (v) => String(v),
+					parse: (v) => String(v),
 					description: 'Description',
 				}),
 			})

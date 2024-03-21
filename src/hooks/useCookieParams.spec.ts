@@ -10,7 +10,7 @@ import { mockContext, mockContextCookies } from '../utils/mockContext'
 import { useCookieParams } from './useCookieParams'
 
 describe('useCookieParams', () => {
-	it('rehydrates params correctly', () => {
+	it('parses params correctly', () => {
 		const ctx = mockContextCookies(mockContext(), {
 			stringParam: 'test_string',
 			numberParam: '12',
@@ -23,7 +23,7 @@ describe('useCookieParams', () => {
 			numberParam: NumberValidator,
 			booleanParam: BooleanValidator,
 			objectParam: RequiredParam<{ foo: string; bar: string }>({
-				rehydrate: (v) => JSON.parse(String(v)),
+				parse: (v) => JSON.parse(String(v)),
 			}),
 		})
 
@@ -91,7 +91,7 @@ describe('useCookieParams', () => {
 		const params = useCookieParams(ctx, {
 			testParam: RequiredParam({
 				prevalidate: (v) => v === 'valid',
-				rehydrate: (v) => String(v),
+				parse: (v) => String(v),
 			}),
 		})
 
@@ -107,7 +107,7 @@ describe('useCookieParams', () => {
 			useCookieParams(ctx, {
 				testParam: RequiredParam({
 					prevalidate: (v) => v === 'valid',
-					rehydrate: (v) => String(v),
+					parse: (v) => String(v),
 				}),
 			})
 		}
@@ -116,7 +116,7 @@ describe('useCookieParams', () => {
 		expect(test).toThrow("Failed cookie param validation: 'testParam'")
 	})
 
-	it('fails prevalidation on rehydrate error', () => {
+	it('fails prevalidation on parse error', () => {
 		const test = () => {
 			const ctx = mockContextCookies(mockContext(), {
 				testParam: 'not a json',
@@ -124,7 +124,7 @@ describe('useCookieParams', () => {
 
 			useCookieParams(ctx, {
 				testParam: RequiredParam<{ foo: 'aaa' }>({
-					rehydrate: (v) => JSON.parse(String(v)),
+					parse: (v) => JSON.parse(String(v)),
 				}),
 			})
 		}
@@ -142,7 +142,7 @@ describe('useCookieParams', () => {
 			useCookieParams(ctx, {
 				testParam: RequiredParam({
 					prevalidate: (v) => v === 'valid',
-					rehydrate: (v) => String(v),
+					parse: (v) => String(v),
 					description: 'Description',
 					errorMessage: 'Error message',
 				}),
@@ -162,7 +162,7 @@ describe('useCookieParams', () => {
 			useCookieParams(ctx, {
 				testParam: RequiredParam({
 					prevalidate: (v) => v === 'valid',
-					rehydrate: (v) => String(v),
+					parse: (v) => String(v),
 					description: 'Description',
 				}),
 			})

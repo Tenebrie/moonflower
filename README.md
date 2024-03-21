@@ -1,9 +1,17 @@
-# Framework documentation
+# Moonflower
+
 > This section is work-in-progress.
 
-'tenebrie-framework' is a TypeScript-first [Koa Router](https://www.npmjs.com/package/koa-router) extension that allows for automatic [OpenAPI](https://www.openapis.org/what-is-openapi) spec generation directly from backend code, without any extra work. Combined with an ORM like [Prisma.js](https://www.npmjs.com/package/prisma) and an API client generator on frontend, it allows for creation of end-to-end type safe REST API.
+Moonflower is a TypeScript-first [Koa Router](https://www.npmjs.com/package/koa-router) extension that allows for automatic [OpenAPI](https://www.openapis.org/what-is-openapi) spec generation directly from backend code, without any extra work. Combined with an ORM like [Prisma.js](https://www.npmjs.com/package/prisma) and an API client generator on frontend, it allows for creation of end-to-end type safe REST API.
 
-'tenebrie-framework' provides type safe 'hooks' that handle runtime validation and return clean types with minimal boilerplate.
+Moonflower provides type safe 'hooks' that handle runtime validation and return clean types with minimal boilerplate. 
+
+## Feature Overview
+
+- React hooks inspired Node.js backend REST API
+- Fully type safe definitions for path, query and header params, request body and response
+- Minimal boilerplate code
+- Out-of-the-box OpenAPI 3.1.0 spec generation
 
 ## Usage example
 
@@ -100,7 +108,7 @@ Outputs the following spec (parts omitted for brevity):
 Install dependencies:
 
 ```bash
-yarn add tenebrie-framework koa @koa/router koa-bodyparser
+yarn add moonflower koa @koa/router koa-bodyparser
 ```
 
 Create a Koa instance with required middleware
@@ -108,7 +116,7 @@ Create a Koa instance with required middleware
 ```ts
 import Koa from 'koa'
 import bodyParser from 'koa-bodyparser'
-import { HttpErrorHandler, initOpenApiEngine, Router } from 'tenebrie-framework'
+import { HttpErrorHandler, initOpenApiEngine, Router } from 'moonflower'
 
 const app = new Koa()
 const myRouter = new Router()
@@ -142,22 +150,15 @@ app
     )
 ```
 
-
-## Feature Overview
-
-- React hooks inspired backend REST API
-- Fully type-safe definitions for path, query and header params, request body and response
-- Minimal boilerplate code
-- Out-of-the-box OpenAPI 3.1.0 spec generation
-
-## Planned features
+### Planned features
 
 - Support for list query params
 - Support for thrown errors in OpenApi engine
 - Support for binary data responses
 - Support for multipart form data
 
-## Known issues
+### Known issues
+
 - Exported models are referenced by name only, leading to potential name collisions
 
 # Hooks
@@ -175,9 +176,8 @@ const rawBody = useRequestRawBody(ctx, {...})
 ```
 
 # Validators
-> This section is work-in-progress.
 
-Validators are run for every parameter received from the client.
+Validators are run for every parameter received from the client. Failed validation or an error thrown during validation will return 400 Bad Request to the user.
 
 **Example:**
 
@@ -185,7 +185,7 @@ Validators are run for every parameter received from the client.
 const query = useQueryParams(ctx, {
     name: RequiredParam(StringValidator),
     fooBar: OptionalParam<{ foo: string; bar: string }>({
-        rehydrate: (v) => JSON.parse(v),
+        parse: (v) => JSON.parse(v),
         validate: (v) => !!v.foo && !!v.bar
     }),
 })
@@ -216,12 +216,10 @@ const query = useQueryParams(ctx, {
     predefinedBool: BooleanValidator,
     optionalBool: OptionalParam(BooleanValidator),
     customBool: RequiredParam({
-        prevalidate: (v) => v === '0' || v === '1',
-        rehydrate: (v) => v === '1',
+        parse: (v) => v === '1',
     }),
     customOptionalBool: OptionalParam({
-        prevalidate: (v) => v === '0' || v === '1',
-        rehydrate: (v) => v === '1',
+        parse: (v) => v === '1',
     }),
 })
 
@@ -240,12 +238,11 @@ Custom validators are simple objects that can be defined either inline, or elsew
 ```ts
 const query = useQueryParams(ctx, {
     numberInRange: RequiredParam({
-        rehydrate: (v) => Number(v),
+        parse: (v) => Number(v),
         validate: (v) => !isNaN(v) && v >= 0 && v <= 100,
     }),
     optionalBoolean: OptionalParam({
-        prevalidate: (v) => v === '0' || v === '1',
-        rehydrate: (v) => v === '1',
+        parse: (v) => v === '1',
     }),
 })
 
@@ -253,15 +250,28 @@ query.numberInRange   // type is 'number'
 query.optionalBoolean // type is 'boolean | undefined'
 ```
 
+### Using Zod
+
+Zod schemas are compatible with validators, allowing you to directly use them to define runtime validation.
+
+```ts
+const body = useRequestBody(ctx, {
+    email: RequiredParam(z.string().email()),
+    password: RequiredParam(z.string()),
+})
+
+const { email, password } = body
+```
+
 ## Anatomy of a validator
 
 A validator contains a number of functions that are useful to check and transform incoming data.
 
-### Rehydrate
+### Parse
 
-> `rehydrate: (v: string) => T extends any`
+> `parse: (v: string) => T extends any`
 
-The only required function of a validator. It takes the raw input param and transforms it into correct data type. The return type of `rehydrate` will match the one specified in the `RequiredParam` or `OptionalParam` generics, or will be used to infer the type.
+The only required function of a validator. It takes the raw input param and transforms it into correct data type. The return type of `parse` will match the one specified in the `RequiredParam` or `OptionalParam` generics, or will be used to infer the type.
 
 Make sure that it returns a correctly typed object.
 
@@ -269,7 +279,7 @@ Make sure that it returns a correctly typed object.
 
 > `validate: (v: T) => boolean`
 
-This function is called on incoming data after it is rehydrated. 
+This function is called on incoming data after it is parsed. 
 
 Returning `false` or any falsy value will cause the validation to fail, and `400 Bad Request` to be sent back to the client.
 
@@ -277,20 +287,20 @@ Returning `false` or any falsy value will cause the validation to fail, and `400
 
 > `prevalidate: (v: string) => boolean`
 
-This function is called on incoming data before it is rehydrated. Useful in cases where rehydration function is slow (i.e. includes a DB read), and some premature validation is desired. In most cases, however, `validate` is preferred.
+This function is called on incoming data before it is parsed. Useful in cases where rehydration function is slow (i.e. includes a DB read), and some premature validation is desired. In most cases, however, `validate` is preferred.
 
 The behaviour is identical to `validate`, aside from the call order.
 
 ### Type inference
 
-In many cases, type of the parameter can be inferred from the return value of `rehydrate` function. For more complex objects, it is possible to specify the type with `as ...` clause:
+In many cases, type of the parameter can be inferred from the return value of `parse` function. For more complex objects, it is possible to specify the type with `as ...` clause:
 
 
 ```ts
 useQueryParams(ctx, {
     fooBar: RequiredParam({
         prevalidate: (v) => v.length > 5,
-        rehydrate: (v) => JSON.parse(v) as { foo: string; bar: string },
+        parse: (v) => JSON.parse(v) as { foo: string; bar: string },
         validate: (v) => !!v.foo && !!v.bar
     }),
 })
@@ -302,7 +312,7 @@ Alternatively, the expected type can be mentioned in `RequiredParam`, `OptionalP
 useQueryParams(ctx, {
     fooBar: RequiredParam<{ foo: string; bar: string }>({
         prevalidate: (v) => v.length > 5,
-        rehydrate: (v) => JSON.parse(v),
+        parse: (v) => JSON.parse(v),
         validate: (v) => !!v.foo && !!v.bar
     }),
 })
@@ -315,7 +325,7 @@ While the following is valid code, the type of the parameter can't be inferred a
 ```ts
 useQueryParams(ctx, {
     myParam: {
-        rehydrate: (v) => Number(v),
+        parse: (v) => Number(v),
         validate: (v) => v > 0,
         optional: false,
     },
@@ -359,9 +369,15 @@ As parameter optionaliy is defined in a path, `RequiredParam` and `OptionalParam
 router.get('/user/:numberId', (ctx) => {
     usePathParams(ctx, {
         numberId: PathParam({
-            rehydrate: (v) => Number(v),
+            parse: (v) => Number(v),
             validate: (v) => !isNaN(v) && v >= 0 && v <= 100,
         })
     })
 }
 ```
+
+## Escape hatch
+
+All Koa and Koa Router APIs are still available in case some functionality is unavailable through Moonflower. Endpoints provide a `ctx` prop, and the router expose `koaRouter` which is raw underlying router implementation.
+
+However, avoiding Moonflower's API will degrade the quality of the generated spec.

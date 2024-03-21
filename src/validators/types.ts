@@ -10,7 +10,7 @@ export type ValidateArg<T> = T extends object ? DeepPartial<T> : T
 
 export type Validator<T> = {
 	prevalidate?: (v: string | null) => boolean
-	rehydrate: (v: string | null) => T
+	parse: (v: string | null) => T
 	validate?: (v: ValidateArg<T>) => boolean
 	/**
 	 * The field is optional and validation will be skipped if it is not provided.

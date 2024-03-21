@@ -6,7 +6,7 @@ import { Validator } from '../validators/types'
 
 type CheckIfOptional<T, B extends boolean | undefined> = B extends false ? T : T | undefined
 
-type ValidatedData<T extends Validator<any>> = CheckIfOptional<ReturnType<T['rehydrate']>, T['optional']>
+type ValidatedData<T extends Validator<any>> = CheckIfOptional<ReturnType<T['parse']>, T['optional']>
 
 /**
  * Hook to access request body data without parsing into an object.
@@ -38,11 +38,11 @@ export const useRequestRawBody = <ValidatorT extends Validator<any>>(
 	const validationResult = (() => {
 		try {
 			const prevalidatorSuccess = !validator.prevalidate || validator.prevalidate(providedBody)
-			const rehydratedValue = validator.rehydrate(providedBody)
-			const validatorSuccess = !validator.validate || validator.validate(rehydratedValue)
+			const parsedValue = validator.parse(providedBody)
+			const validatorSuccess = !validator.validate || validator.validate(parsedValue)
 			return {
 				validated: prevalidatorSuccess && validatorSuccess,
-				rehydratedValue,
+				parsedValue,
 			}
 		} catch (error) {
 			return { validated: false }
@@ -52,5 +52,5 @@ export const useRequestRawBody = <ValidatorT extends Validator<any>>(
 	if (!validationResult.validated) {
 		throw new ValidationError(getFailedRawBodyValidationMessage(validator))
 	}
-	return validationResult.rehydratedValue as ValidatedData<ValidatorT>
+	return validationResult.parsedValue as ValidatedData<ValidatorT>
 }

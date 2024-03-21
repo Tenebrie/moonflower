@@ -10,7 +10,7 @@ import { mockContext, mockContextPath } from '../utils/mockContext'
 import { usePathParams } from './usePathParams'
 
 describe('usePathParams', () => {
-	it('rehydrates params correctly', () => {
+	it('parses params correctly', () => {
 		const ctx = mockContextPath(mockContext(), '/test/:stringParam/:numberParam/:booleanParam/:objectParam', {
 			stringParam: 'test_string',
 			numberParam: '12',
@@ -23,7 +23,7 @@ describe('usePathParams', () => {
 			numberParam: NumberValidator,
 			booleanParam: BooleanValidator,
 			objectParam: RequiredParam<{ foo: string; bar: string }>({
-				rehydrate: (v) => JSON.parse(String(v)),
+				parse: (v) => JSON.parse(String(v)),
 			}),
 		})
 
@@ -78,7 +78,7 @@ describe('usePathParams', () => {
 		const params = usePathParams(ctx, {
 			testParam: PathParam({
 				prevalidate: (v) => v === 'valid',
-				rehydrate: (v) => String(v),
+				parse: (v) => String(v),
 			}),
 		})
 
@@ -94,7 +94,7 @@ describe('usePathParams', () => {
 			usePathParams(ctx, {
 				testParam: PathParam({
 					prevalidate: (v) => v === 'valid',
-					rehydrate: (v) => String(v),
+					parse: (v) => String(v),
 				}),
 			})
 		}
@@ -103,7 +103,7 @@ describe('usePathParams', () => {
 		expect(test).toThrow("Failed route param validation: 'testParam'")
 	})
 
-	it('fails prevalidation on rehydrate error', () => {
+	it('fails prevalidation on parse error', () => {
 		const test = () => {
 			const ctx = mockContextPath(mockContext(), '/test/:testParam', {
 				testParam: 'not a json',
@@ -111,7 +111,7 @@ describe('usePathParams', () => {
 
 			usePathParams(ctx, {
 				testParam: PathParam<{ foo: 'aaa' }>({
-					rehydrate: (v) => JSON.parse(String(v)),
+					parse: (v) => JSON.parse(String(v)),
 				}),
 			})
 		}
@@ -129,7 +129,7 @@ describe('usePathParams', () => {
 			usePathParams(ctx, {
 				testParam: PathParam({
 					prevalidate: (v) => v === 'valid',
-					rehydrate: (v) => String(v),
+					parse: (v) => String(v),
 					description: 'Description',
 					errorMessage: 'Error message',
 				}),
@@ -149,7 +149,7 @@ describe('usePathParams', () => {
 			usePathParams(ctx, {
 				testParam: PathParam({
 					prevalidate: (v) => v === 'valid',
-					rehydrate: (v) => String(v),
+					parse: (v) => String(v),
 					description: 'Description',
 				}),
 			})

@@ -294,18 +294,18 @@ export const getValidatorPropertyShape = (innerLiteralNode: Node): ShapeOfType['
 		return 'unknown_3'
 	}
 
-	// Attempting to infer type from `rehydrate` function
+	// Attempting to infer type from `parse` function
 	const innerNodePropertyAssignments = innerLiteralNode
 		.getFirstChildByKind(SyntaxKind.SyntaxList)!
 		.getChildrenOfKind(SyntaxKind.PropertyAssignment)
-	const rehydratePropertyAssignment = innerNodePropertyAssignments.find((prop) => {
-		return prop.getFirstChildByKind(SyntaxKind.Identifier)?.getText() === 'rehydrate'
+	const parsePropertyAssignment = innerNodePropertyAssignments.find((prop) => {
+		return prop.getFirstChildByKind(SyntaxKind.Identifier)?.getText() === 'parse'
 	})
-	if (rehydratePropertyAssignment) {
-		const returnType = findPropertyAssignmentValueNode(rehydratePropertyAssignment)
+	if (parsePropertyAssignment) {
+		const returnType = findPropertyAssignmentValueNode(parsePropertyAssignment)
 			.asKind(SyntaxKind.ArrowFunction)!
 			.getReturnType()
-		return getProperTypeShape(returnType, rehydratePropertyAssignment)
+		return getProperTypeShape(returnType, parsePropertyAssignment)
 	}
 
 	// Import statement

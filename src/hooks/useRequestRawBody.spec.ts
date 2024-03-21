@@ -2,7 +2,7 @@ import { NumberValidator, OptionalParam, RequiredParam, useRequestRawBody, Valid
 import { mockContext, mockContextBody, mockContextRawBody } from '../utils/mockContext'
 
 describe('useRequestRawBody', () => {
-	it('rehydrates param correctly', () => {
+	it('parses param correctly', () => {
 		const ctx = mockContextBody(mockContext(), {
 			foo: 'aaa',
 			bar: 'bbb',
@@ -11,7 +11,7 @@ describe('useRequestRawBody', () => {
 		const params = useRequestRawBody(
 			ctx,
 			RequiredParam<{ foo: string; bar: string }>({
-				rehydrate: (v) => JSON.parse(String(v)),
+				parse: (v) => JSON.parse(String(v)),
 			})
 		)
 
@@ -58,7 +58,7 @@ describe('useRequestRawBody', () => {
 			useRequestRawBody(
 				mockContext(),
 				RequiredParam({
-					rehydrate: (v) => Number(v),
+					parse: (v) => Number(v),
 					validate: (v) => !Number.isNaN(v),
 				})
 			)
@@ -75,7 +75,7 @@ describe('useRequestRawBody', () => {
 			ctx,
 			RequiredParam({
 				prevalidate: (v) => v === 'valid',
-				rehydrate: (v) => String(v),
+				parse: (v) => String(v),
 			})
 		)
 
@@ -90,7 +90,7 @@ describe('useRequestRawBody', () => {
 				ctx,
 				RequiredParam({
 					prevalidate: (v) => v === 'valid',
-					rehydrate: (v) => String(v),
+					parse: (v) => String(v),
 				})
 			)
 		}
@@ -99,14 +99,14 @@ describe('useRequestRawBody', () => {
 		expect(test).toThrow('Failed request body validation.')
 	})
 
-	it('fails prevalidation on rehydrate error', () => {
+	it('fails prevalidation on parse error', () => {
 		const test = () => {
 			const ctx = mockContextRawBody(mockContext(), 'not a valid json')
 
 			useRequestRawBody(
 				ctx,
 				RequiredParam<{ foo: 'aaa' }>({
-					rehydrate: (v) => JSON.parse(String(v)),
+					parse: (v) => JSON.parse(String(v)),
 				})
 			)
 		}
@@ -123,7 +123,7 @@ describe('useRequestRawBody', () => {
 				ctx,
 				RequiredParam({
 					prevalidate: (v) => v === 'valid',
-					rehydrate: (v) => String(v),
+					parse: (v) => String(v),
 					description: 'Description',
 					errorMessage: 'Error message',
 				})
@@ -142,7 +142,7 @@ describe('useRequestRawBody', () => {
 				ctx,
 				RequiredParam({
 					prevalidate: (v) => v === 'valid',
-					rehydrate: (v) => String(v),
+					parse: (v) => String(v),
 					description: 'Description',
 				})
 			)

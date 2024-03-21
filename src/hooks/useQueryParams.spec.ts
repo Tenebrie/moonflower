@@ -11,7 +11,7 @@ import {
 import { mockContext, mockContextQuery } from '../utils/mockContext'
 
 describe('useQueryParams', () => {
-	it('rehydrates params correctly', () => {
+	it('parses params correctly', () => {
 		const ctx = mockContextQuery(mockContext(), {
 			stringParam: 'test_string',
 			numberParam: '12',
@@ -24,7 +24,7 @@ describe('useQueryParams', () => {
 			numberParam: NumberValidator,
 			booleanParam: BooleanValidator,
 			objectParam: RequiredParam<{ foo: string; bar: string }>({
-				rehydrate: (v) => JSON.parse(String(v)),
+				parse: (v) => JSON.parse(String(v)),
 			}),
 		})
 
@@ -141,7 +141,7 @@ describe('useQueryParams', () => {
 		const params = useQueryParams(ctx, {
 			testParam: RequiredParam({
 				prevalidate: (v) => v === 'valid',
-				rehydrate: (v) => String(v),
+				parse: (v) => String(v),
 			}),
 		})
 
@@ -157,7 +157,7 @@ describe('useQueryParams', () => {
 			useQueryParams(ctx, {
 				testParam: RequiredParam({
 					prevalidate: (v) => v === 'valid',
-					rehydrate: (v) => String(v),
+					parse: (v) => String(v),
 				}),
 			})
 		}
@@ -166,7 +166,7 @@ describe('useQueryParams', () => {
 		expect(test).toThrow("Failed query param validation: 'testParam'")
 	})
 
-	it('fails prevalidation on rehydrate error', () => {
+	it('fails prevalidation on parse error', () => {
 		const test = () => {
 			const ctx = mockContextQuery(mockContext(), {
 				testParam: 'not a json',
@@ -174,7 +174,7 @@ describe('useQueryParams', () => {
 
 			useQueryParams(ctx, {
 				testParam: RequiredParam<{ foo: 'aaa' }>({
-					rehydrate: (v) => JSON.parse(String(v)),
+					parse: (v) => JSON.parse(String(v)),
 				}),
 			})
 		}
@@ -192,7 +192,7 @@ describe('useQueryParams', () => {
 			useQueryParams(ctx, {
 				testParam: RequiredParam({
 					prevalidate: (v) => v === 'valid',
-					rehydrate: (v) => String(v),
+					parse: (v) => String(v),
 					description: 'Description',
 					errorMessage: 'Error message',
 				}),
@@ -212,7 +212,7 @@ describe('useQueryParams', () => {
 			useQueryParams(ctx, {
 				testParam: RequiredParam({
 					prevalidate: (v) => v === 'valid',
-					rehydrate: (v) => String(v),
+					parse: (v) => String(v),
 					description: 'Description',
 				}),
 			})
