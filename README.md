@@ -1,7 +1,147 @@
 # Framework documentation
 > This section is work-in-progress.
 
-This package is NOT FINISHED, use at your own risk.
+'tenebrie-framework' is a TypeScript-first [Koa Router](https://www.npmjs.com/package/koa-router) extension that allows for automatic [OpenAPI](https://www.openapis.org/what-is-openapi) spec generation directly from backend code, without any extra work. Combined with an ORM like [Prisma.js](https://www.npmjs.com/package/prisma) and an API client generator on frontend, it allows for creation of end-to-end type safe REST API.
+
+'tenebrie-framework' provides type safe 'hooks' that handle runtime validation and return clean types with minimal boilerplate.
+
+## Usage example
+
+Every variable and parameter in this example is fully typed.
+
+```ts
+const router = new Router()
+
+router.post('/auth', (ctx) => {
+    useApiEndpoint({
+        name: 'createAccount',
+        summary: 'Registration endpoint',
+        description: 'Creates a new user account with provided credentials',
+    })
+
+    const body = useRequestBody(ctx, {
+        email: EmailValidator,
+        username: NonEmptyStringValidator,
+        password: NonEmptyStringValidator,
+    })
+
+    const user = UserService.register(body.email, body.username, body.password)
+    const token = TokenService.generateJwtToken(user)
+
+    return {
+        accessToken: token,
+    }
+})
+```
+
+Outputs the following spec (parts omitted for brevity):
+
+```json
+"/auth": {
+    "post": {
+        "operationId": "createAccount",
+        "summary": "Registration endpoint",
+        "description": "Creates a new user account with provided credentials",
+        "parameters": [],
+        "requestBody": {
+            "content": {
+                "application/json": {
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "email": {
+                                "type": "string"
+                            },
+                            "username": {
+                                "type": "string"
+                            },
+                            "password": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "email",
+                            "username",
+                            "password"
+                        ]
+                    }
+                },
+            }
+        },
+        "responses": {
+            "200": {
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "oneOf": [{
+                                "type": "object",
+                                "properties": {
+                                    "accessToken": {
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "accessToken"
+                                ]
+                            }]
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+## Getting Started
+
+> This package requires a TypeScript based project. OpenAPI spec is created through parsing the TypeScript AST and can't be done in plain JS projects.
+
+Install dependencies:
+
+```bash
+yarn add tenebrie-framework koa @koa/router koa-bodyparser
+```
+
+Create a Koa instance with required middleware
+
+```ts
+import Koa from 'koa'
+import bodyParser from 'koa-bodyparser'
+import { HttpErrorHandler, initOpenApiEngine, Router } from 'tenebrie-framework'
+
+const app = new Koa()
+const myRouter = new Router()
+
+myRouter.get('/api/hello', (ctx) => {
+    /* Unlike in Koa, all endpoints must do a plain return.
+     * However, Koa context is still available for edge cases.
+     */
+    return {
+        greeting: 'hello world',
+    }
+})
+
+app
+    // Returns standard HTTP errors for common requests
+    .use(HttpErrorHandler)
+    .use(
+        // Required for requests with body
+        bodyParser({
+            enableTypes: ['text', 'json', 'form'],
+        })
+    )
+    // Register the router in Koa
+    .use(myRouter.routes())
+    .use(myRouter.allowedMethods())
+    .use(
+        // Enables collection of OpenAPI spec from code
+        initOpenApiEngine({
+            tsconfigPath: './tsconfig.json',
+        })
+    )
+```
+
 
 ## Feature Overview
 
@@ -13,20 +153,21 @@ This package is NOT FINISHED, use at your own risk.
 ## Planned features
 
 - Support for list query params
-- Proper support for router-level middleware
-- Ability to output spec as file
-- CLI-level spec generation function
 - Support for thrown errors in OpenApi engine
 - Support for binary data responses
 - Support for multipart form data
 
 ## Known issues
-- Exported models are referenced by name only, leading to potential name collisions and invalid spec
+- Exported models are referenced by name only, leading to potential name collisions
 
 # Hooks
 > This section is work-in-progress.
 
 ```ts
+// Dangling hooks
+useApiHeader({...})
+
+// Endpoint hooks
 const params = usePathParams(ctx, {...})
 const query = useQueryParams(ctx, {...})
 const body = useRequestBody(ctx, {...})
@@ -187,10 +328,10 @@ Path params have extra binding to the endpoint path. Only the properties mention
 
 ```ts
 router.get('/user/:userId', (ctx) => {
-	const params = usePathParams(ctx, {
-		userId: StringValidator,   // valid
+    const params = usePathParams(ctx, {
+        userId: StringValidator,   // valid
         username: StringValidator, // 'username' is not a path param
-	})
+    })
 
     params.userId  // type is 'string'
 }
@@ -202,9 +343,9 @@ Following standard Koa way of defining an optional param, a param marked by a qu
 
 ```ts
 router.get('/user/:userId?', (ctx) => {
-	const params = usePathParams(ctx, {
-		userId: StringValidator,
-	})
+    const params = usePathParams(ctx, {
+        userId: StringValidator,
+    })
 
     params.userId  // type is 'string | undefined'
 }
@@ -216,11 +357,11 @@ As parameter optionaliy is defined in a path, `RequiredParam` and `OptionalParam
 
 ```ts
 router.get('/user/:numberId', (ctx) => {
-	usePathParams(ctx, {
-		numberId: PathParam({
+    usePathParams(ctx, {
+        numberId: PathParam({
             rehydrate: (v) => Number(v),
             validate: (v) => !isNaN(v) && v >= 0 && v <= 100,
         })
-	})
+    })
 }
 ```
