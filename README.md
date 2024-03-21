@@ -177,7 +177,7 @@ const rawBody = useRequestRawBody(ctx, {...})
 
 # Validators
 
-Validators are run for every parameter received from the client. Failed validation or an error thrown during validation will return 400 Bad Request to the user.
+Validators are a primary way to define and validate user input. A validator is run for every parameter received from the client, checking it for validity and transforming it from a plain string to a value of a correct type. Failed validation or an error thrown during validation will return 400 Bad Request to the user.
 
 **Example:**
 
