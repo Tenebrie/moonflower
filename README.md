@@ -212,6 +212,19 @@ query.myString  // type is 'string'
 query.myBoolean // type is 'boolean'
 ```
 
+The following validators are available:
+
+- `BooleanValidator`
+- `NumberValidator`
+- `StringValidator`
+- `EmailValidator`
+- `NonEmptyStringValidator`
+- `BigIntValidator`
+- `NullableBooleanValidator`
+- `NullableNumberValidator`
+- `NullableStringValidator`
+- `NullableBigIntValidator`
+
 ## Required and optional parameters
 ```ts
 const query = useQueryParams(ctx, {
@@ -277,6 +290,8 @@ The only required function of a validator. It takes the raw input param and tran
 
 Make sure that it returns a correctly typed object.
 
+An error thrown during parsing will be caught by HttpErrorHandler middleware and return `400 Bad Request` to the user.
+
 ### Validate
 
 > `validate: (v: T) => boolean`
@@ -301,7 +316,6 @@ In many cases, type of the parameter can be inferred from the return value of `p
 ```ts
 useQueryParams(ctx, {
     fooBar: RequiredParam({
-        prevalidate: (v) => v.length > 5,
         parse: (v) => JSON.parse(v) as { foo: string; bar: string },
         validate: (v) => !!v.foo && !!v.bar
     }),
@@ -313,16 +327,15 @@ Alternatively, the expected type can be mentioned in `RequiredParam`, `OptionalP
 ```ts
 useQueryParams(ctx, {
     fooBar: RequiredParam<{ foo: string; bar: string }>({
-        prevalidate: (v) => v.length > 5,
         parse: (v) => JSON.parse(v),
         validate: (v) => !!v.foo && !!v.bar
     }),
 })
 ```
 
-### Avoid
+### :warning: Avoid :warning:
 
-While the following is valid code, the type of the parameter can't be inferred as TS will not parse this as Validator type. The type of `validate` will be `(v: any) => boolean`, which is unsafe.
+While the following is valid code, the type of the parameter can't be inferred as TS will not parse this as a Validator type. The type of `validate` will be `(v: any) => boolean`, which is unsafe.
 
 ```ts
 useQueryParams(ctx, {
@@ -353,6 +366,8 @@ router.get('/user/:userId', (ctx) => {
 
 Following standard Koa way of defining an optional param, a param marked by a question mark is considered optional.
 
+An optional param may exist in the request or be omitted entirely, but it must still pass the validation.
+
 ```ts
 router.get('/user/:userId?', (ctx) => {
     const params = usePathParams(ctx, {
@@ -365,7 +380,7 @@ router.get('/user/:userId?', (ctx) => {
 
 ## Custom path parameters
 
-As parameter optionaliy is defined in a path, `RequiredParam` and `OptionalParam` will be ignored. To reduce confusion, `PathParam` is available.
+As parameter optionaliy is defined in a path, `RequiredParam` and `OptionalParam` will be treated the same. To reduce confusion, `PathParam` is available as an alias.
 
 ```ts
 router.get('/user/:numberId', (ctx) => {
@@ -380,6 +395,6 @@ router.get('/user/:numberId', (ctx) => {
 
 ## Escape hatch
 
-All Koa and Koa Router APIs are still available in case some functionality is unavailable through Moonflower. Endpoints provide a `ctx` prop, and the router expose `koaRouter` which is raw underlying router implementation.
+All Koa and Koa Router APIs are still available in case some functionality is unavailable through Moonflower. Endpoints provide a `ctx` prop, and the router exposes `koaRouter` which is raw underlying router implementation.
 
 However, avoiding Moonflower's API will degrade the quality of the generated spec.
