@@ -46,6 +46,7 @@ export class Router<StateT = Koa.DefaultState, ContextT = Koa.DefaultContext> {
 		callback: KoaRouter.Middleware<StateT, ContextT & ExtractedRequestParams<P>>
 	) {
 		this.koaRouter.get(path, async (ctx) => {
+			ctx.set('Content-Type', 'application/json; charset=utf-8')
 			// @ts-ignore
 			const responseValue = await callback(ctx, undefined)
 			ctx.body = responseValueToJson(responseValue)
@@ -58,6 +59,7 @@ export class Router<StateT = Koa.DefaultState, ContextT = Koa.DefaultContext> {
 		callback: KoaRouter.Middleware<StateT, ContextT & ExtractedRequestParams<P>>
 	) {
 		this.koaRouter.post(path, async (ctx) => {
+			ctx.set('Content-Type', 'application/json; charset=utf-8')
 			// @ts-ignore
 			const responseValue = await callback(ctx, undefined)
 			ctx.body = responseValueToJson(responseValue)
@@ -70,6 +72,7 @@ export class Router<StateT = Koa.DefaultState, ContextT = Koa.DefaultContext> {
 		callback: KoaRouter.Middleware<StateT, ContextT & ExtractedRequestParams<P>>
 	) {
 		this.koaRouter.put(path, async (ctx) => {
+			ctx.set('Content-Type', 'application/json; charset=utf-8')
 			// @ts-ignore
 			const responseValue = await callback(ctx, undefined)
 			ctx.body = responseValueToJson(responseValue)
@@ -82,6 +85,7 @@ export class Router<StateT = Koa.DefaultState, ContextT = Koa.DefaultContext> {
 		callback: KoaRouter.Middleware<StateT, ContextT & ExtractedRequestParams<P>>
 	) {
 		this.koaRouter.delete(path, async (ctx) => {
+			ctx.set('Content-Type', 'application/json; charset=utf-8')
 			// @ts-ignore
 			const responseValue = await callback(ctx, undefined)
 			ctx.body = responseValueToJson(responseValue)
@@ -94,6 +98,7 @@ export class Router<StateT = Koa.DefaultState, ContextT = Koa.DefaultContext> {
 		callback: KoaRouter.Middleware<StateT, ContextT & ExtractedRequestParams<P>>
 	) {
 		this.koaRouter.del(path, async (ctx) => {
+			ctx.set('Content-Type', 'application/json; charset=utf-8')
 			// @ts-ignore
 			const responseValue = await callback(ctx, undefined)
 			ctx.body = responseValueToJson(responseValue)
@@ -106,6 +111,7 @@ export class Router<StateT = Koa.DefaultState, ContextT = Koa.DefaultContext> {
 		callback: KoaRouter.Middleware<StateT, ContextT & ExtractedRequestParams<P>>
 	) {
 		this.koaRouter.patch(path, async (ctx) => {
+			ctx.set('Content-Type', 'application/json; charset=utf-8')
 			// @ts-ignore
 			const responseValue = await callback(ctx, undefined)
 			ctx.body = responseValueToJson(responseValue)

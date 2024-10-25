@@ -34,7 +34,7 @@ myRouter.get('/test/query', (ctx) => {
 })
 
 myRouter.post('/test/post', () => {
-	return 'post response'
+	return { val: 'post response' }
 })
 
 myRouter.del('/test/del', () => {
@@ -46,7 +46,7 @@ myRouter.delete('/test/delete', () => {
 })
 
 myRouter.patch('/test/patch', () => {
-	return 'patch response'
+	return { val: 'patch response' }
 })
 
 myRouter.get('/test/error/generic', () => {

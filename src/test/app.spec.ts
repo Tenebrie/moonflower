@@ -5,10 +5,17 @@ import { generateOpenApiSpec } from '../openapi/generatorModule/generatorModule'
 import { app } from './app'
 
 describe('TestAppRouter', () => {
+	it('includes content type header', async () => {
+		const response = await request(app.callback()).get('/test/hello')
+		expect(response.status).toBe(200)
+		expect(response.headers['content-type']).toBe('application/json; charset=utf-8')
+	})
+
 	it('handles get request correctly', async () => {
 		const response = await request(app.callback()).get('/test/hello')
 		expect(response.status).toBe(200)
 		expect(response.text).toBe(JSON.stringify({ greeting: 'hello world' }))
+		expect(JSON.stringify(response.body)).toBe(JSON.stringify({ greeting: 'hello world' }))
 	})
 
 	it('handles query params', async () => {
@@ -26,7 +33,7 @@ describe('TestAppRouter', () => {
 	it('handles post request correctly', async () => {
 		const response = await request(app.callback()).post('/test/post')
 		expect(response.status).toBe(200)
-		expect(response.text).toBe('post response')
+		expect(response.text).toBe(JSON.stringify({ val: 'post response' }))
 	})
 
 	it('handles del request correctly', async () => {
@@ -44,7 +51,7 @@ describe('TestAppRouter', () => {
 	it('handles patch request correctly', async () => {
 		const response = await request(app.callback()).patch('/test/patch')
 		expect(response.status).toBe(200)
-		expect(response.text).toBe('patch response')
+		expect(response.text).toBe(JSON.stringify({ val: 'patch response' }))
 	})
 
 	it('rethrows a generic error', async () => {
