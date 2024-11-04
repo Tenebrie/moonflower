@@ -1,5 +1,6 @@
 import {
 	BooleanValidator,
+	NullableNumberValidator,
 	NumberValidator,
 	OptionalParam,
 	RequiredParam,
@@ -98,6 +99,30 @@ describe('useRequestBody', () => {
 		})
 
 		expect(params.testParam).toEqual(undefined)
+	})
+
+	it('returns optional type when OptionalParam is used', () => {
+		const ctx = mockContextBody(mockContext(), {})
+
+		const params = useRequestBody(ctx, {
+			testParam: OptionalParam(NumberValidator),
+		})
+
+		// TypeScript level check that type is optional
+		const testValue = undefined as typeof params.testParam
+		expect(testValue).toEqual(undefined)
+	})
+
+	it('returns nullable type when OptionalParam is used', () => {
+		const ctx = mockContextBody(mockContext(), {})
+
+		const params = useRequestBody(ctx, {
+			testParam: OptionalParam(NullableNumberValidator),
+		})
+
+		// TypeScript level check that type is nullable
+		const testValue = null as typeof params.testParam
+		expect(testValue).toEqual(null)
 	})
 
 	it('fails validation when required parameter is not provided', () => {

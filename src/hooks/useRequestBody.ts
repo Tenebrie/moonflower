@@ -5,7 +5,7 @@ import { keysOf } from '../utils/object'
 import { getMissingParamMessage, getValidationResultMessage } from '../utils/validationMessages'
 import { Validator } from '../validators/types'
 
-type CheckIfOptional<T, B extends boolean | undefined> = B extends false ? T : T
+type CheckIfOptional<T, B extends boolean | undefined> = B extends false ? T : T | undefined
 
 type ValidatedData<T extends Record<string, Validator<any>>> = {
 	[K in keyof T]: CheckIfOptional<ReturnType<T[K]['parse']>, T[K]['optional']>
