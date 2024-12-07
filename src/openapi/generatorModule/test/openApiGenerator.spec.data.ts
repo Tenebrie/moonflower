@@ -10,7 +10,7 @@ export const manyEndpointsData: EndpointData[] = [
 		requestHeaders: [],
 		rawBody: undefined,
 		objectBody: [],
-		responses: [{ status: 200, signature: 'void' }],
+		responses: [{ status: 200, signature: 'void', contentType: 'application/json' }],
 		name: 'Test endpoint name',
 		summary: 'Test endpoint summary',
 		description: 'Test endpoint description',
@@ -40,7 +40,7 @@ export const manyEndpointsData: EndpointData[] = [
 		requestHeaders: [],
 		rawBody: undefined,
 		objectBody: [],
-		responses: [{ status: 200, signature: 'void' }],
+		responses: [{ status: 200, signature: 'void', contentType: 'application/json' }],
 		name: undefined,
 		summary: undefined,
 		description: undefined,
@@ -70,7 +70,7 @@ export const manyEndpointsData: EndpointData[] = [
 		requestHeaders: [],
 		rawBody: undefined,
 		objectBody: [],
-		responses: [{ status: 200, signature: 'void' }],
+		responses: [{ status: 200, signature: 'void', contentType: 'application/json' }],
 		name: undefined,
 		summary: undefined,
 		description: undefined,
@@ -121,7 +121,7 @@ export const manyEndpointsData: EndpointData[] = [
 		requestHeaders: [],
 		rawBody: undefined,
 		objectBody: [],
-		responses: [{ status: 200, signature: 'void' }],
+		responses: [{ status: 200, signature: 'void', contentType: 'application/json' }],
 		name: undefined,
 		summary: undefined,
 		description: undefined,
@@ -160,7 +160,7 @@ export const manyEndpointsData: EndpointData[] = [
 		requestHeaders: [],
 		rawBody: undefined,
 		objectBody: [],
-		responses: [{ status: 200, signature: 'void' }],
+		responses: [{ status: 200, signature: 'void', contentType: 'application/json' }],
 		name: undefined,
 		summary: undefined,
 		description: undefined,
@@ -233,7 +233,7 @@ export const manyEndpointsData: EndpointData[] = [
 		requestHeaders: [],
 		rawBody: undefined,
 		objectBody: [],
-		responses: [{ status: 200, signature: 'void' }],
+		responses: [{ status: 200, signature: 'void', contentType: 'application/json' }],
 		name: undefined,
 		summary: undefined,
 		description: undefined,
@@ -259,7 +259,7 @@ export const manyEndpointsData: EndpointData[] = [
 		requestHeaders: [],
 		rawBody: undefined,
 		objectBody: [],
-		responses: [{ status: 200, signature: 'void' }],
+		responses: [{ status: 200, signature: 'void', contentType: 'application/json' }],
 		name: undefined,
 		summary: undefined,
 		description: undefined,
@@ -289,7 +289,7 @@ export const manyEndpointsData: EndpointData[] = [
 			optional: false,
 		},
 		objectBody: [],
-		responses: [{ status: 200, signature: 'void' }],
+		responses: [{ status: 200, signature: 'void', contentType: 'application/json' }],
 		name: undefined,
 		summary: undefined,
 		description: undefined,
@@ -319,7 +319,7 @@ export const manyEndpointsData: EndpointData[] = [
 			optional: false,
 		},
 		objectBody: [],
-		responses: [{ status: 200, signature: 'void' }],
+		responses: [{ status: 200, signature: 'void', contentType: 'application/json' }],
 		name: undefined,
 		summary: undefined,
 		description: undefined,
@@ -349,7 +349,7 @@ export const manyEndpointsData: EndpointData[] = [
 			optional: true,
 		},
 		objectBody: [],
-		responses: [{ status: 200, signature: 'void' }],
+		responses: [{ status: 200, signature: 'void', contentType: 'application/json' }],
 		name: undefined,
 		summary: undefined,
 		description: undefined,
@@ -363,7 +363,7 @@ export const manyEndpointsData: EndpointData[] = [
 		requestHeaders: [],
 		rawBody: { signature: 'boolean', optional: true },
 		objectBody: [],
-		responses: [{ status: 200, signature: 'void' }],
+		responses: [{ status: 200, signature: 'void', contentType: 'application/json' }],
 		name: undefined,
 		summary: undefined,
 		description: undefined,
@@ -389,7 +389,7 @@ export const manyEndpointsData: EndpointData[] = [
 			},
 			{ identifier: 'thirdParam', signature: 'number', optional: true },
 		],
-		responses: [{ status: 200, signature: 'void' }],
+		responses: [{ status: 200, signature: 'void', contentType: 'application/json' }],
 		name: undefined,
 		summary: undefined,
 		description: undefined,
@@ -415,7 +415,7 @@ export const manyEndpointsData: EndpointData[] = [
 			},
 			{ identifier: 'thirdParam', signature: 'number', optional: true },
 		],
-		responses: [{ status: 200, signature: 'void' }],
+		responses: [{ status: 200, signature: 'void', contentType: 'application/json' }],
 		name: undefined,
 		summary: undefined,
 		description: undefined,
@@ -441,7 +441,7 @@ export const manyEndpointsData: EndpointData[] = [
 			},
 			{ identifier: 'thirdParam', signature: 'number', optional: true },
 		],
-		responses: [{ status: 200, signature: 'void' }],
+		responses: [{ status: 200, signature: 'void', contentType: 'application/json' }],
 		name: undefined,
 		summary: undefined,
 		description: undefined,
@@ -455,7 +455,7 @@ export const manyEndpointsData: EndpointData[] = [
 		requestHeaders: [],
 		rawBody: undefined,
 		objectBody: [],
-		responses: [{ status: 200, signature: 'string' }],
+		responses: [{ status: 200, signature: 'string', contentType: 'application/json' }],
 		name: undefined,
 		summary: undefined,
 		description: undefined,
@@ -470,9 +470,9 @@ export const manyEndpointsData: EndpointData[] = [
 		rawBody: undefined,
 		objectBody: [],
 		responses: [
-			{ status: 200, signature: 'boolean' },
-			{ status: 200, signature: 'string' },
-			{ status: 200, signature: 'number' },
+			{ status: 200, signature: 'boolean', contentType: 'application/json' },
+			{ status: 200, signature: 'string', contentType: 'application/json' },
+			{ status: 200, signature: 'number', contentType: 'application/json' },
 		],
 		name: undefined,
 		summary: undefined,
@@ -490,6 +490,7 @@ export const manyEndpointsData: EndpointData[] = [
 		responses: [
 			{
 				status: 200,
+				contentType: 'application/json',
 				signature: [
 					{
 						role: 'property',
@@ -522,6 +523,7 @@ export const manyEndpointsData: EndpointData[] = [
 		responses: [
 			{
 				status: 200,
+				contentType: 'application/json',
 				signature: [
 					{
 						role: 'property',
@@ -554,6 +556,7 @@ export const manyEndpointsData: EndpointData[] = [
 		responses: [
 			{
 				status: 200,
+				contentType: 'application/json',
 				signature: [
 					{
 						role: 'property',
@@ -602,6 +605,7 @@ export const manyEndpointsData: EndpointData[] = [
 		responses: [
 			{
 				status: 200,
+				contentType: 'application/json',
 				signature: [
 					{
 						role: 'property',
@@ -640,6 +644,7 @@ export const manyEndpointsData: EndpointData[] = [
 		responses: [
 			{
 				status: 200,
+				contentType: 'application/json',
 				signature: [
 					{
 						role: 'property',
@@ -690,6 +695,7 @@ export const manyEndpointsData: EndpointData[] = [
 		responses: [
 			{
 				status: 200,
+				contentType: 'application/json',
 				signature: [
 					{
 						role: 'property',
@@ -701,6 +707,7 @@ export const manyEndpointsData: EndpointData[] = [
 			},
 			{
 				status: 200,
+				contentType: 'application/json',
 				signature: [
 					{
 						role: 'property',
@@ -736,7 +743,7 @@ export const manyEndpointsData: EndpointData[] = [
 		requestHeaders: [],
 		rawBody: undefined,
 		objectBody: [],
-		responses: [{ status: 200, signature: 'object' }],
+		responses: [{ status: 200, signature: 'object', contentType: 'application/json' }],
 		name: undefined,
 		summary: undefined,
 		description: undefined,
@@ -750,7 +757,7 @@ export const manyEndpointsData: EndpointData[] = [
 		requestHeaders: [],
 		rawBody: undefined,
 		objectBody: [],
-		responses: [{ status: 204, signature: 'void' }],
+		responses: [{ status: 204, signature: 'void', contentType: 'application/json' }],
 		name: undefined,
 		summary: undefined,
 		description: undefined,

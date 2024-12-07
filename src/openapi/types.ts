@@ -19,13 +19,14 @@ export type PathDefinition = {
 		string,
 		{
 			description: string
-			content?: {
-				'application/json': {
+			content?: Record<
+				string,
+				{
 					schema: {
 						oneOf: SchemaType[]
 					}
 				}
-			}
+			>
 		}
 	>
 }
@@ -80,6 +81,7 @@ export type EndpointData = {
 	responses: {
 		status: number
 		signature: string | ShapeOfType[]
+		contentType: string
 		description?: string
 		errorMessage?: string
 	}[]

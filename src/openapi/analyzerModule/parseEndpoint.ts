@@ -262,11 +262,53 @@ const parseRequestResponse = (node: Node<ts.Node>): EndpointData['responses'] =>
 
 	const responseType = getProperTypeShape(actualType, node)
 
+	return parseResponseTypes(responseType)
+}
+
+const parseResponseTypes = (
+	responseType: ReturnType<typeof getProperTypeShape>
+): EndpointData['responses'] => {
 	// TODO: Add support for response descriptions and errors
 	if (typeof responseType === 'string') {
 		return [
 			{
 				status: responseType === 'void' || responseType === 'null' ? 204 : 200,
+				contentType: 'text/plain',
+				signature: responseType,
+				description: '',
+				errorMessage: '',
+			},
+		]
+	}
+
+	if (responseType[0].role === 'union_entry' || responseType[0].role === 'literal_string') {
+		return parseResponseTypes(responseType[0].shape)
+	}
+
+	// Response type is a useReturnValue hook
+	if (responseType[0].role === 'property' && responseType[0].identifier === '_isUseReturnValue') {
+		const status = (() => {
+			const property = responseType.find(
+				(response) => response.role === 'property' && response.identifier === 'status'
+			)?.shape
+			if (!property || typeof property === 'string' || typeof property[0].shape !== 'string') {
+				throw new Error('Invalid useReturnValue hook')
+			}
+			return parseInt(property[0].shape)
+		})()
+		const contentType = (() => {
+			const property = responseType.find(
+				(response) => response.role === 'property' && response.identifier === 'contentType'
+			)?.shape
+			if (!property || typeof property === 'string' || typeof property[0].shape !== 'string') {
+				throw new Error('Invalid useReturnValue hook')
+			}
+			return property[0].shape
+		})()
+		return [
+			{
+				status,
+				contentType,
 				signature: responseType,
 				description: '',
 				errorMessage: '',
@@ -279,6 +321,7 @@ const parseRequestResponse = (node: Node<ts.Node>): EndpointData['responses'] =>
 			return [
 				{
 					status: responseType[0].shape === 'void' || responseType[0].shape === 'null' ? 204 : 200,
+					contentType: 'application/json',
 					signature: responseType[0].shape,
 					description: '',
 					errorMessage: '',
@@ -286,17 +329,27 @@ const parseRequestResponse = (node: Node<ts.Node>): EndpointData['responses'] =>
 			]
 		}
 
-		return responseType[0].shape.map((unionEntry) => ({
-			status: unionEntry.shape === 'void' || unionEntry.shape === 'null' ? 204 : 200,
-			signature: unionEntry.shape,
-			description: '',
-			errorMessage: '',
-		}))
+		return responseType[0].shape.flatMap((unionEntry) => {
+			return parseResponseTypes([unionEntry])
+		})
+	}
+
+	if (responseType[0].role === 'buffer') {
+		return [
+			{
+				status: 200,
+				contentType: 'application/octet-stream',
+				signature: responseType,
+				description: '',
+				errorMessage: '',
+			},
+		]
 	}
 
 	return [
 		{
 			status: 200,
+			contentType: 'application/json',
 			signature: responseType,
 			description: '',
 			errorMessage: '',

@@ -92,16 +92,19 @@ export const generatePaths = (endpoints: EndpointData[], preferences: ApiDocsPre
 		endpoint.responses.forEach((response) => {
 			const status = String(response.status)
 
-			const existingSchemas = responses[status]?.['content']?.['application/json']['schema']['oneOf'] ?? []
+			const existingSchemas =
+				responses[status]?.['content']?.[response.contentType]?.['schema']['oneOf'] ?? []
 
 			const responseSchema = getSchema(response.signature)
+
 			const content = (() => {
 				if ('type' in responseSchema && (responseSchema.type === 'void' || responseSchema.type === 'null')) {
 					return undefined
 				}
 
 				return {
-					'application/json': {
+					...responses[status]?.['content'],
+					[response.contentType]: {
 						schema: {
 							oneOf: [...existingSchemas, getSchema(response.signature)],
 						},

@@ -4,6 +4,7 @@ export type ShapeOfType =
 	| ShapeOfNumberLiteral
 	| ShapeOfUnion
 	| ShapeOfUnionEntry
+	| ShapeOfBuffer
 	| ShapeOfRecord
 	| ShapeOfArray
 	| ShapeOfRef
@@ -38,6 +39,12 @@ export type ShapeOfUnion = {
 export type ShapeOfUnionEntry = {
 	role: 'union_entry'
 	shape: string | ShapeOfType[]
+	optional: boolean
+}
+
+export type ShapeOfBuffer = {
+	role: 'buffer'
+	shape: string
 	optional: boolean
 }
 

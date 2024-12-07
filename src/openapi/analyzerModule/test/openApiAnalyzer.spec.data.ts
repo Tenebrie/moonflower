@@ -8,6 +8,7 @@ import { usePathParams } from '../../../hooks/usePathParams'
 import { useQueryParams } from '../../../hooks/useQueryParams'
 import { useRequestBody } from '../../../hooks/useRequestBody'
 import { useRequestRawBody } from '../../../hooks/useRequestRawBody'
+import { useReturnValue } from '../../../hooks/useReturnValue'
 import { Router } from '../../../router/Router'
 import {
 	BigIntValidator,
@@ -518,4 +519,34 @@ router.patch('/test/e349c3c6-990b-4d97-9bde-f3bf133d2df7/:id', () => {
 
 router.delete('/test/e349c3c6-990b-4d97-9bde-f3bf133d2df7/:id', () => {
 	/* Empty */
+})
+
+router.get('/test/61ebf020-fe62-426b-8078-43fa0b29635b', () => {
+	return 'foo'
+})
+
+router.get('/test/5a39c1ff-5d17-4e9e-ad4b-56736bb01f67', () => {
+	return Buffer.from('foo')
+})
+
+router.get('/test/a47c9a37-a6cb-45bd-9460-e58562f179d4', () => {
+	return {
+		value: 'foo',
+		contentType: 'application/contentTypeThatIsNotRead',
+	}
+})
+
+router.get('/test/81202d25-c5ef-44f2-be20-f1442f25540d', () => {
+	return useReturnValue('foo', 418, 'application/customContentType')
+})
+
+router.get('/test/2ec01787-13d0-4512-9cf3-468f409508b7', () => {
+	if (Math.random() > 0.5) {
+		return useReturnValue('foo', 418, 'application/customContentType')
+	} else if (Math.random() > 0.5) {
+		return 'foo'
+	}
+	return {
+		value: 'foo',
+	}
 })

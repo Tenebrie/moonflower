@@ -749,6 +749,7 @@ describe('OpenApi Analyzer', () => {
 			it('parses array return type correctly', () => {
 				const endpoint = analyzeEndpointById('e3659429-1a05-4590-a5a6-dc80a30878e6')
 
+				expect(endpoint.responses[0].contentType).toEqual('application/json')
 				expect(endpoint.responses[0].status).toEqual(200)
 				expect(endpoint.responses[0].signature).toEqual([
 					{
@@ -944,6 +945,36 @@ describe('OpenApi Analyzer', () => {
 					},
 				])
 				expect(endpoint.responses.length).toEqual(1)
+			})
+
+			it('handles content type of string', () => {
+				const endpoint = analyzeEndpointById('61ebf020-fe62-426b-8078-43fa0b29635b')
+				expect(endpoint.responses[0].status).toEqual(200)
+				expect(endpoint.responses[0].contentType).toEqual('text/plain')
+			})
+			it('handles content type of Buffer object', () => {
+				const endpoint = analyzeEndpointById('5a39c1ff-5d17-4e9e-ad4b-56736bb01f67')
+				expect(endpoint.responses[0].status).toEqual(200)
+				expect(endpoint.responses[0].contentType).toEqual('application/octet-stream')
+			})
+			it('handles content type of normal object', () => {
+				const endpoint = analyzeEndpointById('a47c9a37-a6cb-45bd-9460-e58562f179d4')
+				expect(endpoint.responses[0].status).toEqual(200)
+				expect(endpoint.responses[0].contentType).toEqual('application/json')
+			})
+			it('handles content type of useReturnValue', () => {
+				const endpoint = analyzeEndpointById('81202d25-c5ef-44f2-be20-f1442f25540d')
+				expect(endpoint.responses[0].status).toEqual(418)
+				expect(endpoint.responses[0].contentType).toEqual('application/customContentType')
+			})
+			it('handles content type of a complex union type', () => {
+				const endpoint = analyzeEndpointById('2ec01787-13d0-4512-9cf3-468f409508b7')
+				expect(endpoint.responses[0].status).toEqual(200)
+				expect(endpoint.responses[0].contentType).toEqual('text/plain')
+				expect(endpoint.responses[1].status).toEqual(418)
+				expect(endpoint.responses[1].contentType).toEqual('application/customContentType')
+				expect(endpoint.responses[2].status).toEqual(200)
+				expect(endpoint.responses[2].contentType).toEqual('application/json')
 			})
 		})
 

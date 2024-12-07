@@ -4,7 +4,7 @@ import Koa from 'koa'
 
 import { OpenApiManager } from '../openapi/manager/OpenApiManager'
 import { ExtractedRequestParams } from '../utils/TypeUtils'
-import { responseValueToJson } from './responseValueToJson'
+import { parseEndpointReturnValue } from './parseEndpointReturnValue'
 
 type Props = {
 	skipOpenApiAnalysis: boolean
@@ -46,10 +46,11 @@ export class Router<StateT = Koa.DefaultState, ContextT = Koa.DefaultContext> {
 		callback: KoaRouter.Middleware<StateT, ContextT & ExtractedRequestParams<P>>
 	) {
 		this.koaRouter.get(path, async (ctx) => {
-			ctx.set('Content-Type', 'application/json; charset=utf-8')
 			// @ts-ignore
 			const responseValue = await callback(ctx, undefined)
-			ctx.body = responseValueToJson(responseValue)
+			const { value, contentType } = parseEndpointReturnValue(responseValue)
+			ctx.body = value
+			ctx.set('Content-Type', contentType)
 		})
 		return this
 	}
@@ -59,10 +60,11 @@ export class Router<StateT = Koa.DefaultState, ContextT = Koa.DefaultContext> {
 		callback: KoaRouter.Middleware<StateT, ContextT & ExtractedRequestParams<P>>
 	) {
 		this.koaRouter.post(path, async (ctx) => {
-			ctx.set('Content-Type', 'application/json; charset=utf-8')
 			// @ts-ignore
 			const responseValue = await callback(ctx, undefined)
-			ctx.body = responseValueToJson(responseValue)
+			const { value, contentType } = parseEndpointReturnValue(responseValue)
+			ctx.body = value
+			ctx.set('Content-Type', contentType)
 		})
 		return this
 	}
@@ -72,10 +74,11 @@ export class Router<StateT = Koa.DefaultState, ContextT = Koa.DefaultContext> {
 		callback: KoaRouter.Middleware<StateT, ContextT & ExtractedRequestParams<P>>
 	) {
 		this.koaRouter.put(path, async (ctx) => {
-			ctx.set('Content-Type', 'application/json; charset=utf-8')
 			// @ts-ignore
 			const responseValue = await callback(ctx, undefined)
-			ctx.body = responseValueToJson(responseValue)
+			const { value, contentType } = parseEndpointReturnValue(responseValue)
+			ctx.body = value
+			ctx.set('Content-Type', contentType)
 		})
 		return this
 	}
@@ -85,10 +88,11 @@ export class Router<StateT = Koa.DefaultState, ContextT = Koa.DefaultContext> {
 		callback: KoaRouter.Middleware<StateT, ContextT & ExtractedRequestParams<P>>
 	) {
 		this.koaRouter.delete(path, async (ctx) => {
-			ctx.set('Content-Type', 'application/json; charset=utf-8')
 			// @ts-ignore
 			const responseValue = await callback(ctx, undefined)
-			ctx.body = responseValueToJson(responseValue)
+			const { value, contentType } = parseEndpointReturnValue(responseValue)
+			ctx.body = value
+			ctx.set('Content-Type', contentType)
 		})
 		return this
 	}
@@ -98,10 +102,11 @@ export class Router<StateT = Koa.DefaultState, ContextT = Koa.DefaultContext> {
 		callback: KoaRouter.Middleware<StateT, ContextT & ExtractedRequestParams<P>>
 	) {
 		this.koaRouter.del(path, async (ctx) => {
-			ctx.set('Content-Type', 'application/json; charset=utf-8')
 			// @ts-ignore
 			const responseValue = await callback(ctx, undefined)
-			ctx.body = responseValueToJson(responseValue)
+			const { value, contentType } = parseEndpointReturnValue(responseValue)
+			ctx.body = value
+			ctx.set('Content-Type', contentType)
 		})
 		return this
 	}
@@ -111,10 +116,11 @@ export class Router<StateT = Koa.DefaultState, ContextT = Koa.DefaultContext> {
 		callback: KoaRouter.Middleware<StateT, ContextT & ExtractedRequestParams<P>>
 	) {
 		this.koaRouter.patch(path, async (ctx) => {
-			ctx.set('Content-Type', 'application/json; charset=utf-8')
 			// @ts-ignore
 			const responseValue = await callback(ctx, undefined)
-			ctx.body = responseValueToJson(responseValue)
+			const { value, contentType } = parseEndpointReturnValue(responseValue)
+			ctx.body = value
+			ctx.set('Content-Type', contentType)
 		})
 		return this
 	}

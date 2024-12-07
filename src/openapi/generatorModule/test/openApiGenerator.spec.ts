@@ -77,6 +77,7 @@ describe('OpenApi Generator', () => {
 					{
 						status: 204,
 						signature: 'void',
+						contentType: 'application/json',
 					},
 				],
 			},
@@ -94,6 +95,7 @@ describe('OpenApi Generator', () => {
 					{
 						status: 200,
 						signature: 'bigint',
+						contentType: 'application/json',
 					},
 				],
 			},
@@ -121,6 +123,7 @@ describe('OpenApi Generator', () => {
 				responses: [
 					{
 						status: 200,
+						contentType: 'application/json',
 						signature: [
 							{
 								role: 'record',
@@ -179,6 +182,7 @@ describe('OpenApi Generator', () => {
 				responses: [
 					{
 						status: 200,
+						contentType: 'application/json',
 						signature: [
 							{
 								role: 'property',
@@ -225,6 +229,7 @@ describe('OpenApi Generator', () => {
 				responses: [
 					{
 						status: 200,
+						contentType: 'application/json',
 						signature: [
 							{
 								role: 'array',
@@ -270,6 +275,7 @@ describe('OpenApi Generator', () => {
 				responses: [
 					{
 						status: 200,
+						contentType: 'application/json',
 						signature: [
 							{
 								identifier: 'foo',
@@ -316,6 +322,7 @@ describe('OpenApi Generator', () => {
 				responses: [
 					{
 						status: 200,
+						contentType: 'application/json',
 						signature: [
 							{
 								role: 'union',
@@ -369,6 +376,7 @@ describe('OpenApi Generator', () => {
 				responses: [
 					{
 						status: 200,
+						contentType: 'application/json',
 						signature: [{ role: 'literal_string', shape: 'hello world', optional: false }],
 					},
 				],
@@ -496,6 +504,7 @@ describe('OpenApi Generator', () => {
 				responses: [
 					{
 						status: 200,
+						contentType: 'application/json',
 						signature: 'string',
 						description: 'Test description',
 					},
@@ -730,6 +739,7 @@ describe('OpenApi Generator', () => {
 				responses: [
 					{
 						status: 200,
+						contentType: 'application/json',
 						signature: [
 							{
 								identifier: 'foo',
@@ -778,6 +788,158 @@ describe('OpenApi Generator', () => {
 			parameters: [],
 			requestBody: undefined,
 			responses: {},
+		})
+	})
+
+	describe('responses with multiple content types', () => {
+		it('respects contentType in single response', () => {
+			const manager = createManagerWithEndpoints([
+				{
+					...minimalEndpointData,
+					responses: [
+						{
+							status: 200,
+							contentType: 'text/plain',
+							signature: 'string',
+						},
+					],
+				},
+			])
+			const spec = generateOpenApiSpec(manager)
+
+			expect(spec.paths['/test/path'].get?.responses[200].content).toEqual({
+				'text/plain': {
+					schema: {
+						oneOf: [{ type: 'string' }],
+					},
+				},
+			})
+		})
+
+		it('includes multiple responses with different content types', () => {
+			const manager = createManagerWithEndpoints([
+				{
+					...minimalEndpointData,
+					responses: [
+						{
+							status: 200,
+							contentType: 'text/plain',
+							signature: 'string',
+						},
+						{
+							status: 200,
+							contentType: 'application/json',
+							signature: 'string',
+						},
+						{
+							status: 200,
+							contentType: 'content/custom',
+							signature: 'string',
+						},
+					],
+				},
+			])
+			const spec = generateOpenApiSpec(manager)
+
+			expect(spec.paths['/test/path'].get?.responses[200].content).toEqual({
+				'text/plain': {
+					schema: {
+						oneOf: [{ type: 'string' }],
+					},
+				},
+				'application/json': {
+					schema: {
+						oneOf: [{ type: 'string' }],
+					},
+				},
+				'content/custom': {
+					schema: {
+						oneOf: [{ type: 'string' }],
+					},
+				},
+			})
+		})
+
+		it('combines responses with the same content type and status code', () => {
+			const manager = createManagerWithEndpoints([
+				{
+					...minimalEndpointData,
+					responses: [
+						{
+							status: 200,
+							contentType: 'text/plain',
+							signature: 'number',
+						},
+						{
+							status: 200,
+							contentType: 'text/plain',
+							signature: 'string',
+						},
+						{
+							status: 200,
+							contentType: 'text/plain',
+							signature: 'boolean',
+						},
+					],
+				},
+			])
+			const spec = generateOpenApiSpec(manager)
+
+			expect(spec.paths['/test/path'].get?.responses[200].content).toEqual({
+				'text/plain': {
+					schema: {
+						oneOf: [{ type: 'number' }, { type: 'string' }, { type: 'boolean' }],
+					},
+				},
+			})
+		})
+
+		it('keeps content types separate for different status codes', () => {
+			const manager = createManagerWithEndpoints([
+				{
+					...minimalEndpointData,
+					responses: [
+						{
+							status: 200,
+							contentType: 'text/plain',
+							signature: 'number',
+						},
+						{
+							status: 204,
+							contentType: 'text/plain',
+							signature: 'string',
+						},
+						{
+							status: 418,
+							contentType: 'text/plain',
+							signature: 'boolean',
+						},
+					],
+				},
+			])
+			const spec = generateOpenApiSpec(manager)
+
+			expect(spec.paths['/test/path'].get?.responses[200].content).toEqual({
+				'text/plain': {
+					schema: {
+						oneOf: [{ type: 'number' }],
+					},
+				},
+			})
+			expect(spec.paths['/test/path'].get?.responses[204].content).toEqual({
+				'text/plain': {
+					schema: {
+						oneOf: [{ type: 'string' }],
+					},
+				},
+			})
+			expect(spec.paths['/test/path'].get?.responses[418].content).toEqual({
+				'text/plain': {
+					schema: {
+						oneOf: [{ type: 'boolean' }],
+					},
+				},
+			})
 		})
 	})
 })

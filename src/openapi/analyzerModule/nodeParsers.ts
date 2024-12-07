@@ -522,6 +522,16 @@ export const getProperTypeShape = (
 		]
 	}
 
+	if (type.isObject() && type.getText() === 'Buffer') {
+		return [
+			{
+				role: 'buffer' as const,
+				shape: 'buffer',
+				optional: false,
+			},
+		]
+	}
+
 	if (type.isObject() && type.getProperties().length === 0) {
 		const targetType = type.getAliasTypeArguments()[1]
 		return [
