@@ -4,6 +4,7 @@ import {
 	NonEmptyStringValidator,
 	UnauthorizedError,
 	useQueryParams,
+	useReturnValue,
 } from '..'
 import { Router as RenamedRouter } from '../router/Router'
 
@@ -65,6 +66,14 @@ myRouter.get('/test/get/bigint', () => {
 	return {
 		foo: BigInt(100),
 	}
+})
+
+myRouter.get('/test/get/useReturnValue', () => {
+	return useReturnValue('foo', 418, 'text/custom')
+})
+
+myRouter.get('/test/get/useReturnValue/buffer', () => {
+	return useReturnValue(Buffer.from('foo'), 418, 'text/custom')
 })
 
 myRouter.get('/test/get/middleware-data', (ctx) => {

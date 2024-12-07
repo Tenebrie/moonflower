@@ -81,6 +81,20 @@ describe('TestAppRouter', () => {
 		expect(response.text).toBe(JSON.stringify({ foo: '100' }))
 	})
 
+	it('handles useReturnValue return value correctly', async () => {
+		const response = await request(app.callback()).get('/test/get/useReturnValue')
+		expect(response.text).toBe('foo')
+		expect(response.status).toBe(418)
+		expect(response.header['content-type']).toEqual('text/custom')
+	})
+
+	it('handles useReturnValue binary return value correctly', async () => {
+		const response = await request(app.callback()).get('/test/get/useReturnValue')
+		expect(response.text).toBe('foo')
+		expect(response.status).toBe(418)
+		expect(response.header['content-type']).toEqual('text/custom')
+	})
+
 	it('includes middleware data from context', async () => {
 		const response = await request(app.callback()).get('/test/get/middleware-data')
 		expect(response.status).toBe(200)

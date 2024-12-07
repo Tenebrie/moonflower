@@ -20,6 +20,20 @@ export class Router<StateT = Koa.DefaultState, ContextT = Koa.DefaultContext> {
 		}
 	}
 
+	private async sendResponseValue<P extends string>(
+		ctx: Parameters<Parameters<KoaRouter['get']>[1]>[0],
+		callback: KoaRouter.Middleware<StateT, ContextT & ExtractedRequestParams<P>>
+	) {
+		// @ts-ignore
+		const responseValue = await callback(ctx, undefined)
+		const { value, status, contentType } = parseEndpointReturnValue(responseValue)
+		ctx.body = value
+		if (status !== 'unset') {
+			ctx.status = status
+		}
+		ctx.set('Content-Type', contentType)
+	}
+
 	public use(...middleware: Array<KoaRouter.Middleware<StateT, ContextT>>) {
 		// @ts-ignore
 		this.koaRouter.use(...middleware)
@@ -46,11 +60,7 @@ export class Router<StateT = Koa.DefaultState, ContextT = Koa.DefaultContext> {
 		callback: KoaRouter.Middleware<StateT, ContextT & ExtractedRequestParams<P>>
 	) {
 		this.koaRouter.get(path, async (ctx) => {
-			// @ts-ignore
-			const responseValue = await callback(ctx, undefined)
-			const { value, contentType } = parseEndpointReturnValue(responseValue)
-			ctx.body = value
-			ctx.set('Content-Type', contentType)
+			await this.sendResponseValue(ctx, callback)
 		})
 		return this
 	}
@@ -60,11 +70,7 @@ export class Router<StateT = Koa.DefaultState, ContextT = Koa.DefaultContext> {
 		callback: KoaRouter.Middleware<StateT, ContextT & ExtractedRequestParams<P>>
 	) {
 		this.koaRouter.post(path, async (ctx) => {
-			// @ts-ignore
-			const responseValue = await callback(ctx, undefined)
-			const { value, contentType } = parseEndpointReturnValue(responseValue)
-			ctx.body = value
-			ctx.set('Content-Type', contentType)
+			await this.sendResponseValue(ctx, callback)
 		})
 		return this
 	}
@@ -74,11 +80,7 @@ export class Router<StateT = Koa.DefaultState, ContextT = Koa.DefaultContext> {
 		callback: KoaRouter.Middleware<StateT, ContextT & ExtractedRequestParams<P>>
 	) {
 		this.koaRouter.put(path, async (ctx) => {
-			// @ts-ignore
-			const responseValue = await callback(ctx, undefined)
-			const { value, contentType } = parseEndpointReturnValue(responseValue)
-			ctx.body = value
-			ctx.set('Content-Type', contentType)
+			await this.sendResponseValue(ctx, callback)
 		})
 		return this
 	}
@@ -88,11 +90,7 @@ export class Router<StateT = Koa.DefaultState, ContextT = Koa.DefaultContext> {
 		callback: KoaRouter.Middleware<StateT, ContextT & ExtractedRequestParams<P>>
 	) {
 		this.koaRouter.delete(path, async (ctx) => {
-			// @ts-ignore
-			const responseValue = await callback(ctx, undefined)
-			const { value, contentType } = parseEndpointReturnValue(responseValue)
-			ctx.body = value
-			ctx.set('Content-Type', contentType)
+			await this.sendResponseValue(ctx, callback)
 		})
 		return this
 	}
@@ -102,11 +100,7 @@ export class Router<StateT = Koa.DefaultState, ContextT = Koa.DefaultContext> {
 		callback: KoaRouter.Middleware<StateT, ContextT & ExtractedRequestParams<P>>
 	) {
 		this.koaRouter.del(path, async (ctx) => {
-			// @ts-ignore
-			const responseValue = await callback(ctx, undefined)
-			const { value, contentType } = parseEndpointReturnValue(responseValue)
-			ctx.body = value
-			ctx.set('Content-Type', contentType)
+			await this.sendResponseValue(ctx, callback)
 		})
 		return this
 	}
@@ -116,11 +110,7 @@ export class Router<StateT = Koa.DefaultState, ContextT = Koa.DefaultContext> {
 		callback: KoaRouter.Middleware<StateT, ContextT & ExtractedRequestParams<P>>
 	) {
 		this.koaRouter.patch(path, async (ctx) => {
-			// @ts-ignore
-			const responseValue = await callback(ctx, undefined)
-			const { value, contentType } = parseEndpointReturnValue(responseValue)
-			ctx.body = value
-			ctx.set('Content-Type', contentType)
+			await this.sendResponseValue(ctx, callback)
 		})
 		return this
 	}
