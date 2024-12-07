@@ -791,6 +791,35 @@ describe('OpenApi Generator', () => {
 		})
 	})
 
+	it('handles buffer role correctly', () => {
+		const manager = createManagerWithEndpoints([
+			{
+				...minimalEndpointData,
+				responses: [
+					{
+						status: 200,
+						contentType: 'binary/octet-stream',
+						signature: [{ role: 'buffer', shape: 'buffer', optional: false }],
+					},
+				],
+			},
+		])
+		const spec = generateOpenApiSpec(manager)
+
+		expect(spec.paths['/test/path'].get?.responses[200].content).toEqual({
+			'binary/octet-stream': {
+				schema: {
+					oneOf: [
+						{
+							type: 'string',
+							format: 'binary',
+						},
+					],
+				},
+			},
+		})
+	})
+
 	describe('responses with multiple content types', () => {
 		it('respects contentType in single response', () => {
 			const manager = createManagerWithEndpoints([

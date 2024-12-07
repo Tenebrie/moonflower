@@ -143,6 +143,14 @@ export const getSchema = (shape: string | ShapeOfType[]): SchemaType => {
 		}
 	}
 
+	const isBuffer = shape[0].role === 'buffer'
+	if (isBuffer) {
+		return {
+			type: 'string',
+			format: 'binary',
+		}
+	}
+
 	return {
 		type: 'unknown_21',
 	}
