@@ -45,6 +45,21 @@ describe('useHeaderParams', () => {
 		expect(params.stringHeader).toEqual('test_string')
 	})
 
+	it('parses capital letters correctly', () => {
+		const ctx = mockContextHeaders(mockContext(), {
+			'session-id': 'test_string',
+			'even-a-longer-name': 'test_string',
+		})
+
+		const params = useHeaderParams(ctx, {
+			['Session-ID']: StringValidator,
+			['Even-A-Longer-Name']: StringValidator,
+		})
+
+		expect(params.sessionID).toEqual('test_string')
+		expect(params.evenALongerName).toEqual('test_string')
+	})
+
 	it('passes validation on valid parameter', () => {
 		const ctx = mockContextHeaders(mockContext(), {
 			'test-header': '12',
