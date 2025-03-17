@@ -22,7 +22,7 @@ export const mockContext = <State = Koa.DefaultState, Context = MockContext>() =
 export const mockContextPath = <Context extends Koa.ParameterizedContext, Path extends string>(
 	ctx: Context,
 	path: Path,
-	params: Record<string, string>
+	params: Record<string, string>,
 ) => {
 	const typedContext = ctx as Context & { params: any } & ExtractedRequestParams<Path>
 	ctx.request.path = path
@@ -32,7 +32,7 @@ export const mockContextPath = <Context extends Koa.ParameterizedContext, Path e
 
 export const mockContextQuery = <Context extends Koa.ParameterizedContext>(
 	ctx: Context,
-	params: Record<string, string>
+	params: Record<string, string>,
 ) => {
 	ctx.query = params
 	return ctx
@@ -40,7 +40,7 @@ export const mockContextQuery = <Context extends Koa.ParameterizedContext>(
 
 export const mockContextCookies = <Context extends Koa.ParameterizedContext>(
 	ctx: Context,
-	params: Record<string, string | { value: string; expires?: Date }>
+	params: Record<string, string | { value: string; expires?: Date }>,
 ) => {
 	const cookies = keysOf(params).map((name) => {
 		const cookieData = params[name]
@@ -62,7 +62,7 @@ export const mockContextCookies = <Context extends Koa.ParameterizedContext>(
 
 export const mockContextHeaders = <Context extends Koa.ParameterizedContext>(
 	ctx: Context,
-	params: Record<string, string>
+	params: Record<string, string>,
 ) => {
 	ctx.request.headers = params
 	return ctx
@@ -70,7 +70,7 @@ export const mockContextHeaders = <Context extends Koa.ParameterizedContext>(
 
 export const mockContextBody = <Context extends Koa.ParameterizedContext>(
 	ctx: Context,
-	params: Record<string, string | number | boolean | object | null>
+	params: Record<string, string | number | boolean | object | null>,
 ) => {
 	ctx.request.body = params
 	ctx.request.rawBody = JSON.stringify(params)
@@ -79,7 +79,7 @@ export const mockContextBody = <Context extends Koa.ParameterizedContext>(
 
 export const mockContextRawBody = <Context extends Koa.ParameterizedContext>(
 	ctx: Context,
-	params: string
+	params: string,
 ) => {
 	ctx.request.rawBody = params
 	return ctx

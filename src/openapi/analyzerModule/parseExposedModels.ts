@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Node, SyntaxKind, ts } from 'ts-morph'
 
 import { ExposedModelData } from '../types'

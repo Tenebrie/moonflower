@@ -9,7 +9,10 @@ export interface HttpError {
 export class BaseHttpError extends Error implements HttpError {
 	public reason: string
 
-	constructor(public status: StatusCodes, public message: string) {
+	constructor(
+		public status: StatusCodes,
+		public message: string,
+	) {
 		super(message)
 		this.reason = getReasonPhrase(status)
 	}

@@ -26,7 +26,7 @@ describe('printer utilities', () => {
 				'/test-file',
 				`
 				type Foo = string
-				`
+				`,
 			)
 
 			debugNode(sourceFile.getFirstChild())
@@ -48,7 +48,7 @@ describe('printer utilities', () => {
 				'/test-file',
 				`
 				type Foo = string
-				`
+				`,
 			)
 
 			debugNodes(sourceFile.getChildren())
@@ -70,7 +70,7 @@ describe('printer utilities', () => {
 				'/test-file',
 				`
 				type Foo = string
-				`
+				`,
 			)
 
 			debugNodeChildren(sourceFile.getFirstChild())
@@ -95,8 +95,8 @@ describe('printer utilities', () => {
 						q1: 'qqq',
 						q2: 'www',
 					},
-					{ showHidden: false, depth: null, colors: true }
-				)
+					{ showHidden: false, depth: null, colors: true },
+				),
 			)
 		})
 	})

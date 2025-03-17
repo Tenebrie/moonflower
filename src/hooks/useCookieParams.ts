@@ -13,7 +13,7 @@ type ValidatedData<T extends Record<string, Validator<any>>> = {
 
 export const useCookieParams = <ValidatorsT extends Record<string, Validator<any>>>(
 	ctx: ParameterizedContext,
-	validators: ValidatorsT
+	validators: ValidatorsT,
 ): ValidatedData<ValidatorsT> => {
 	const params = keysOf(validators).map((name) => ({
 		name,
@@ -25,7 +25,7 @@ export const useCookieParams = <ValidatorsT extends Record<string, Validator<any
 
 	if (missingParams.length > 0) {
 		throw new ValidationError(
-			`Missing cookie params: ${missingParams.map((param) => getMissingParamMessage(param)).join(', ')}`
+			`Missing cookie params: ${missingParams.map((param) => getMissingParamMessage(param)).join(', ')}`,
 		)
 	}
 
@@ -47,7 +47,7 @@ export const useCookieParams = <ValidatorsT extends Record<string, Validator<any
 				validated: prevalidatorSuccess && validatorSuccess,
 				parsedValue,
 			}
-		} catch (error) {
+		} catch {
 			return { param, validated: false }
 		}
 	})
@@ -58,7 +58,7 @@ export const useCookieParams = <ValidatorsT extends Record<string, Validator<any
 		throw new ValidationError(
 			`Failed cookie param validation: ${failedValidations
 				.map((result) => getValidationResultMessage(result.param))
-				.join(', ')}`
+				.join(', ')}`,
 		)
 	}
 

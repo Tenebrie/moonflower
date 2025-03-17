@@ -18,6 +18,11 @@ type Props = {
 	tsconfigPath: string
 	sourceFilePaths?: string[]
 	sourceFileDiscovery?: boolean | FileDiscoveryConfig
+	incremental?:
+		| boolean
+		| {
+				cachePath: string
+		  }
 }
 
 type FileDiscoveryConfig = {
@@ -28,7 +33,12 @@ type FileDiscoveryConfig = {
  * @param tsconfigPath Path to tsconfig file relative to project root
  * @param sourceFilePaths Array of router source files relative to project root
  */
-export const prepareOpenApiSpec = ({ tsconfigPath, sourceFilePaths, sourceFileDiscovery }: Props) => {
+export const prepareOpenApiSpec = ({
+	tsconfigPath,
+	sourceFilePaths,
+	sourceFileDiscovery,
+	incremental,
+}: Props) => {
 	const openApiManager = OpenApiManager.getInstance()
 
 	if (openApiManager.isReady()) {
@@ -54,16 +64,20 @@ export const prepareOpenApiSpec = ({ tsconfigPath, sourceFilePaths, sourceFileDi
 				return { discoveredRouterFiles: [], discoveredSourceFiles: [] }
 			}
 
-			return discoverRouterFiles({
+			const t1 = performance.now()
+			const files = discoverRouterFiles({
 				targetPath: typeof sourceFileDiscovery === 'object' ? sourceFileDiscovery.rootPath : '.',
 				tsConfigPath: tsconfigPath,
 			})
+			const t2 = performance.now()
+			console.log(`discoverRouterFiles took ${t2 - t1}ms`)
+			return files
 		})()
 
 		const allSourceFiles = sourceFiles.reduce(
 			(acc, current) =>
 				acc.some((r) => r.getFilePath() === current.getFilePath()) ? acc : acc.concat(current),
-			discoveredSourceFiles
+			discoveredSourceFiles,
 		)
 
 		return { explicitRouters, discoveredRouterFiles, allSourceFiles }
@@ -71,7 +85,7 @@ export const prepareOpenApiSpec = ({ tsconfigPath, sourceFilePaths, sourceFileDi
 
 	const filesToAnalyze = explicitRouters.reduce(
 		(acc, current) => (acc.some((r) => r.fileName === current.fileName) ? acc : acc.concat(current)),
-		discoveredRouterFiles
+		discoveredRouterFiles,
 	)
 
 	const apiHeaders = allSourceFiles
@@ -84,6 +98,20 @@ export const prepareOpenApiSpec = ({ tsconfigPath, sourceFilePaths, sourceFileDi
 	const exposedModels = allSourceFiles.flatMap((file) => analyzeSourceFileExposedModels(file))
 
 	openApiManager.setExposedModels(exposedModels)
+
+	// const t1 = performance.now()
+	// const cachePath = (() => {
+	// 	if (typeof incremental === 'object' && incremental.cachePath) {
+	// 		return incremental.cachePath
+	// 	}
+	// 	return path.resolve(process.cwd(), 'node_modules', '.cache', 'moonflower')
+	// })()
+	// const endpoints = analyzeMultipleSourceFiles(filesToAnalyze, {
+	// 	incremental: incremental !== false,
+	// 	cachePath,
+	// })
+	// const t2 = performance.now()
+	// console.log(`analyzeSourceFileEndpoints took ${t2 - t1}ms TOTAL`)
 
 	const endpoints = filesToAnalyze.flatMap((file) => analyzeSourceFileEndpoints(file))
 
@@ -112,29 +140,61 @@ export const prepareOpenApiSpec = ({ tsconfigPath, sourceFilePaths, sourceFileDi
 	openApiManager.markAsReady()
 }
 
+export const analyzeMultipleSourceFiles = (
+	files: DiscoveredSourceFile[],
+	config: {
+		incremental: boolean
+		cachePath: string
+	},
+	filterEndpointPaths?: string[],
+) => {
+	return files.flatMap((file) => analyzeSourceFileWithCache(file, config, filterEndpointPaths))
+}
+
+export const analyzeSourceFileWithCache = (
+	file: DiscoveredSourceFile,
+	config: {
+		incremental: boolean
+		cachePath: string
+	},
+	filterEndpointPaths?: string[],
+): EndpointData[] => {
+	return analyzeSourceFileEndpoints(file, filterEndpointPaths)
+}
+
 export const analyzeSourceFileEndpoints = (
 	file: DiscoveredSourceFile,
-	filterEndpointPaths?: string[]
+	filterEndpointPaths?: string[],
 ): EndpointData[] => {
 	const endpoints: EndpointData[] = []
+	const operations = ['get', 'post', 'put', 'delete', 'del', 'patch']
+	const joinedOperations = operations.join('|')
+	const t1 = performance.now()
 
 	file.routers.named.forEach((routerName) => {
 		file.sourceFile.forEachChild((node) => {
 			const nodeText = node.getText()
-			const operations = ['get', 'post', 'put', 'delete', 'del', 'patch']
-			const targetNodes = operations.map((op) => `${routerName}.${op}`)
+			// Create a single regex pattern for all operations
+			const routerPattern = new RegExp(`${routerName}\\.(?:${joinedOperations})`)
 
-			if (targetNodes.some((targetNode) => nodeText.includes(targetNode))) {
+			if (routerPattern.test(nodeText)) {
 				const endpointText = node.getFirstDescendantByKind(SyntaxKind.StringLiteral)?.getText() ?? ''
-				const endpointPath = endpointText.substring(1, endpointText.length - 1)
-				if (!!filterEndpointPaths && !filterEndpointPaths.some((path) => endpointPath.includes(path))) {
+				const endpointPath = endpointText.slice(1, -1)
+
+				if (filterEndpointPaths && !filterEndpointPaths.some((path) => endpointPath.includes(path))) {
 					return
 				}
 
+				const t3 = performance.now()
 				endpoints.push(parseEndpoint(node, file.fileName))
+				const t4 = performance.now()
+				// console.log(`parseEndpoint took ${t4 - t3}ms`)
 			}
 		})
 	})
+
+	const t2 = performance.now()
+	// console.log(`analyzeSourceFileEndpoints took ${t2 - t1}ms`)
 	return endpoints
 }
 

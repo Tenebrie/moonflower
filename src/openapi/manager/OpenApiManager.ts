@@ -51,7 +51,7 @@ export class OpenApiManager {
 		private exposedModels: ExposedModelData[],
 		private endpoints: EndpointData[],
 		private preferences: ApiDocsPreferences,
-		private stats: ApiAnalysisStats
+		private stats: ApiAnalysisStats,
 	) {}
 
 	public isReady(): boolean {
@@ -145,7 +145,7 @@ export class OpenApiManager {
 				{
 					discoveredRouterFiles: [],
 					explicitRouterFiles: [],
-				}
+				},
 			)
 		}
 		return OpenApiManager.instance

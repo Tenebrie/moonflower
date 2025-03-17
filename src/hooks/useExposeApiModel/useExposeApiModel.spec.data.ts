@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 import { useExposeApiModel, useExposeNamedApiModels } from './useExposeApiModel'
 
 type FooBarObject = {

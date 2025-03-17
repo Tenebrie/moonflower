@@ -17,7 +17,7 @@ type ValidatedData<
 			callback: ValidatorsT[CleanUpPathParam<ParamsT[K]>]
 		}
 	},
-	ValidatorsT extends Record<TestTemplate[number]['cleaned'], Omit<Validator<any>, 'optional'>>
+	ValidatorsT extends Record<TestTemplate[number]['cleaned'], Omit<Validator<any>, 'optional'>>,
 > = {
 	[K in keyof TestTemplate as K extends `${number}` ? TestTemplate[K]['cleaned'] : never]: CheckIfOptional<
 		ReturnType<TestTemplate[K]['callback']['parse']>,
@@ -34,10 +34,10 @@ export const usePathParams = <
 			callback: ValidatorsT[CleanUpPathParam<ParamsT[K]>]
 		}
 	},
-	ValidatorsT extends Record<CleanUpPathParam<ParamsT[number]>, Omit<Validator<any>, 'optional'>>
+	ValidatorsT extends Record<CleanUpPathParam<ParamsT[number]>, Omit<Validator<any>, 'optional'>>,
 >(
 	ctx: ParameterizedContext & { parsedPathParams: ParamsT },
-	validators: ValidatorsT
+	validators: ValidatorsT,
 ): ValidatedData<ParamsT, TestTemplate, ValidatorsT> => {
 	const params = ctx.params
 	const expectedParams = keysOf(validators).map((name) => ({
@@ -63,7 +63,7 @@ export const usePathParams = <
 				validated: prevalidatorSuccess && validatorSuccess,
 				parsedValue,
 			}
-		} catch (error) {
+		} catch {
 			return { param, validated: false }
 		}
 	})
@@ -74,7 +74,7 @@ export const usePathParams = <
 		throw new ValidationError(
 			`Failed route param validation: ${failedValidations
 				.map((result) => getValidationResultMessage(result.param))
-				.join(', ')}`
+				.join(', ')}`,
 		)
 	}
 

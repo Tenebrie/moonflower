@@ -18,7 +18,7 @@ describe('OpenApi Generator', () => {
 			{
 				discoveredRouterFiles: [],
 				explicitRouterFiles: [],
-			}
+			},
 		)
 	}
 
@@ -36,7 +36,7 @@ describe('OpenApi Generator', () => {
 			{
 				discoveredRouterFiles: [],
 				explicitRouterFiles: [],
-			}
+			},
 		)
 	}
 
@@ -54,7 +54,7 @@ describe('OpenApi Generator', () => {
 			{
 				discoveredRouterFiles: [],
 				explicitRouterFiles: [],
-			}
+			},
 		)
 	}
 
@@ -473,7 +473,7 @@ describe('OpenApi Generator', () => {
 
 		expect(spec.paths['/test/path'].get?.parameters[0].in).toEqual('path')
 		expect(spec.paths['/test/path'].get?.parameters[0].description).toEqual(
-			'(Optional parameter) Test description'
+			'(Optional parameter) Test description',
 		)
 	})
 
@@ -554,7 +554,7 @@ describe('OpenApi Generator', () => {
 						},
 					],
 				},
-			]
+			],
 		)
 		const spec = generateOpenApiSpec(manager)
 

@@ -19,7 +19,7 @@ type ValidatedData<T extends Record<string, Validator<any>>> = {
 
 export const useHeaderParams = <ValidatorsT extends Record<string, Validator<any>>>(
 	ctx: ParameterizedContext,
-	validators: ValidatorsT
+	validators: ValidatorsT,
 ) => {
 	const headers = ctx.headers
 	const params = keysOf(validators).map((name) => ({
@@ -32,7 +32,7 @@ export const useHeaderParams = <ValidatorsT extends Record<string, Validator<any
 
 	if (missingParams.length > 0) {
 		throw new ValidationError(
-			`Missing headers: ${missingParams.map((param) => getMissingParamMessage(param)).join(', ')}`
+			`Missing headers: ${missingParams.map((param) => getMissingParamMessage(param)).join(', ')}`,
 		)
 	}
 
@@ -55,7 +55,7 @@ export const useHeaderParams = <ValidatorsT extends Record<string, Validator<any
 				validated: prevalidatorSuccess && validatorSuccess,
 				parsedValue,
 			}
-		} catch (error) {
+		} catch {
 			return { param, validated: false }
 		}
 	})
@@ -66,7 +66,7 @@ export const useHeaderParams = <ValidatorsT extends Record<string, Validator<any
 		throw new ValidationError(
 			`Failed header validation: ${failedValidations
 				.map((result) => getValidationFailedMessage(result.param))
-				.join(', ')}`
+				.join(', ')}`,
 		)
 	}
 

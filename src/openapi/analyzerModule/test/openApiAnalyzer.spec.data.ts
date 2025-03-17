@@ -227,7 +227,7 @@ router.get('/test/6040cd01-a0c6-4b70-9901-b647f19b19a7', (ctx) => {
 		ctx,
 		RequiredParam<{ foo: string; bar?: number }>({
 			parse: (v) => JSON.parse(String(v)),
-		})
+		}),
 	)
 })
 
@@ -236,7 +236,7 @@ router.get('/test/f3754325-6d9c-42b6-becf-4a9e72bd2c4e', (ctx) => {
 		ctx,
 		RequiredParam({
 			parse: (v) => JSON.parse(String(v)) as { foo: string; bar?: number },
-		})
+		}),
 	)
 })
 
@@ -245,7 +245,7 @@ router.get('/test/1ab973ff-9937-4e2d-b432-ff43a9df42cb', (ctx) => {
 		ctx,
 		OptionalParam({
 			parse: (v) => JSON.parse(String(v)) as { foo: string; bar?: number },
-		})
+		}),
 	)
 })
 
@@ -260,7 +260,7 @@ router.get('/test/54768e53-4094-4e2e-96bf-8891235f264b', (ctx) => {
 			parse: (v) => String(v),
 			description: 'Test description',
 			errorMessage: 'Test error message',
-		})
+		}),
 	)
 })
 
@@ -271,7 +271,7 @@ router.get('/test/87a1470c-3fec-492a-bc4c-ff35fc95524a', (ctx) => {
 			parse: (v) => String(v),
 			description: 'Test description',
 			errorMessage: 'Test error message',
-		})
+		}),
 	)
 })
 
@@ -472,7 +472,7 @@ router.get('/test/39669151-c529-4bcd-86a5-a10de7834104/:foo', (ctx) => {
 			parse: (v) => String(v),
 		}),
 	})
-	foo
+	return foo
 })
 
 type FooBarObject = {

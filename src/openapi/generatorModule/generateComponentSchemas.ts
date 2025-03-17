@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { ExposedModelData } from '../types'
 import { getSchema, SchemaType } from './getSchema'
 

@@ -111,6 +111,8 @@ describe('useRequestBody', () => {
 		// TypeScript level check that type is optional
 		const testValue = undefined as typeof params.testParam
 		expect(testValue).toEqual(undefined)
+
+		params.testParam = 123
 	})
 
 	it('returns nullable type when OptionalParam is used', () => {
@@ -123,6 +125,8 @@ describe('useRequestBody', () => {
 		// TypeScript level check that type is nullable
 		const testValue = null as typeof params.testParam
 		expect(testValue).toEqual(null)
+
+		params.testParam = 123
 	})
 
 	it('fails validation when required parameter is not provided', () => {

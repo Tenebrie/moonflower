@@ -4,7 +4,7 @@ import { UnauthorizedError, ValidationError } from '../../errors/UserFacingError
 
 export const useOptionalAuth = async <UserObject>(
 	ctx: ParameterizedContext,
-	authenticator: (ctx: ParameterizedContext) => UserObject | Promise<UserObject>
+	authenticator: (ctx: ParameterizedContext) => UserObject | Promise<UserObject>,
 ): Promise<UserObject | undefined> => {
 	try {
 		return await authenticator(ctx)

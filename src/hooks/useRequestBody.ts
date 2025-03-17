@@ -24,7 +24,7 @@ type ValidatedData<T extends Record<string, Validator<any>>> = {
  */
 export const useRequestBody = <ValidatorsT extends Record<string, Validator<any>>>(
 	ctx: ParameterizedContext,
-	validators: ValidatorsT
+	validators: ValidatorsT,
 ): ValidatedData<ValidatorsT> => {
 	const providedParams = (ctx.request.body || {}) as Record<string, string | number | boolean | object>
 	const params = keysOf(validators).map((name) => ({
@@ -33,12 +33,12 @@ export const useRequestBody = <ValidatorsT extends Record<string, Validator<any>
 	}))
 
 	const missingParams = params.filter(
-		(param) => providedParams[param.name] === undefined && !validators[param.name].optional
+		(param) => providedParams[param.name] === undefined && !validators[param.name].optional,
 	)
 
 	if (missingParams.length > 0) {
 		throw new ValidationError(
-			`Missing body params: ${missingParams.map((param) => getMissingParamMessage(param)).join(', ')}`
+			`Missing body params: ${missingParams.map((param) => getMissingParamMessage(param)).join(', ')}`,
 		)
 	}
 
@@ -68,7 +68,7 @@ export const useRequestBody = <ValidatorsT extends Record<string, Validator<any>
 				validated: prevalidatorSuccess && validatorSuccess,
 				parsedValue,
 			}
-		} catch (error) {
+		} catch {
 			return { param, validated: false }
 		}
 	})
@@ -79,7 +79,7 @@ export const useRequestBody = <ValidatorsT extends Record<string, Validator<any>
 		throw new ValidationError(
 			`Failed body param validation: ${failedValidations
 				.map((result) => getValidationResultMessage(result.param))
-				.join(', ')}`
+				.join(', ')}`,
 		)
 	}
 

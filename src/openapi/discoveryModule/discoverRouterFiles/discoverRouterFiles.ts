@@ -20,7 +20,7 @@ export const discoverRouterFiles = ({
 	}
 
 	const usersExcludedFiles = (excludedFiles ?? []).map((value) =>
-		typeof value === 'string' ? new RegExp(`${value}`) : value
+		typeof value === 'string' ? new RegExp(`${value}`) : value,
 	)
 	const excludedPrefixes = [/^node_modules/, /^\./, /^dist/].concat(usersExcludedFiles ?? [])
 
@@ -53,9 +53,9 @@ export const discoverRouterFiles = ({
 		})
 		.filter(
 			(
-				file
-			): file is Omit<typeof file, 'sourceFile'> & { sourceFile: NonNullable<typeof file['sourceFile']> } =>
-				!!file.sourceFile
+				file,
+			): file is Omit<typeof file, 'sourceFile'> & { sourceFile: NonNullable<(typeof file)['sourceFile']> } =>
+				!!file.sourceFile,
 		)
 
 	const routersInFiles = allSourceFiles

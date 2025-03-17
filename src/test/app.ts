@@ -28,7 +28,7 @@ app
 	.use(
 		bodyParser({
 			enableTypes: ['text', 'json', 'form'],
-		})
+		}),
 	)
 	.use(TestAppRouter.routes())
 	.use(TestAppRouter.allowedMethods())
@@ -39,5 +39,5 @@ app
 				rootPath: resolve(__dirname, '.'),
 			},
 			sourceFilePaths: ['./src/test/TestAppRouter.ts'],
-		})
+		}),
 	)

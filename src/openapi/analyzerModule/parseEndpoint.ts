@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Node, SyntaxKind, ts } from 'ts-morph'
 
 import { ApiEndpointDocs } from '../../hooks/useApiEndpoint'
@@ -140,7 +139,7 @@ const getHookNode = (
 		| 'useQueryParams'
 		| 'useHeaderParams'
 		| 'useRequestBody'
-		| 'useRequestRawBody'
+		| 'useRequestRawBody',
 ) => {
 	const callExpressions = endpointNode.getDescendantsOfKind(SyntaxKind.CallExpression)
 	const matchingCallExpressions = callExpressions.filter((node) => {
@@ -166,7 +165,7 @@ const parseApiDocumentation = (node: Node<ts.Node>) => {
 	const values = getValuesOfObjectLiteral(objectLiteral).filter((param) => param.value !== null)
 	return values as {
 		identifier: keyof ApiEndpointDocs
-		value: typeof values[number]['value']
+		value: (typeof values)[number]['value']
 	}[]
 }
 
@@ -209,7 +208,9 @@ const parseRequestRawBody = (node: Node<ts.Node>): NonNullable<EndpointData['raw
 		return null
 	}
 	const paramNode = hookNode.getFirstChildByKind(SyntaxKind.SyntaxList)!
-	const valueNode = findNodeImplementation(paramNode.getLastChild()!)
+	const valueNode = findNodeImplementation(
+		paramNode.getLastChild((node) => !node.isKind(SyntaxKind.CommaToken))!,
+	)
 
 	return {
 		signature: getValidatorPropertyShape(valueNode),
@@ -221,7 +222,7 @@ const parseRequestRawBody = (node: Node<ts.Node>): NonNullable<EndpointData['raw
 
 const parseRequestObjectInput = (
 	node: Node<ts.Node>,
-	nodeName: 'useQueryParams' | 'useHeaderParams' | 'useRequestBody'
+	nodeName: 'useQueryParams' | 'useHeaderParams' | 'useRequestBody',
 ): EndpointData['requestQuery'] | EndpointData['objectBody'] => {
 	const hookNode = getHookNode(node, nodeName)
 	if (!hookNode) {
@@ -266,7 +267,7 @@ const parseRequestResponse = (node: Node<ts.Node>): EndpointData['responses'] =>
 }
 
 const parseResponseTypes = (
-	responseType: ReturnType<typeof getProperTypeShape>
+	responseType: ReturnType<typeof getProperTypeShape>,
 ): EndpointData['responses'] => {
 	// TODO: Add support for response descriptions and errors
 	if (typeof responseType === 'string') {
@@ -289,7 +290,7 @@ const parseResponseTypes = (
 	if (responseType[0].role === 'property' && responseType[0].identifier === '_isUseReturnValue') {
 		const status = (() => {
 			const property = responseType.find(
-				(response) => response.role === 'property' && response.identifier === 'status'
+				(response) => response.role === 'property' && response.identifier === 'status',
 			)?.shape
 			if (!property || typeof property === 'string' || typeof property[0].shape !== 'string') {
 				throw new Error('Invalid useReturnValue hook')
@@ -298,7 +299,7 @@ const parseResponseTypes = (
 		})()
 		const contentType = (() => {
 			const property = responseType.find(
-				(response) => response.role === 'property' && response.identifier === 'contentType'
+				(response) => response.role === 'property' && response.identifier === 'contentType',
 			)?.shape
 			if (!property || typeof property === 'string' || typeof property[0].shape !== 'string') {
 				throw new Error('Invalid useReturnValue hook')

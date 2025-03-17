@@ -12,7 +12,7 @@ describe('useRequestRawBody', () => {
 			ctx,
 			RequiredParam<{ foo: string; bar: string }>({
 				parse: (v) => JSON.parse(String(v)),
-			})
+			}),
 		)
 
 		expect(params.foo).toEqual('aaa')
@@ -60,7 +60,7 @@ describe('useRequestRawBody', () => {
 				RequiredParam({
 					parse: (v) => Number(v),
 					validate: (v) => !Number.isNaN(v),
-				})
+				}),
 			)
 		}
 
@@ -76,7 +76,7 @@ describe('useRequestRawBody', () => {
 			RequiredParam({
 				prevalidate: (v) => v === 'valid',
 				parse: (v) => String(v),
-			})
+			}),
 		)
 
 		expect(params).toEqual('valid')
@@ -91,7 +91,7 @@ describe('useRequestRawBody', () => {
 				RequiredParam({
 					prevalidate: (v) => v === 'valid',
 					parse: (v) => String(v),
-				})
+				}),
 			)
 		}
 
@@ -107,7 +107,7 @@ describe('useRequestRawBody', () => {
 				ctx,
 				RequiredParam<{ foo: 'aaa' }>({
 					parse: (v) => JSON.parse(String(v)),
-				})
+				}),
 			)
 		}
 
@@ -126,7 +126,7 @@ describe('useRequestRawBody', () => {
 					parse: (v) => String(v),
 					description: 'Description',
 					errorMessage: 'Error message',
-				})
+				}),
 			)
 		}
 
@@ -144,7 +144,7 @@ describe('useRequestRawBody', () => {
 					prevalidate: (v) => v === 'valid',
 					parse: (v) => String(v),
 					description: 'Description',
-				})
+				}),
 			)
 		}
 

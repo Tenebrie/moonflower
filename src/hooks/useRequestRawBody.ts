@@ -22,7 +22,7 @@ type ValidatedData<T extends Validator<any>> = CheckIfOptional<ReturnType<T['par
  */
 export const useRequestRawBody = <ValidatorT extends Validator<any>>(
 	ctx: ParameterizedContext,
-	validator: ValidatorT
+	validator: ValidatorT,
 ): ValidatedData<ValidatorT> => {
 	const providedBody = ctx.request.rawBody
 	const isOptional = validator.optional
@@ -44,7 +44,7 @@ export const useRequestRawBody = <ValidatorT extends Validator<any>>(
 				validated: prevalidatorSuccess && validatorSuccess,
 				parsedValue,
 			}
-		} catch (error) {
+		} catch {
 			return { validated: false }
 		}
 	})()

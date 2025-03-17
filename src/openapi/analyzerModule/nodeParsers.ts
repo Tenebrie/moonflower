@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
 	Node,
 	PropertyAccessExpression,
@@ -11,6 +10,7 @@ import {
 	TypeReferenceNode,
 } from 'ts-morph'
 
+import { debugNode } from '../../utils/printers'
 import { OpenApiManager } from '../manager/OpenApiManager'
 import { ShapeOfProperty, ShapeOfType, ShapeOfUnionEntry } from './types'
 
@@ -47,7 +47,7 @@ export const findPropertyAssignmentValueNode = (
 		| TypeReferenceNode
 		| PropertySignature
 		| PropertyAccessExpression
-		| ShorthandPropertyAssignment
+		| ShorthandPropertyAssignment,
 ): Node => {
 	const identifierChildren = node.getChildrenOfKind(SyntaxKind.Identifier)
 	if (identifierChildren.length === 2) {
@@ -58,7 +58,7 @@ export const findPropertyAssignmentValueNode = (
 		(child) =>
 			child.getKind() !== SyntaxKind.GreaterThanToken &&
 			child.getKind() !== SyntaxKind.CommaToken &&
-			child.getKind() !== SyntaxKind.SemicolonToken
+			child.getKind() !== SyntaxKind.SemicolonToken,
 	)!
 }
 
@@ -204,7 +204,7 @@ export const getRecursiveNodeShape = (nodeOrReference: Node): ShapeOfType['shape
 }
 
 export const getShapeOfValidatorLiteral = (
-	objectLiteralNode: Node<ts.ObjectLiteralExpression>
+	objectLiteralNode: Node<ts.ObjectLiteralExpression>,
 ): (ShapeOfProperty & { description: string; errorMessage: string })[] => {
 	const syntaxListNode = objectLiteralNode.getFirstDescendantByKind(SyntaxKind.SyntaxList)!
 	const assignmentNodes = syntaxListNode.getChildrenOfKind(SyntaxKind.PropertyAssignment)!
@@ -266,7 +266,7 @@ export const getValidatorPropertyShape = (innerLiteralNode: Node): ShapeOfType['
 	const childCallExpressionNode = innerLiteralNode.getParent()!.getFirstChildByKind(SyntaxKind.CallExpression)
 	if (childCallExpressionNode) {
 		const callExpressionArgument = findNodeImplementation(
-			childCallExpressionNode.getFirstChildByKind(SyntaxKind.SyntaxList)!.getFirstChild()!
+			childCallExpressionNode.getFirstChildByKind(SyntaxKind.SyntaxList)!.getFirstChild()!,
 		)
 
 		// Param is a type reference
@@ -355,7 +355,7 @@ export const getValidatorPropertyOptionality = (node: Node): boolean => {
 
 export const getValidatorPropertyStringValue = (
 	nodeOrReference: Node,
-	name: 'description' | 'errorMessage'
+	name: 'description' | 'errorMessage',
 ): string => {
 	const node = findNodeImplementation(nodeOrReference)
 
@@ -404,7 +404,7 @@ export const getValidatorPropertyStringValue = (
 		const identifier = node.getFirstDescendantByKind(SyntaxKind.Identifier)!
 		if (identifier.getText() === name) {
 			const targetNode = findPropertyAssignmentValueNode(propertySignatureNode).getFirstDescendantByKind(
-				SyntaxKind.StringLiteral
+				SyntaxKind.StringLiteral,
 			)!
 			return targetNode.getLiteralText()
 		}
@@ -425,7 +425,7 @@ const isPromise = (type: Type) => {
 export const getProperTypeShape = (
 	typeOrPromise: Type,
 	atLocation: Node,
-	stack: Type[] = []
+	stack: Type[] = [],
 ): ShapeOfType['shape'] => {
 	const typeName = typeOrPromise.getAliasSymbol()?.getName()
 	if (typeName && OpenApiManager.getInstance().hasExposedModel(typeName)) {
@@ -594,7 +594,7 @@ export const getProperTypeShape = (
 		}))
 
 		const dedupedShapes = unfilteredShapes.filter(
-			(type, index, arr) => !arr.find((dup, dupIndex) => dup.shape === type.shape && dupIndex > index)
+			(type, index, arr) => !arr.find((dup, dupIndex) => dup.shape === type.shape && dupIndex > index),
 		)
 		const isNullable = dedupedShapes.some((shape) => shape.shape === 'undefined')
 		const shapes = dedupedShapes.filter((shape) => shape.shape !== 'undefined')

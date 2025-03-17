@@ -20,7 +20,7 @@ export const discoverRouters = (sourceFile: SourceFile) => {
 
 	const namedRouters = routers.filter((node) => !!node.getFirstAncestorByKind(SyntaxKind.VariableDeclaration))
 	const anonymousRouters = routers.filter(
-		(node) => !!node.getFirstAncestorByKind(SyntaxKind.ExportAssignment)
+		(node) => !!node.getFirstAncestorByKind(SyntaxKind.ExportAssignment),
 	)
 
 	return {
@@ -28,12 +28,12 @@ export const discoverRouters = (sourceFile: SourceFile) => {
 			node
 				.getFirstAncestorByKindOrThrow(SyntaxKind.VariableDeclaration)
 				.getFirstChildByKindOrThrow(SyntaxKind.Identifier)
-				.getText()
+				.getText(),
 		),
 		anonymous: anonymousRouters.map((node) =>
 			node
 				.getFirstAncestorByKindOrThrow(SyntaxKind.ExportAssignment)
-				.getFirstChildByKindOrThrow(SyntaxKind.CallExpression)
+				.getFirstChildByKindOrThrow(SyntaxKind.CallExpression),
 		),
 	}
 }

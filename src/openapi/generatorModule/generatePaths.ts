@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { ApiDocsPreferences } from '../manager/OpenApiManager'
 import { EndpointData, PathDefinition } from '../types'
 import { getSchema } from './getSchema'
@@ -17,6 +16,7 @@ export const generatePaths = (endpoints: EndpointData[], preferences: ApiDocsPre
 
 	const { allowOptionalPathParams } = preferences
 
+	const t1 = performance.now()
 	endpoints.forEach((endpoint) => {
 		const path = endpoint.path
 			.split('/')
@@ -34,7 +34,7 @@ export const generatePaths = (endpoints: EndpointData[], preferences: ApiDocsPre
 			description:
 				param.optional && !allowOptionalPathParams
 					? `(Optional parameter) ${param.description}`
-					: param.description ?? '',
+					: (param.description ?? ''),
 			required: !allowOptionalPathParams || !param.optional,
 			schema: getSchema(param.signature),
 		}))
@@ -136,6 +136,8 @@ export const generatePaths = (endpoints: EndpointData[], preferences: ApiDocsPre
 			[endpoint.method.toLowerCase()]: definition,
 		}
 	})
+	const t2 = performance.now()
+	console.log(`generatePaths took ${t2 - t1}ms`)
 
 	return paths
 }

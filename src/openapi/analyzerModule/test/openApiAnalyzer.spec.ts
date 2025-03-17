@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Project, SyntaxKind } from 'ts-morph'
 
 import { loadTestData } from '../../../utils/loadTestData'
@@ -20,7 +19,7 @@ describe('OpenApi Analyzer', () => {
 					sourceFile: dataFile,
 					routers: discoverRouters(dataFile),
 				},
-				[`/test/${id}`]
+				[`/test/${id}`],
 			)
 			const endpoint = analysisResult.find((endpoint) => endpoint.path.startsWith(`/test/${id}`))
 			if (!endpoint) {
@@ -36,7 +35,7 @@ describe('OpenApi Analyzer', () => {
 					sourceFile: dataFile,
 					routers: discoverRouters(dataFile),
 				},
-				[`/test/${id}`]
+				[`/test/${id}`],
 			)
 			const endpoints = analysisResult.filter((endpoint) => endpoint.path.startsWith(`/test/${id}`))
 			if (endpoints.length === 0) {
@@ -395,6 +394,7 @@ describe('OpenApi Analyzer', () => {
 			it('parses inline useRequestRawBody validator correctly', () => {
 				const endpoint = analyzeEndpointById('6040cd01-a0c6-4b70-9901-b647f19b19a7')
 
+				console.log(endpoint)
 				const body = endpoint.rawBody
 				if (!body) {
 					throw new Error('No body definition found')
@@ -1051,7 +1051,7 @@ describe('OpenApi Analyzer', () => {
 				} & {
 					optional: false;
 				};
-				`
+				`,
 			)
 
 			const node = sourceFile
