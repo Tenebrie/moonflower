@@ -11,11 +11,17 @@ import {
 } from 'ts-morph'
 
 import { Logger } from '../../utils/logger'
-import { debugNode } from '../../utils/printers'
 import { OpenApiManager } from '../manager/OpenApiManager'
 import { ShapeOfProperty, ShapeOfType, ShapeOfUnionEntry } from './types'
 
+const implementationCache = new WeakMap<Node, Node>()
+
 export const findNodeImplementation = (node: Node): Node => {
+	const cached = implementationCache.get(node)
+	if (cached) {
+		return cached
+	}
+
 	if (node.getKind() === SyntaxKind.Identifier) {
 		const implementationNode = node.asKind(SyntaxKind.Identifier)!.getImplementations()[0]?.getNode()
 		if (implementationNode) {
@@ -24,7 +30,9 @@ export const findNodeImplementation = (node: Node): Node => {
 			if (assignmentValueNode === node) {
 				throw new Error('Recursive implementation found')
 			}
-			return findNodeImplementation(assignmentValueNode)
+			const result = findNodeImplementation(assignmentValueNode)
+			implementationCache.set(node, result)
+			return result
 		}
 
 		const definitionNode = node.asKind(SyntaxKind.Identifier)!.getDefinitions()[0]?.getNode()
@@ -34,11 +42,14 @@ export const findNodeImplementation = (node: Node): Node => {
 			if (assignmentValueNode === node) {
 				throw new Error('Recursive implementation found')
 			}
-			return findNodeImplementation(assignmentValueNode)
+			const result = findNodeImplementation(assignmentValueNode)
+			implementationCache.set(node, result)
+			return result
 		}
 		throw new Error('No implementation nor definition available')
 	}
 
+	implementationCache.set(node, node)
 	return node
 }
 
