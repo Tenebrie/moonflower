@@ -22,7 +22,9 @@ export const discoverRouterFiles = ({
 	const usersExcludedFiles = (excludedFiles ?? []).map((value) =>
 		typeof value === 'string' ? new RegExp(`${value}`) : value,
 	)
-	const excludedPrefixes = [/^node_modules/, /^\./, /^dist/].concat(usersExcludedFiles ?? [])
+	const excludedPrefixes = [/^node_modules/, /^\./, /^dist/, /\.d\.ts$/, /\.spec\.ts$/, /\.test\.ts$/].concat(
+		usersExcludedFiles ?? [],
+	)
 
 	const files = fs.readdirSync(targetPath, { recursive: true }).filter((filePath): filePath is string => {
 		if (typeof filePath !== 'string') {
@@ -41,6 +43,7 @@ export const discoverRouterFiles = ({
 
 	const project = new Project({
 		tsConfigFilePath: tsConfigPath,
+		skipFileDependencyResolution: true,
 	})
 
 	const allSourceFiles = files
@@ -72,7 +75,6 @@ export const discoverRouterFiles = ({
 			}
 		})
 		.filter((file): file is NonNullable<typeof file> => file !== null)
-
 	return {
 		discoveredRouterFiles: routersInFiles,
 		discoveredSourceFiles: allSourceFiles.map((file) => file.sourceFile),

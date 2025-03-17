@@ -1037,6 +1037,7 @@ describe('OpenApi Analyzer', () => {
 		beforeAll(() => {
 			project = new Project({
 				useInMemoryFileSystem: true,
+				skipFileDependencyResolution: true,
 			})
 		})
 

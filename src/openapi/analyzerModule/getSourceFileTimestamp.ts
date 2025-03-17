@@ -23,12 +23,15 @@ export function getSourceFileTimestamp(sourceFile: SourceFile, timestampCache: T
 }
 
 function getFileDependencies(sourceFile: SourceFile, timestampCache: TimestampCache): SourceFile[] {
+	const fileName = sourceFile.getFilePath().split('/').pop()
+	if (!fileName) {
+		return []
+	}
+
 	const cacheHit = timestampCache[sourceFile.getFilePath()]
 	if (cacheHit) {
 		return cacheHit.dependencies
 	}
-
-	const fileName = sourceFile.getFilePath().split('/').pop()
 
 	// Initialize cache entry early to prevent circular dependencies
 	timestampCache[sourceFile.getFilePath()] = { dependencies: [] }

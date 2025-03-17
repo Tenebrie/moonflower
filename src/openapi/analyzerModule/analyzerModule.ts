@@ -58,6 +58,7 @@ export const prepareOpenApiSpec = ({
 
 	const project = new Project({
 		tsConfigFilePath: path.resolve(tsconfigPath),
+		skipFileDependencyResolution: true,
 	})
 
 	const { explicitRouters, discoveredRouterFiles, allSourceFiles } = (() => {
