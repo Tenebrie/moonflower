@@ -421,7 +421,7 @@ export const getValidatorPropertyStringValue = (
 	}
 
 	const fileName = node.getSourceFile().getFilePath().split('/').pop()
-	Logger.warn(`[${fileName}] Unknown property string value node ${node.getKindName()}`)
+	Logger.dev(`[${fileName}] Unknown property string value node ${node.getKindName()}`)
 	return 'unknown_25'
 }
 
@@ -649,7 +649,8 @@ const getLiteralValueOfNode = (node: Node): string | string[] | unknown[] => {
 	}
 
 	const fileName = node.getSourceFile().getFilePath().split('/').pop()
-	Logger.warn(`[${fileName}] Unknown literal value node ${node.getKindName()}`)
+	Logger.dev(`[${fileName}] Unknown literal value node ${node.getKindName()}`)
+
 	return 'unknown_6'
 }
 

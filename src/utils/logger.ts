@@ -1,9 +1,10 @@
 const levelToNumber = {
-	debug: 0,
-	info: 1,
-	warn: 2,
-	error: 3,
-	silent: 4,
+	dev: 0,
+	debug: 1,
+	info: 2,
+	warn: 3,
+	error: 4,
+	silent: 5,
 }
 
 const colors = {
@@ -33,10 +34,14 @@ const formatMessage = (level: string, message: string) => {
 
 export const Logger = {
 	_level: levelToNumber.warn,
-	setLevel: (level: 'debug' | 'info' | 'warn' | 'error' | 'silent') => {
+	setLevel: (level: 'dev' | 'debug' | 'info' | 'warn' | 'error' | 'silent') => {
 		Logger._level = levelToNumber[level]
 	},
 
+	dev: (message: string, ...args: unknown[]) => {
+		if (Logger._level > levelToNumber.dev) return
+		console.debug(formatMessage('dev', message), ...args)
+	},
 	debug: (message: string, ...args: unknown[]) => {
 		if (Logger._level > levelToNumber.debug) return
 		console.debug(formatMessage('debug', message), ...args)
