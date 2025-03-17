@@ -10,6 +10,7 @@ import {
 	TypeReferenceNode,
 } from 'ts-morph'
 
+import { Logger } from '../../utils/logger'
 import { debugNode } from '../../utils/printers'
 import { OpenApiManager } from '../manager/OpenApiManager'
 import { ShapeOfProperty, ShapeOfType, ShapeOfUnionEntry } from './types'
@@ -200,6 +201,8 @@ export const getRecursiveNodeShape = (nodeOrReference: Node): ShapeOfType['shape
 	}
 
 	// TODO
+	const fileName = node.getSourceFile().getFilePath().split('/').pop()
+	Logger.warn(`[${fileName}] Unknown node type: ${node.getKind()}`)
 	return 'unknown_1'
 }
 
@@ -218,6 +221,8 @@ export const getShapeOfValidatorLiteral = (
 			if (identifierNode.isKind(SyntaxKind.StringLiteral)) {
 				return identifierNode.getLiteralText()
 			}
+			const fileName = node.getSourceFile().getFilePath().split('/').pop()
+			Logger.warn(`[${fileName}] Unknown identifier name: ${identifierNode.getText()}`)
 			return 'unknown_30'
 		})()
 
@@ -291,6 +296,9 @@ export const getValidatorPropertyShape = (innerLiteralNode: Node): ShapeOfType['
 		if (callExpressionArgument.getKind() === SyntaxKind.IntersectionType) {
 			return getValidatorPropertyShape(callExpressionArgument)
 		}
+
+		const fileName = innerLiteralNode.getSourceFile().getFilePath().split('/').pop()
+		Logger.warn(`[${fileName}] Unknown call expression argument: ${callExpressionArgument.getKind()}`)
 		return 'unknown_3'
 	}
 
@@ -320,6 +328,8 @@ export const getValidatorPropertyShape = (innerLiteralNode: Node): ShapeOfType['
 		return getRecursiveNodeShape(targetSyntaxList.getFirstChild()!)
 	}
 
+	const fileName = innerLiteralNode.getSourceFile().getFilePath().split('/').pop()
+	Logger.warn(`[${fileName}] Unknown import type node`)
 	return 'unknown_2'
 }
 
@@ -410,6 +420,8 @@ export const getValidatorPropertyStringValue = (
 		}
 	}
 
+	const fileName = node.getSourceFile().getFilePath().split('/').pop()
+	Logger.warn(`[${fileName}] Unknown property string value node ${node.getKind()}`)
 	return 'unknown_25'
 }
 
@@ -618,6 +630,8 @@ export const getProperTypeShape = (
 		return shapesOfChildren.reduce<ShapeOfType[]>((total, current) => [...total, ...current], [])
 	}
 
+	const fileName = atLocation.getSourceFile().getFilePath().split('/').pop()
+	Logger.warn(`[${fileName}] Unknown type shape node ${typeOrPromise.getText()}`)
 	return 'unknown_5'
 }
 
@@ -633,6 +647,9 @@ const getLiteralValueOfNode = (node: Node): string | string[] | unknown[] => {
 	} else if (node.isKind(SyntaxKind.ObjectLiteralExpression)) {
 		return getValuesOfObjectLiteral(node)
 	}
+
+	const fileName = node.getSourceFile().getFilePath().split('/').pop()
+	Logger.warn(`[${fileName}] Unknown literal value node ${node.getKind()}`)
 	return 'unknown_6'
 }
 

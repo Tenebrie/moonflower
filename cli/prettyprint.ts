@@ -1,4 +1,5 @@
 import { ApiAnalysisStats } from '../src/openapi/manager/OpenApiManager'
+import { Logger } from '../src/utils/logger'
 
 export const printAnalysisStats = (stats: ApiAnalysisStats) => {
 	stats.explicitRouterFiles.forEach((file) => printRouterFile(file))
@@ -6,11 +7,11 @@ export const printAnalysisStats = (stats: ApiAnalysisStats) => {
 }
 
 export const printRouterFile = (file: ApiAnalysisStats['discoveredRouterFiles'][number]) => {
-	console.info(`${file.path}`)
+	Logger.info(`${file.path}`)
 	file.routers.forEach((r) => {
-		console.info(`└ ${r.name}`)
+		Logger.info(`└ ${r.name}`)
 		r.endpoints.forEach((e) => {
-			console.info(`  └ ${e}`)
+			Logger.info(`  └ ${e}`)
 		})
 	})
 }

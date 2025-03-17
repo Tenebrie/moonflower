@@ -1,3 +1,4 @@
+import { Logger } from '../../utils/logger'
 import { ApiDocsPreferences } from '../manager/OpenApiManager'
 import { EndpointData, PathDefinition } from '../types'
 import { getSchema } from './getSchema'
@@ -16,7 +17,7 @@ export const generatePaths = (endpoints: EndpointData[], preferences: ApiDocsPre
 
 	const { allowOptionalPathParams } = preferences
 
-	const t1 = performance.now()
+	const startTime = performance.now()
 	endpoints.forEach((endpoint) => {
 		const path = endpoint.path
 			.split('/')
@@ -136,8 +137,7 @@ export const generatePaths = (endpoints: EndpointData[], preferences: ApiDocsPre
 			[endpoint.method.toLowerCase()]: definition,
 		}
 	})
-	const t2 = performance.now()
-	console.log(`generatePaths took ${t2 - t1}ms`)
+	Logger.info(`Path generation took ${Math.round(performance.now() - startTime)}ms`)
 
 	return paths
 }

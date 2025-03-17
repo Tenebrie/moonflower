@@ -2,6 +2,7 @@ import * as path from 'path'
 import { SourceFile, SyntaxKind } from 'ts-morph'
 import { Project } from 'ts-morph'
 
+import { Logger } from '../../utils/logger'
 import { discoverImportedName } from '../discoveryModule/discoverImports/discoverImports'
 import {
 	DiscoveredSourceFile,
@@ -10,11 +11,14 @@ import {
 import { discoverRouters } from '../discoveryModule/discoverRouters/discoverRouters'
 import { ApiDocsHeader, OpenApiManager } from '../manager/OpenApiManager'
 import { EndpointData, ExposedModelData } from '../types'
+import { getSourceFileTimestamp, TimestampCache } from './getSourceFileTimestamp'
 import { getValuesOfObjectLiteral } from './nodeParsers'
 import { parseEndpoint } from './parseEndpoint'
 import { parseExposedModel, parseNamedExposedModels } from './parseExposedModels'
+import { SourceFileCache } from './sourceFileCache'
 
 type Props = {
+	logLevel?: Parameters<(typeof Logger)['setLevel']>[0]
 	tsconfigPath: string
 	sourceFilePaths?: string[]
 	sourceFileDiscovery?: boolean | FileDiscoveryConfig
@@ -34,6 +38,7 @@ type FileDiscoveryConfig = {
  * @param sourceFilePaths Array of router source files relative to project root
  */
 export const prepareOpenApiSpec = ({
+	logLevel,
 	tsconfigPath,
 	sourceFilePaths,
 	sourceFileDiscovery,
@@ -44,6 +49,12 @@ export const prepareOpenApiSpec = ({
 	if (openApiManager.isReady()) {
 		return
 	}
+
+	if (logLevel) {
+		Logger.setLevel(logLevel)
+	}
+
+	Logger.info('Preparing OpenAPI spec')
 
 	const project = new Project({
 		tsConfigFilePath: path.resolve(tsconfigPath),
@@ -64,13 +75,12 @@ export const prepareOpenApiSpec = ({
 				return { discoveredRouterFiles: [], discoveredSourceFiles: [] }
 			}
 
-			const t1 = performance.now()
+			const startTime = performance.now()
 			const files = discoverRouterFiles({
 				targetPath: typeof sourceFileDiscovery === 'object' ? sourceFileDiscovery.rootPath : '.',
 				tsConfigPath: tsconfigPath,
 			})
-			const t2 = performance.now()
-			console.log(`discoverRouterFiles took ${t2 - t1}ms`)
+			Logger.info(`File discovery took ${Math.round(performance.now() - startTime)}ms`)
 			return files
 		})()
 
@@ -99,21 +109,20 @@ export const prepareOpenApiSpec = ({
 
 	openApiManager.setExposedModels(exposedModels)
 
-	// const t1 = performance.now()
-	// const cachePath = (() => {
-	// 	if (typeof incremental === 'object' && incremental.cachePath) {
-	// 		return incremental.cachePath
-	// 	}
-	// 	return path.resolve(process.cwd(), 'node_modules', '.cache', 'moonflower')
-	// })()
-	// const endpoints = analyzeMultipleSourceFiles(filesToAnalyze, {
-	// 	incremental: incremental !== false,
-	// 	cachePath,
-	// })
-	// const t2 = performance.now()
-	// console.log(`analyzeSourceFileEndpoints took ${t2 - t1}ms TOTAL`)
-
-	const endpoints = filesToAnalyze.flatMap((file) => analyzeSourceFileEndpoints(file))
+	const startTime = performance.now()
+	const cachePath = (() => {
+		if (typeof incremental === 'object' && incremental.cachePath) {
+			return incremental.cachePath
+		}
+		return path.resolve(process.cwd(), 'node_modules', '.cache', 'moonflower')
+	})()
+	const endpoints = analyzeMultipleSourceFiles(filesToAnalyze, {
+		incremental: incremental !== false,
+		cachePath,
+		project,
+		timestampCache: {},
+	})
+	Logger.info(`Router analysis took ${Math.round(performance.now() - startTime)}ms`)
 
 	openApiManager.setStats({
 		discoveredRouterFiles: discoveredRouterFiles.map((file) => ({
@@ -145,6 +154,8 @@ export const analyzeMultipleSourceFiles = (
 	config: {
 		incremental: boolean
 		cachePath: string
+		project: Project
+		timestampCache: TimestampCache
 	},
 	filterEndpointPaths?: string[],
 ) => {
@@ -156,10 +167,26 @@ export const analyzeSourceFileWithCache = (
 	config: {
 		incremental: boolean
 		cachePath: string
+		project: Project
+		timestampCache: TimestampCache
 	},
 	filterEndpointPaths?: string[],
 ): EndpointData[] => {
-	return analyzeSourceFileEndpoints(file, filterEndpointPaths)
+	const timestamp = getSourceFileTimestamp(file.sourceFile, config.timestampCache)
+	const cachedResults = SourceFileCache.getCachedResults(file.sourceFile, timestamp, config.cachePath)
+
+	if (cachedResults) {
+		Logger.debug(`[${file.fileName}] Found cached results`)
+		return cachedResults.endpoints
+	}
+	Logger.debug(`[${file.fileName}] Analyzing...`)
+
+	const t1 = performance.now()
+	const endpoints = analyzeSourceFileEndpoints(file, filterEndpointPaths)
+	const t2 = performance.now()
+	Logger.info(`[${file.fileName}] Analyzed in ${t2 - t1}ms`)
+	SourceFileCache.cacheResults(file.sourceFile, timestamp, config.cachePath, endpoints)
+	return endpoints
 }
 
 export const analyzeSourceFileEndpoints = (
@@ -169,12 +196,10 @@ export const analyzeSourceFileEndpoints = (
 	const endpoints: EndpointData[] = []
 	const operations = ['get', 'post', 'put', 'delete', 'del', 'patch']
 	const joinedOperations = operations.join('|')
-	const t1 = performance.now()
 
 	file.routers.named.forEach((routerName) => {
 		file.sourceFile.forEachChild((node) => {
 			const nodeText = node.getText()
-			// Create a single regex pattern for all operations
 			const routerPattern = new RegExp(`${routerName}\\.(?:${joinedOperations})`)
 
 			if (routerPattern.test(nodeText)) {
@@ -185,16 +210,11 @@ export const analyzeSourceFileEndpoints = (
 					return
 				}
 
-				const t3 = performance.now()
 				endpoints.push(parseEndpoint(node, file.fileName))
-				const t4 = performance.now()
-				// console.log(`parseEndpoint took ${t4 - t3}ms`)
 			}
 		})
 	})
 
-	const t2 = performance.now()
-	// console.log(`analyzeSourceFileEndpoints took ${t2 - t1}ms`)
 	return endpoints
 }
 

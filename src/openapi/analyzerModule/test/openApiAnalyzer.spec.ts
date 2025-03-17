@@ -394,7 +394,6 @@ describe('OpenApi Analyzer', () => {
 			it('parses inline useRequestRawBody validator correctly', () => {
 				const endpoint = analyzeEndpointById('6040cd01-a0c6-4b70-9901-b647f19b19a7')
 
-				console.log(endpoint)
 				const body = endpoint.rawBody
 				if (!body) {
 					throw new Error('No body definition found')

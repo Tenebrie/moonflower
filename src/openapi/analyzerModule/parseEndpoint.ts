@@ -11,6 +11,7 @@ import {
 	getValidatorPropertyStringValue,
 	getValuesOfObjectLiteral,
 } from './nodeParsers'
+import { Logger } from '../../utils/logger'
 
 export const parseEndpoint = (node: Node<ts.Node>, sourceFilePath: string) => {
 	const parsedEndpointMethod = node
@@ -56,7 +57,7 @@ export const parseEndpoint = (node: Node<ts.Node>, sourceFilePath: string) => {
 			segment: 'api',
 			error: err as Error,
 		})
-		console.error('Error', err)
+		Logger.error('Error', err)
 	}
 
 	// Request params
@@ -67,7 +68,7 @@ export const parseEndpoint = (node: Node<ts.Node>, sourceFilePath: string) => {
 			segment: 'path',
 			error: err as Error,
 		})
-		console.error('Error', err)
+		Logger.error('Error', err)
 	}
 
 	// Request query
@@ -78,7 +79,7 @@ export const parseEndpoint = (node: Node<ts.Node>, sourceFilePath: string) => {
 			segment: 'query',
 			error: err as Error,
 		})
-		console.error('Error', err)
+		Logger.error('Error', err)
 	}
 
 	// Request headers
@@ -89,7 +90,7 @@ export const parseEndpoint = (node: Node<ts.Node>, sourceFilePath: string) => {
 			segment: 'headers',
 			error: err as Error,
 		})
-		console.error('Error', err)
+		Logger.error('Error', err)
 	}
 
 	// Raw request body
@@ -103,7 +104,7 @@ export const parseEndpoint = (node: Node<ts.Node>, sourceFilePath: string) => {
 			segment: 'rawBody',
 			error: err as Error,
 		})
-		console.error('Error', err)
+		Logger.error('Error', err)
 	}
 
 	// Object request body
@@ -114,7 +115,7 @@ export const parseEndpoint = (node: Node<ts.Node>, sourceFilePath: string) => {
 			segment: 'objectBody',
 			error: err as Error,
 		})
-		console.error('Error', err)
+		Logger.error('Error', err)
 	}
 
 	// Request response
@@ -125,7 +126,7 @@ export const parseEndpoint = (node: Node<ts.Node>, sourceFilePath: string) => {
 			segment: 'response',
 			error: err as Error,
 		})
-		console.error('Error', err)
+		Logger.error('Error', err)
 	}
 
 	return endpointData

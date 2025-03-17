@@ -8,6 +8,7 @@ import {
 	ShapeOfType,
 	ShapeOfUnion,
 } from '../../openapi/analyzerModule/types'
+import { Logger } from '../../utils/logger'
 
 export type SchemaType =
 	| { type: string }
@@ -58,6 +59,7 @@ export const getSchema = (shape: string | ShapeOfType[]): SchemaType => {
 	}
 
 	if (shape.length === 0) {
+		Logger.warn(`Unknown shape ${shape}`)
 		return {
 			type: 'unknown_20',
 		}
@@ -151,6 +153,7 @@ export const getSchema = (shape: string | ShapeOfType[]): SchemaType => {
 		}
 	}
 
+	Logger.warn(`Unknown shape ${shape}`)
 	return {
 		type: 'unknown_21',
 	}
