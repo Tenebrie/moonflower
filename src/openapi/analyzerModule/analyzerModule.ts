@@ -110,7 +110,6 @@ export const prepareOpenApiSpec = ({
 
 	openApiManager.setExposedModels(exposedModels)
 
-	const startTime = performance.now()
 	const cachePath = (() => {
 		if (typeof incremental === 'object' && incremental.cachePath) {
 			return incremental.cachePath
@@ -120,10 +119,8 @@ export const prepareOpenApiSpec = ({
 	const endpoints = analyzeMultipleSourceFiles(filesToAnalyze, {
 		incremental: incremental !== false,
 		cachePath,
-		project,
 		timestampCache: {},
 	})
-	Logger.info(`Router analysis took ${Math.round(performance.now() - startTime)}ms`)
 
 	openApiManager.setStats({
 		discoveredRouterFiles: discoveredRouterFiles.map((file) => ({
@@ -155,12 +152,26 @@ export const analyzeMultipleSourceFiles = (
 	config: {
 		incremental: boolean
 		cachePath: string
-		project: Project
 		timestampCache: TimestampCache
 	},
 	filterEndpointPaths?: string[],
-) => {
-	return files.flatMap((file) => analyzeSourceFileWithCache(file, config, filterEndpointPaths))
+): EndpointData[] => {
+	const startTime = performance.now()
+	const analyzedFiles = files.map((file) => analyzeSourceFileWithCache(file, config, filterEndpointPaths))
+	Logger.info(`Router analysis took ${Math.round(performance.now() - startTime)}ms`)
+
+	analyzedFiles
+		.map((f, index) => ({
+			fileName: files[index].fileName,
+			timeTaken: f.timing,
+		}))
+		.sort((a, b) => b.timeTaken - a.timeTaken)
+		.filter((t) => t.timeTaken > 500)
+		.forEach((t) => {
+			Logger.info(`- [${t.fileName}] Took ${Math.round(t.timeTaken)}ms to analyze`)
+		})
+
+	return analyzedFiles.flatMap((f) => f.endpoints)
 }
 
 export const analyzeSourceFileWithCache = (
@@ -168,26 +179,25 @@ export const analyzeSourceFileWithCache = (
 	config: {
 		incremental: boolean
 		cachePath: string
-		project: Project
 		timestampCache: TimestampCache
 	},
 	filterEndpointPaths?: string[],
-): EndpointData[] => {
+): { endpoints: EndpointData[]; timing: number } => {
 	const timestamp = getSourceFileTimestamp(file.sourceFile, config.timestampCache)
 	const cachedResults = SourceFileCache.getCachedResults(file.sourceFile, timestamp, config.cachePath)
 
 	if (cachedResults) {
 		Logger.debug(`[${file.fileName}] Found cached results`)
-		return cachedResults.endpoints
+		return { endpoints: cachedResults.endpoints, timing: 0 }
 	}
 	Logger.debug(`[${file.fileName}] Analyzing...`)
 
 	const t1 = performance.now()
 	const endpoints = analyzeSourceFileEndpoints(file, filterEndpointPaths)
 	const t2 = performance.now()
-	Logger.info(`[${file.fileName}] Analyzed in ${t2 - t1}ms`)
+	Logger.debug(`[${file.fileName}] Analyzed in ${t2 - t1}ms`)
 	SourceFileCache.cacheResults(file.sourceFile, timestamp, config.cachePath, endpoints)
-	return endpoints
+	return { endpoints, timing: t2 - t1 }
 }
 
 export const analyzeSourceFileEndpoints = (

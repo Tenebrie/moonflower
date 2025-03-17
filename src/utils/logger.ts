@@ -1,4 +1,5 @@
 const levelToNumber = {
+	dev: 0,
 	debug: 1,
 	info: 2,
 	warn: 3,
@@ -19,7 +20,7 @@ const colors = {
 	white: '\x1b[37m',
 }
 
-const formatMessage = (level: keyof typeof levelToNumber | 'dev', message: string) => {
+const formatMessage = (level: keyof typeof levelToNumber, message: string) => {
 	const levelColors = {
 		dev: colors.cyan,
 		error: colors.red,
@@ -39,6 +40,7 @@ export const Logger = {
 	},
 
 	dev: (message: string, ...args: unknown[]) => {
+		if (Logger._level > levelToNumber.dev) return
 		console.debug(formatMessage('dev', message), ...args)
 	},
 	debug: (message: string, ...args: unknown[]) => {
