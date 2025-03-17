@@ -202,7 +202,7 @@ export const getRecursiveNodeShape = (nodeOrReference: Node): ShapeOfType['shape
 
 	// TODO
 	const fileName = node.getSourceFile().getFilePath().split('/').pop()
-	Logger.warn(`[${fileName}] Unknown node type: ${node.getKind()}`)
+	Logger.warn(`[${fileName}] Unknown node type: ${node.getKindName()}`)
 	return 'unknown_1'
 }
 
@@ -298,7 +298,7 @@ export const getValidatorPropertyShape = (innerLiteralNode: Node): ShapeOfType['
 		}
 
 		const fileName = innerLiteralNode.getSourceFile().getFilePath().split('/').pop()
-		Logger.warn(`[${fileName}] Unknown call expression argument: ${callExpressionArgument.getKind()}`)
+		Logger.warn(`[${fileName}] Unknown call expression argument: ${callExpressionArgument.getKindName()}`)
 		return 'unknown_3'
 	}
 
@@ -421,7 +421,7 @@ export const getValidatorPropertyStringValue = (
 	}
 
 	const fileName = node.getSourceFile().getFilePath().split('/').pop()
-	Logger.warn(`[${fileName}] Unknown property string value node ${node.getKind()}`)
+	Logger.warn(`[${fileName}] Unknown property string value node ${node.getKindName()}`)
 	return 'unknown_25'
 }
 
@@ -649,7 +649,7 @@ const getLiteralValueOfNode = (node: Node): string | string[] | unknown[] => {
 	}
 
 	const fileName = node.getSourceFile().getFilePath().split('/').pop()
-	Logger.warn(`[${fileName}] Unknown literal value node ${node.getKind()}`)
+	Logger.warn(`[${fileName}] Unknown literal value node ${node.getKindName()}`)
 	return 'unknown_6'
 }
 
