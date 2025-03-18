@@ -115,7 +115,6 @@
 		"test-coverage": "vitest --coverage"
 	},
 	"dependencies": {
-		"http-status-codes": "^2.3.0",
 		"module-alias": "^2.2.3",
 		"ts-morph": "^24.0.0",
 		"typescript": "^5.7.2"
@@ -126,6 +125,7 @@
 		"koa-bodyparser": "^4.4.1"
 	},
 	"devDependencies": {
+		"http-status-codes": "^2.3.0",
 		"@koa/router": "^13.1.0",
 		"@types/jest": "29.5.14",
 		"@types/jsonwebtoken": "^9.0.7",
