@@ -1,6 +1,6 @@
 {
 	"name": "moonflower",
-	"version": "1.0.1",
+	"version": "1.0.0",
 	"description": "",
 	"author": "tenebrie",
 	"license": "MIT",
@@ -115,7 +115,6 @@
 		"test-coverage": "vitest --coverage"
 	},
 	"dependencies": {
-		"module-alias": "^2.2.3",
 		"ts-morph": "^24.0.0",
 		"typescript": "^5.7.2"
 	},
@@ -140,7 +139,6 @@
 		"eslint-plugin-prettier": "^5.2.1",
 		"eslint-plugin-simple-import-sort": "^12.1.1",
 		"eslint-plugin-unused-imports": "^4.1.4",
-		"http-status-codes": "^2.3.0",
 		"jest": "29.7.0",
 		"koa": "^2.15.3",
 		"koa-bodyparser": "^4.4.1",

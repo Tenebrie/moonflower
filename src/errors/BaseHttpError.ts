@@ -1,7 +1,8 @@
-import { getReasonPhrase, StatusCodes } from 'http-status-codes'
+import { StatusToReasonPhrase } from './ReasonPhrases'
+import { StatusCodeValue } from './StatusCodes'
 
 export interface HttpError {
-	status: StatusCodes
+	status: StatusCodeValue
 	reason: string
 	message: string
 }
@@ -10,10 +11,10 @@ export class BaseHttpError extends Error implements HttpError {
 	public reason: string
 
 	constructor(
-		public status: StatusCodes,
+		public status: StatusCodeValue,
 		public message: string,
 	) {
 		super(message)
-		this.reason = getReasonPhrase(status)
+		this.reason = StatusToReasonPhrase(status)
 	}
 }

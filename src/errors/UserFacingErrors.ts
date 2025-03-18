@@ -1,6 +1,5 @@
-import { StatusCodes } from 'http-status-codes'
-
 import { BaseHttpError } from './BaseHttpError'
+import { StatusCodes } from './StatusCodes'
 
 export class ValidationError extends BaseHttpError {
 	constructor(message: string) {

@@ -11,7 +11,6 @@ import {
 } from 'ts-morph'
 
 import { Logger } from '../../utils/logger'
-import { debugNode } from '../../utils/printers'
 import { OpenApiManager } from '../manager/OpenApiManager'
 import { ShapeOfProperty, ShapeOfType, ShapeOfUnionEntry } from './types'
 

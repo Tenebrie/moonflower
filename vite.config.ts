@@ -79,9 +79,6 @@ export const baseViteConfig: ViteUserConfig = {
 		}),
 	],
 	resolve: {
-		alias: {
-			'@src': resolve(__dirname, './src'),
-		},
 		preserveSymlinks: true,
 	},
 	optimizeDeps: {
