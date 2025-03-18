@@ -8,6 +8,103 @@
 	"main": "./dist/index.cjs",
 	"module": "./dist/index.mjs",
 	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.mjs",
+			"require": "./dist/index.cjs"
+		},
+		"./errors/HttpErrorHandler": {
+			"types": "./dist/errors/HttpErrorHandler.d.ts",
+			"import": "./dist/errors/HttpErrorHandler.mjs",
+			"require": "./dist/errors/HttpErrorHandler.cjs"
+		},
+		"./errors/UserFacingErrors": {
+			"types": "./dist/errors/UserFacingErrors.d.ts",
+			"import": "./dist/errors/UserFacingErrors.mjs",
+			"require": "./dist/errors/UserFacingErrors.cjs"
+		},
+		"./hooks/authentication/useAuth": {
+			"types": "./dist/hooks/authentication/useAuth.d.ts",
+			"import": "./dist/hooks/authentication/useAuth.mjs",
+			"require": "./dist/hooks/authentication/useAuth.cjs"
+		},
+		"./hooks/authentication/useOptionalAuth": {
+			"types": "./dist/hooks/authentication/useOptionalAuth.d.ts",
+			"import": "./dist/hooks/authentication/useOptionalAuth.mjs",
+			"require": "./dist/hooks/authentication/useOptionalAuth.cjs"
+		},
+		"./hooks/useApiEndpoint": {
+			"types": "./dist/hooks/useApiEndpoint.d.ts",
+			"import": "./dist/hooks/useApiEndpoint.mjs",
+			"require": "./dist/hooks/useApiEndpoint.cjs"
+		},
+		"./hooks/useApiHeader": {
+			"types": "./dist/hooks/useApiHeader/useApiHeader.d.ts",
+			"import": "./dist/hooks/useApiHeader/useApiHeader.mjs",
+			"require": "./dist/hooks/useApiHeader/useApiHeader.cjs"
+		},
+		"./hooks/useCookieParams": {
+			"types": "./dist/hooks/useCookieParams.d.ts",
+			"import": "./dist/hooks/useCookieParams.mjs",
+			"require": "./dist/hooks/useCookieParams.cjs"
+		},
+		"./hooks/useExposeApiModel": {
+			"types": "./dist/hooks/useExposeApiModel.d.ts",
+			"import": "./dist/hooks/useExposeApiModel.mjs",
+			"require": "./dist/hooks/useExposeApiModel.cjs"
+		},
+		"./hooks/useHeaderParams": {
+			"types": "./dist/hooks/useHeaderParams.d.ts",
+			"import": "./dist/hooks/useHeaderParams.mjs",
+			"require": "./dist/hooks/useHeaderParams.cjs"
+		},
+		"./hooks/usePathParams": {
+			"types": "./dist/hooks/usePathParams.d.ts",
+			"import": "./dist/hooks/usePathParams.mjs",
+			"require": "./dist/hooks/usePathParams.cjs"
+		},
+		"./hooks/useQueryParams": {
+			"types": "./dist/hooks/useQueryParams.d.ts",
+			"import": "./dist/hooks/useQueryParams.mjs",
+			"require": "./dist/hooks/useQueryParams.cjs"
+		},
+		"./hooks/useRequestBody": {
+			"types": "./dist/hooks/useRequestBody.d.ts",
+			"import": "./dist/hooks/useRequestBody.mjs",
+			"require": "./dist/hooks/useRequestBody.cjs"
+		},
+		"./hooks/useRequestRawBody": {
+			"types": "./dist/hooks/useRequestRawBody.d.ts",
+			"import": "./dist/hooks/useRequestRawBody.mjs",
+			"require": "./dist/hooks/useRequestRawBody.cjs"
+		},
+		"./hooks/useReturnValue": {
+			"types": "./dist/hooks/useReturnValue.d.ts",
+			"import": "./dist/hooks/useReturnValue.mjs",
+			"require": "./dist/hooks/useReturnValue.cjs"
+		},
+		"./openapi/initOpenApiEngine": {
+			"types": "./dist/openapi/initOpenApiEngine.d.ts",
+			"import": "./dist/openapi/initOpenApiEngine.mjs",
+			"require": "./dist/openapi/initOpenApiEngine.cjs"
+		},
+		"./router/Router": {
+			"types": "./dist/router/Router.d.ts",
+			"import": "./dist/router/Router.mjs",
+			"require": "./dist/router/Router.cjs"
+		},
+		"./validators/BuiltInValidators": {
+			"types": "./dist/validators/BuiltInValidators.d.ts",
+			"import": "./dist/validators/BuiltInValidators.mjs",
+			"require": "./dist/validators/BuiltInValidators.cjs"
+		},
+		"./validators/ParamWrappers": {
+			"types": "./dist/validators/ParamWrappers.d.ts",
+			"import": "./dist/validators/ParamWrappers.mjs",
+			"require": "./dist/validators/ParamWrappers.cjs"
+		}
+	},
 	"bin": "cli/entry.cjs",
 	"scripts": {
 		"prepublish": "vite build",
@@ -54,9 +151,9 @@
 		"ts-jest": "29.2.5",
 		"ts-node": "^10.9.2",
 		"tsconfig-paths": "4.2.0",
-		"vite": "^5.1.4",
+		"vite": "^6.2.2",
 		"vite-plugin-dts": "^3.7.3",
-		"vitest": "^2.1.8",
+		"vitest": "^3.0.9",
 		"yargs": "^17.7.2"
 	}
 }

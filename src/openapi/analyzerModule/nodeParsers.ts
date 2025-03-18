@@ -11,6 +11,7 @@ import {
 } from 'ts-morph'
 
 import { Logger } from '../../utils/logger'
+import { debugNode } from '../../utils/printers'
 import { OpenApiManager } from '../manager/OpenApiManager'
 import { ShapeOfProperty, ShapeOfType, ShapeOfUnionEntry } from './types'
 
@@ -75,7 +76,7 @@ export const findPropertyAssignmentValueNode = (
 }
 
 export const getTypeReferenceShape = (node: TypeReferenceNode): ShapeOfType['shape'] => {
-	const firstChild = node.getFirstChild()!
+	const firstChild = node.getFirstChildByKind(SyntaxKind.SyntaxList)!
 	if (firstChild.isKind(SyntaxKind.SyntaxList)) {
 		return getRecursiveNodeShape(firstChild.getFirstChild()!)
 	} else {
@@ -339,8 +340,23 @@ export const getValidatorPropertyShape = (innerLiteralNode: Node): ShapeOfType['
 		return getRecursiveNodeShape(targetSyntaxList.getFirstChild()!)
 	}
 
+	// Intersection type with Validator
+	const intersectionType = innerLiteralNode.isKind(SyntaxKind.IntersectionType)
+		? innerLiteralNode
+		: innerLiteralNode.getParent()?.isKind(SyntaxKind.VariableDeclaration)
+			? innerLiteralNode.getParent()?.getFirstChildByKind(SyntaxKind.IntersectionType)
+			: null
+
+	if (intersectionType) {
+		const validatorType = intersectionType.getFirstChildByKind(SyntaxKind.TypeReference)
+		if (validatorType) {
+			return getTypeReferenceShape(validatorType)
+		}
+	}
+
 	const fileName = innerLiteralNode.getSourceFile().getFilePath().split('/').pop()
 	Logger.warn(`[${fileName}] Unknown import type node`)
+
 	return 'unknown_2'
 }
 
