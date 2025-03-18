@@ -1,13 +1,11 @@
 import { SourceFile, SyntaxKind } from 'ts-morph'
 
-import { Router } from '../../../router/Router'
-import { nameOf } from '../../../utils/nameOf'
 import { discoverImportedName } from '../discoverImports/discoverImports'
 
 export const discoverRouters = (sourceFile: SourceFile) => {
 	const routerClassName = discoverImportedName({
 		sourceFile,
-		originalName: nameOf(Router),
+		originalName: 'Router',
 	})
 
 	if (!routerClassName) {

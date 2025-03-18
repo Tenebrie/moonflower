@@ -9,7 +9,6 @@ export const discoverImportedName = ({ sourceFile, originalName }: Props): strin
 	const importDeclarations = sourceFile.getDescendantsOfKind(SyntaxKind.ImportDeclaration)
 	const discoveredName = importDeclarations
 		.filter((declaration) => {
-			// declaration
 			const importPathNode = declaration.getLastChildByKind(SyntaxKind.StringLiteral)
 			if (!importPathNode) {
 				return false
