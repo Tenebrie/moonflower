@@ -36,6 +36,7 @@ jobs:
         run: yarn test
 
   publish:
+    name: Publish to NPM
     needs: test
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
