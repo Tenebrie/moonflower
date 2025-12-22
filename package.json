@@ -105,7 +105,9 @@
 			"require": "./dist/validators/ParamWrappers.cjs"
 		}
 	},
-	"bin": "cli/entry.cjs",
+	"bin": {
+		"moonflower": "cli/entry.cjs"
+	},
 	"scripts": {
 		"prepublish": "vite build",
 		"build": "vite build",
