@@ -1,10 +1,10 @@
 # Moonflower
 
-> This section is work-in-progress.
-
 Moonflower is a TypeScript-first [Koa Router](https://www.npmjs.com/package/koa-router) extension that allows for automatic [OpenAPI](https://www.openapis.org/what-is-openapi) spec generation directly from backend code, without any extra work. Combined with an ORM like [Prisma.js](https://www.npmjs.com/package/prisma) and an API client generator on frontend, it allows for creation of end-to-end type safe REST API.
 
 Moonflower provides type safe 'hooks' that handle runtime validation and return clean types with minimal boilerplate.
+
+> This readme is work-in-progress.
 
 ## Feature Overview
 

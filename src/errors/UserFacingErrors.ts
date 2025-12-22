@@ -1,6 +1,9 @@
 import { BaseHttpError } from './BaseHttpError'
 import { StatusCodes } from './StatusCodes'
 
+export const MoonflowerError = BaseHttpError
+export { StatusCodes as HttpStatusCodes }
+
 export class ValidationError extends BaseHttpError {
 	constructor(message: string) {
 		super(StatusCodes.BAD_REQUEST, message)
@@ -16,6 +19,24 @@ export class BadRequestError extends BaseHttpError {
 export class UnauthorizedError extends BaseHttpError {
 	constructor(message: string) {
 		super(StatusCodes.UNAUTHORIZED, message)
+	}
+}
+
+export class NotFoundError extends BaseHttpError {
+	constructor(message: string) {
+		super(StatusCodes.NOT_FOUND, message)
+	}
+}
+
+export class InternalServerError extends BaseHttpError {
+	constructor(message: string) {
+		super(StatusCodes.INTERNAL_SERVER_ERROR, message)
+	}
+}
+
+export class ServiceUnavailableError extends BaseHttpError {
+	constructor(message: string) {
+		super(StatusCodes.SERVICE_UNAVAILABLE, message)
 	}
 }
 
