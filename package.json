@@ -111,7 +111,8 @@
 		"build": "vite build",
 		"lint": "eslint src/",
 		"lint-fix": "eslint src/ --fix",
-		"test": "vitest",
+		"test": "vitest run",
+		"test-watch": "vitest",
 		"test-coverage": "vitest --coverage"
 	},
 	"dependencies": {

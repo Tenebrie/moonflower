@@ -1,6 +1,7 @@
 import { Node, SyntaxKind, ts } from 'ts-morph'
 
 import { ApiEndpointDocs } from '../../hooks/useApiEndpoint'
+import { Logger } from '../../utils/logger'
 import { EndpointData } from '../types'
 import {
 	findNodeImplementation,
@@ -11,7 +12,6 @@ import {
 	getValidatorPropertyStringValue,
 	getValuesOfObjectLiteral,
 } from './nodeParsers'
-import { Logger } from '../../utils/logger'
 
 export const parseEndpoint = (node: Node<ts.Node>, sourceFilePath: string) => {
 	const parsedEndpointMethod = node
