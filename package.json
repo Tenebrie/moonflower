@@ -110,6 +110,7 @@
 		"prepublish": "vite build",
 		"build": "vite build",
 		"lint": "eslint src/",
+		"tsc": "tsc --noEmit",
 		"lint-fix": "eslint src/ --fix",
 		"test": "vitest run",
 		"test-watch": "vitest",
