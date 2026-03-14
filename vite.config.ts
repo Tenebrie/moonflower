@@ -56,6 +56,7 @@ export const baseViteConfig: ViteUserConfig = {
 				'ts-morph',
 				'yargs',
 				'yargs/helpers',
+				'zod',
 			],
 			output: {
 				globals: {
