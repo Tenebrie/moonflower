@@ -123,8 +123,6 @@
 		"test-coverage": "vitest --coverage"
 	},
 	"dependencies": {
-		"ts-morph": "^24.0.0",
-		"typescript": "^5.7.2",
 		"yargs": "^17.7.2"
 	},
 	"peerDependencies": {
@@ -163,8 +161,10 @@
 		"source-map-support": "^0.5.20",
 		"supertest": "^7.0.0",
 		"ts-jest": "29.2.5",
+		"ts-morph": "^24.0.0",
 		"ts-node": "^10.9.2",
 		"tsconfig-paths": "4.2.0",
+		"typescript": "^5.7.2",
 		"vite": "^6.2.2",
 		"vite-plugin-dts": "^3.7.3",
 		"vitest": "^3.0.9"
