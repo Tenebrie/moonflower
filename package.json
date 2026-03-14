@@ -129,9 +129,13 @@
 		"@koa/router": "^13.1.0",
 		"koa": "^2.15.3",
 		"koa-bodyparser": "^4.4.1",
+		"ts-morph": "^24.0.0",
 		"zod": "4.3.6"
 	},
 	"peerDependenciesMeta": {
+		"ts-morph": {
+			"optional": true
+		},
 		"zod": {
 			"optional": true
 		}
