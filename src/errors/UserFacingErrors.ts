@@ -34,9 +34,63 @@ export class InternalServerError extends BaseHttpError {
 	}
 }
 
+export class ForbiddenError extends BaseHttpError {
+	constructor(message: string) {
+		super(StatusCodes.FORBIDDEN, message)
+	}
+}
+
+export class MethodNotAllowedError extends BaseHttpError {
+	constructor(message: string) {
+		super(StatusCodes.METHOD_NOT_ALLOWED, message)
+	}
+}
+
+export class ConflictError extends BaseHttpError {
+	constructor(message: string) {
+		super(StatusCodes.CONFLICT, message)
+	}
+}
+
+export class GoneError extends BaseHttpError {
+	constructor(message: string) {
+		super(StatusCodes.GONE, message)
+	}
+}
+
+export class UnprocessableEntityError extends BaseHttpError {
+	constructor(message: string) {
+		super(StatusCodes.UNPROCESSABLE_ENTITY, message)
+	}
+}
+
+export class TooManyRequestsError extends BaseHttpError {
+	constructor(message: string) {
+		super(StatusCodes.TOO_MANY_REQUESTS, message)
+	}
+}
+
+export class NotImplementedError extends BaseHttpError {
+	constructor(message: string) {
+		super(StatusCodes.NOT_IMPLEMENTED, message)
+	}
+}
+
+export class BadGatewayError extends BaseHttpError {
+	constructor(message: string) {
+		super(StatusCodes.BAD_GATEWAY, message)
+	}
+}
+
 export class ServiceUnavailableError extends BaseHttpError {
 	constructor(message: string) {
 		super(StatusCodes.SERVICE_UNAVAILABLE, message)
+	}
+}
+
+export class GatewayTimeoutError extends BaseHttpError {
+	constructor(message: string) {
+		super(StatusCodes.GATEWAY_TIMEOUT, message)
 	}
 }
 
