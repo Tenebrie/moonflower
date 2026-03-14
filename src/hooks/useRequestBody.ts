@@ -1,14 +1,20 @@
 import { ParameterizedContext } from 'koa'
+import z from 'zod'
 
 import { ValidationError } from '../errors/UserFacingErrors'
 import { keysOf } from '../utils/object'
-import { getMissingParamMessage, getValidationResultMessage } from '../utils/validationMessages'
+import { getValidationResultMessage } from '../utils/validationMessages'
 import { Validator } from '../validators/types'
+import { validateMissingParams } from '../validators/validateMissingParams'
+import { validateParam } from '../validators/validateParam'
 
 type CheckIfOptional<T, B extends boolean | undefined> = B extends false ? T : T | undefined
 
-type ValidatedData<T extends Record<string, Validator<any>>> = {
-	[K in keyof T]: CheckIfOptional<ReturnType<T[K]['parse']>, T[K]['optional']>
+type ValidatedData<T extends Record<string, Validator<any> | z.ZodType<any>>> = {
+	[K in keyof T]: CheckIfOptional<
+		ReturnType<T[K] extends Validator<any> ? T[K]['parse'] : T[K]['parse']>,
+		T[K] extends Validator<any> ? T[K]['optional'] : false
+	>
 }
 
 /**
@@ -22,7 +28,7 @@ type ValidatedData<T extends Record<string, Validator<any>>> = {
  * @param validators Validator definitions
  * @returns Validated parameters
  */
-export const useRequestBody = <ValidatorsT extends Record<string, Validator<any>>>(
+export const useRequestBody = <ValidatorsT extends Record<string, Validator<any> | z.ZodType<any>>>(
 	ctx: ParameterizedContext,
 	validators: ValidatorsT,
 ): ValidatedData<ValidatorsT> => {
@@ -32,44 +38,19 @@ export const useRequestBody = <ValidatorsT extends Record<string, Validator<any>
 		validator: validators[name],
 	}))
 
-	const missingParams = params.filter(
-		(param) => providedParams[param.name] === undefined && !validators[param.name].optional,
-	)
-
-	if (missingParams.length > 0) {
-		throw new ValidationError(
-			`Missing body params: ${missingParams.map((param) => getMissingParamMessage(param)).join(', ')}`,
-		)
-	}
+	validateMissingParams(params, providedParams, validators, 'body')
 
 	const validationResults = params.map((param) => {
 		const paramValue = providedParams[param.name]
 
 		// Param is optional and is not provided - skip validation
 		if (paramValue === undefined) {
-			return { param, validated: true }
+			return { param, validated: true, parsedValue: undefined, exception: null }
 		}
 
-		try {
-			const convertedValue = (() => {
-				if (paramValue === null) {
-					return null
-				} else if (typeof paramValue === 'object') {
-					return JSON.stringify(paramValue)
-				}
-				return String(paramValue)
-			})()
-			const validatorObject = param.validator
-			const prevalidatorSuccess = !validatorObject.prevalidate || validatorObject.prevalidate(convertedValue)
-			const parsedValue = validatorObject.parse(convertedValue)
-			const validatorSuccess = !validatorObject.validate || validatorObject.validate(parsedValue)
-			return {
-				param,
-				validated: prevalidatorSuccess && validatorSuccess,
-				parsedValue,
-			}
-		} catch {
-			return { param, validated: false }
+		return {
+			...validateParam(param.validator, paramValue),
+			param,
 		}
 	})
 
@@ -78,7 +59,7 @@ export const useRequestBody = <ValidatorsT extends Record<string, Validator<any>
 	if (failedValidations.length > 0) {
 		throw new ValidationError(
 			`Failed body param validation: ${failedValidations
-				.map((result) => getValidationResultMessage(result.param))
+				.map((result) => getValidationResultMessage(result.param, result.exception))
 				.join(', ')}`,
 		)
 	}

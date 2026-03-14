@@ -1,3 +1,5 @@
+import z from 'zod'
+
 type DeepPartial<T> = {
 	[P in keyof T]?: T[P] extends Array<infer U>
 		? Array<DeepPartial<U>>
@@ -33,3 +35,6 @@ export type BuiltInValidator<T, DescriptionT extends string, ErrorMessageT exten
 	description: DescriptionT
 	errorMessage: ErrorMessageT
 }
+
+export type ValidatorUnion = Omit<Validator<any>, 'optional'> | z.ZodType
+export type MaybeOptionalValidatorUnion = Validator<any> | z.ZodType

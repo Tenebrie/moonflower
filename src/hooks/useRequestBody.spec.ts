@@ -1,3 +1,6 @@
+import { expectTypeOf } from 'vitest'
+import z from 'zod'
+
 import {
 	BooleanValidator,
 	NullableNumberValidator,
@@ -240,5 +243,101 @@ describe('useRequestBody', () => {
 
 		expect(test).toThrow(ValidationError)
 		expect(test).toThrow("Failed body param validation: 'testParam' (Description)")
+	})
+
+	describe('zod validators', () => {
+		it('parses required params when present', () => {
+			const ctx = mockContextBody(mockContext(), {
+				stringParam: 'test_string',
+				numberParam: '12',
+				booleanParam: 'true',
+				objectParam: {
+					foo: 'aaa',
+					bar: 'bbb',
+				},
+				arrayParam: [
+					{
+						foo: 'aaa',
+						bar: 'bbb',
+					},
+					{
+						foo: 'ccc',
+						bar: 'ddd',
+					},
+				],
+			})
+
+			const params = useRequestBody(ctx, {
+				stringParam: z.string(),
+				numberParam: z.number(),
+				booleanParam: z.boolean(),
+				objectParam: z.object({
+					foo: z.string(),
+					bar: z.string(),
+				}),
+				arrayParam: z.array(
+					z.object({
+						foo: z.string(),
+						bar: z.string(),
+					}),
+				),
+			})
+
+			expect(params.stringParam).toEqual('test_string')
+			expect(params.numberParam).toEqual(12)
+			expect(params.booleanParam).toEqual(true)
+			expect(params.objectParam).toEqual({ foo: 'aaa', bar: 'bbb' })
+			expect(params.arrayParam).toEqual([
+				{ foo: 'aaa', bar: 'bbb' },
+				{ foo: 'ccc', bar: 'ddd' },
+			])
+
+			expectTypeOf(params.stringParam).toEqualTypeOf<string>()
+			expectTypeOf(params.numberParam).toEqualTypeOf<number>()
+			expectTypeOf(params.booleanParam).toEqualTypeOf<boolean>()
+			expectTypeOf(params.objectParam).toEqualTypeOf<{ foo: string; bar: string }>()
+			expectTypeOf(params.arrayParam).toEqualTypeOf<{ foo: string; bar: string }[]>()
+		})
+
+		it('throws if a required param is missing', () => {
+			const ctx = mockContextBody(mockContext(), {
+				stringParam: 'test_string',
+			})
+
+			const test = () => {
+				useRequestBody(ctx, {
+					stringParam: z.string(),
+					numberParam: z.number(),
+				})
+			}
+
+			expect(test).toThrow(ValidationError)
+			expect(test).toThrow("Missing body params: 'numberParam'")
+		})
+
+		it('allows missing params when optional', () => {
+			const ctx = mockContextBody(mockContext(), {
+				stringParam: 'test_string',
+			})
+
+			const test = () => {
+				useRequestBody(ctx, {
+					stringParam: z.string(),
+					numberParam: z.number().optional(),
+				})
+			}
+
+			expect(test).not.toThrow(ValidationError)
+		})
+
+		it('infers the return type of optional params', () => {
+			const ctx = mockContextBody(mockContext(), {})
+
+			const params = useRequestBody(ctx, {
+				numberParam: z.number().optional(),
+			})
+
+			expectTypeOf(params.numberParam).toEqualTypeOf<number | undefined>()
+		})
 	})
 })

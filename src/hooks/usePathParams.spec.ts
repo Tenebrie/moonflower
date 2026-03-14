@@ -1,3 +1,6 @@
+import { expectTypeOf } from 'vitest'
+import z from 'zod'
+
 import {
 	BooleanValidator,
 	NumberValidator,
@@ -157,5 +160,29 @@ describe('usePathParams', () => {
 
 		expect(test).toThrow(ValidationError)
 		expect(test).toThrow("Failed route param validation: 'testParam' (Description)")
+	})
+
+	describe('zod validators', () => {
+		it('parses required params when present', () => {
+			const ctx = mockContextPath(mockContext(), '/test/:stringParam/:numberParam/:booleanParam', {
+				stringParam: 'test_string',
+				numberParam: '12',
+				booleanParam: 'true',
+			})
+
+			const params = usePathParams(ctx, {
+				stringParam: z.string(),
+				numberParam: z.number(),
+				booleanParam: z.boolean(),
+			})
+
+			expect(params.stringParam).toEqual('test_string')
+			expect(params.numberParam).toEqual(12)
+			expect(params.booleanParam).toEqual(true)
+
+			expectTypeOf(params.stringParam).toEqualTypeOf<string>()
+			expectTypeOf(params.numberParam).toEqualTypeOf<number>()
+			expectTypeOf(params.booleanParam).toEqualTypeOf<boolean>()
+		})
 	})
 })

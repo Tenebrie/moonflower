@@ -12,7 +12,7 @@ import { discoverRouters } from '../discoveryModule/discoverRouters/discoverRout
 import { ApiDocsHeader, OpenApiManager } from '../manager/OpenApiManager'
 import { EndpointData, ExposedModelData } from '../types'
 import { getSourceFileTimestamp, TimestampCache } from './getSourceFileTimestamp'
-import { getValuesOfObjectLiteral } from './nodeParsers'
+import { getValuesOfObjectLiteral, resolveEndpointPath } from './nodeParsers'
 import { parseEndpoint } from './parseEndpoint'
 import { parseExposedModel, parseNamedExposedModels } from './parseExposedModels'
 import { SourceFileCache } from './sourceFileCache'
@@ -214,8 +214,7 @@ export const analyzeSourceFileEndpoints = (
 			const routerPattern = new RegExp(`${routerName}\\.(?:${joinedOperations})`)
 
 			if (routerPattern.test(nodeText)) {
-				const endpointText = node.getFirstDescendantByKind(SyntaxKind.StringLiteral)?.getText() ?? ''
-				const endpointPath = endpointText.slice(1, -1)
+				const endpointPath = resolveEndpointPath(node) ?? ''
 
 				if (filterEndpointPaths && !filterEndpointPaths.some((path) => endpointPath.includes(path))) {
 					return

@@ -550,3 +550,12 @@ router.get('/test/2ec01787-13d0-4512-9cf3-468f409508b7', () => {
 		value: 'foo',
 	}
 })
+
+// Mimics Prisma's JsonValue / JsonObject: an object with an index signature and no own properties
+type JsonValue = string | number | boolean | JsonObject | JsonArray | null
+type JsonObject = { [Key in string]?: JsonValue }
+type JsonArray = JsonValue[]
+
+router.get('/test/c4a1e7b2-9f3d-4e8a-b5c6-7d2f1a3e4b5c', () => {
+	return {} as { data: JsonObject }
+})

@@ -1,3 +1,6 @@
+import { expectTypeOf } from 'vitest'
+import z from 'zod'
+
 import {
 	BigIntValidator,
 	BooleanValidator,
@@ -220,5 +223,101 @@ describe('useQueryParams', () => {
 
 		expect(test).toThrow(ValidationError)
 		expect(test).toThrow("Failed query param validation: 'testParam' (Description)")
+	})
+
+	describe('zod validators', () => {
+		it('parses required params when present', () => {
+			const ctx = mockContextQuery(mockContext(), {
+				stringParam: 'test_string',
+				numberParam: '12',
+				booleanParam: 'true',
+				objectParam: JSON.stringify({
+					foo: 'aaa',
+					bar: 'bbb',
+				}),
+				arrayParam: JSON.stringify([
+					{
+						foo: 'aaa',
+						bar: 'bbb',
+					},
+					{
+						foo: 'ccc',
+						bar: 'ddd',
+					},
+				]),
+			})
+
+			const params = useQueryParams(ctx, {
+				stringParam: z.string(),
+				numberParam: z.number(),
+				booleanParam: z.boolean(),
+				objectParam: z.object({
+					foo: z.string(),
+					bar: z.string(),
+				}),
+				arrayParam: z.array(
+					z.object({
+						foo: z.string(),
+						bar: z.string(),
+					}),
+				),
+			})
+
+			expect(params.stringParam).toEqual('test_string')
+			expect(params.numberParam).toEqual(12)
+			expect(params.booleanParam).toEqual(true)
+			expect(params.objectParam).toEqual({ foo: 'aaa', bar: 'bbb' })
+			expect(params.arrayParam).toEqual([
+				{ foo: 'aaa', bar: 'bbb' },
+				{ foo: 'ccc', bar: 'ddd' },
+			])
+
+			expectTypeOf(params.stringParam).toEqualTypeOf<string>()
+			expectTypeOf(params.numberParam).toEqualTypeOf<number>()
+			expectTypeOf(params.booleanParam).toEqualTypeOf<boolean>()
+			expectTypeOf(params.objectParam).toEqualTypeOf<{ foo: string; bar: string }>()
+			expectTypeOf(params.arrayParam).toEqualTypeOf<{ foo: string; bar: string }[]>()
+		})
+
+		it('throws if a required param is missing', () => {
+			const ctx = mockContextQuery(mockContext(), {
+				stringParam: 'test_string',
+			})
+
+			const test = () => {
+				useQueryParams(ctx, {
+					stringParam: z.string(),
+					numberParam: z.number(),
+				})
+			}
+
+			expect(test).toThrow(ValidationError)
+			expect(test).toThrow("Missing query params: 'numberParam'")
+		})
+
+		it('allows missing params when optional', () => {
+			const ctx = mockContextQuery(mockContext(), {
+				stringParam: 'test_string',
+			})
+
+			const test = () => {
+				useQueryParams(ctx, {
+					stringParam: z.string(),
+					numberParam: z.number().optional(),
+				})
+			}
+
+			expect(test).not.toThrow(ValidationError)
+		})
+
+		it('infers the return type of optional params', () => {
+			const ctx = mockContextQuery(mockContext(), {})
+
+			const params = useQueryParams(ctx, {
+				numberParam: z.number().optional(),
+			})
+
+			expectTypeOf(params.numberParam).toEqualTypeOf<number | undefined>()
+		})
 	})
 })

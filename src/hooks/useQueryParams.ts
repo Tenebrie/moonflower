@@ -1,17 +1,23 @@
 import { ParameterizedContext } from 'koa'
+import z from 'zod'
 
 import { ValidationError } from '../errors/UserFacingErrors'
 import { keysOf } from '../utils/object'
-import { getMissingParamMessage, getValidationResultMessage } from '../utils/validationMessages'
+import { getValidationResultMessage } from '../utils/validationMessages'
 import { Validator } from '../validators/types'
+import { validateMissingParams } from '../validators/validateMissingParams'
+import { validateParam } from '../validators/validateParam'
 
 type CheckIfOptional<T, B extends boolean | undefined> = B extends false ? T : T | undefined
 
-type ValidatedData<T extends Record<string, Validator<any>>> = {
-	[K in keyof T]: CheckIfOptional<ReturnType<T[K]['parse']>, T[K]['optional']>
+type ValidatedData<T extends Record<string, Validator<any> | z.ZodType<any>>> = {
+	[K in keyof T]: CheckIfOptional<
+		ReturnType<T[K] extends Validator<any> ? T[K]['parse'] : T[K]['parse']>,
+		T[K] extends Validator<any> ? T[K]['optional'] : false
+	>
 }
 
-export const useQueryParams = <ValidatorsT extends Record<string, Validator<any>>>(
+export const useQueryParams = <ValidatorsT extends Record<string, Validator<any> | z.ZodType<any>>>(
 	ctx: ParameterizedContext,
 	validators: ValidatorsT,
 ): ValidatedData<ValidatorsT> => {
@@ -21,34 +27,19 @@ export const useQueryParams = <ValidatorsT extends Record<string, Validator<any>
 		validator: validators[name],
 	}))
 
-	const missingParams = params.filter((param) => !query[param.name] && !param.validator.optional)
-
-	if (missingParams.length > 0) {
-		throw new ValidationError(
-			`Missing query params: ${missingParams.map((param) => getMissingParamMessage(param)).join(', ')}`,
-		)
-	}
+	validateMissingParams(params, query, validators, 'query')
 
 	const validationResults = params.map((param) => {
-		const paramValue = query[param.name] as string
+		const paramValue = query[param.name]
 
 		// Param is optional and is not provided - skip validation
 		if (paramValue === undefined) {
-			return { param, validated: true }
+			return { param, validated: true, parsedValue: undefined, exception: null }
 		}
 
-		try {
-			const validatorObject = param.validator
-			const prevalidatorSuccess = !validatorObject.prevalidate || validatorObject.prevalidate(paramValue)
-			const parsedValue = validatorObject.parse(paramValue)
-			const validatorSuccess = !validatorObject.validate || validatorObject.validate(parsedValue)
-			return {
-				param,
-				validated: prevalidatorSuccess && validatorSuccess,
-				parsedValue,
-			}
-		} catch {
-			return { param, validated: false }
+		return {
+			...validateParam(param.validator, paramValue),
+			param,
 		}
 	})
 

@@ -11,6 +11,7 @@ import {
 	getValidatorPropertyShape,
 	getValidatorPropertyStringValue,
 	getValuesOfObjectLiteral,
+	resolveEndpointPath,
 } from './nodeParsers'
 
 export const parseEndpoint = (node: Node<ts.Node>, sourceFilePath: string) => {
@@ -22,8 +23,7 @@ export const parseEndpoint = (node: Node<ts.Node>, sourceFilePath: string) => {
 
 	const endpointMethod = parsedEndpointMethod === 'DEL' ? 'DELETE' : parsedEndpointMethod
 
-	const endpointText = node.getFirstDescendantByKind(SyntaxKind.StringLiteral)!.getText() ?? ''
-	const endpointPath = endpointText.substring(1, endpointText.length - 1)
+	const endpointPath = resolveEndpointPath(node) ?? ''
 
 	const endpointData: EndpointData = {
 		method: endpointMethod as 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',

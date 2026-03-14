@@ -725,6 +725,27 @@ describe('OpenApi Analyzer', () => {
 				expect(endpoint.responses.length).toEqual(1)
 			})
 
+			it('parses return type with index signature object (like Prisma JsonObject) correctly', () => {
+				const endpoint = analyzeEndpointById('c4a1e7b2-9f3d-4e8a-b5c6-7d2f1a3e4b5c')
+
+				expect(endpoint.responses[0].status).toEqual(200)
+				expect(endpoint.responses[0].signature).toEqual([
+					{
+						role: 'property',
+						identifier: 'data',
+						shape: [
+							{
+								role: 'record',
+								shape: expect.anything(),
+								optional: false,
+							},
+						],
+						optional: false,
+					},
+				])
+				expect(endpoint.responses.length).toEqual(1)
+			})
+
 			it('parses no-return endpoint correctly', () => {
 				const endpoint = analyzeEndpointById('196f2937-e369-435f-b239-62eaacaa6fbd')
 

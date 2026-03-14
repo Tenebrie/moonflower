@@ -253,7 +253,87 @@ export const getShapeOfValidatorLiteral = (
 	return properties || []
 }
 
+const isZodCallExpression = (node: Node): boolean => {
+	const callExpression = node.asKind(SyntaxKind.CallExpression)
+	if (!callExpression) {
+		return false
+	}
+	const returnType = callExpression.getReturnType()
+	const typeName = returnType.getSymbol()?.getName() ?? ''
+	return typeName.startsWith('Zod')
+}
+
+const getZodCallShape = (node: Node): ShapeOfType['shape'] => {
+	const callExpression = node.asKind(SyntaxKind.CallExpression)!
+	const returnType = callExpression.getReturnType()
+	const typeName = returnType.getSymbol()?.getName() ?? ''
+
+	if (typeName === 'ZodNumber') {
+		return 'number'
+	}
+	if (typeName === 'ZodString') {
+		return 'string'
+	}
+	if (typeName === 'ZodBoolean') {
+		return 'boolean'
+	}
+	if (typeName === 'ZodBigInt') {
+		return 'bigint'
+	}
+
+	if (typeName === 'ZodObject') {
+		const argNode = callExpression.getFirstChildByKind(SyntaxKind.SyntaxList)?.getFirstChild()
+		const objectLiteral = argNode?.asKind(SyntaxKind.ObjectLiteralExpression)
+		if (!objectLiteral) {
+			return 'unknown_zod_object'
+		}
+		const syntaxList = objectLiteral.getFirstChildByKind(SyntaxKind.SyntaxList)
+		if (!syntaxList) {
+			return []
+		}
+		const properties = syntaxList.getChildrenOfKind(SyntaxKind.PropertyAssignment)
+		return properties.map((prop) => {
+			const identifier = prop.getFirstChildByKind(SyntaxKind.Identifier)!.getText()
+			const valueNode = prop.getLastChild()!
+			return {
+				role: 'property' as const,
+				identifier,
+				shape: isZodCallExpression(valueNode)
+					? getZodCallShape(valueNode)
+					: getValidatorPropertyShape(valueNode),
+				optional: false,
+			}
+		})
+	}
+
+	if (typeName === 'ZodArray') {
+		const argNode = callExpression.getFirstChildByKind(SyntaxKind.SyntaxList)?.getFirstChild()
+		if (!argNode) {
+			return 'unknown_zod_array'
+		}
+		const elementShape = isZodCallExpression(argNode)
+			? getZodCallShape(argNode)
+			: getValidatorPropertyShape(argNode)
+		return [
+			{
+				role: 'array' as const,
+				shape: elementShape,
+				optional: false,
+			},
+		]
+	}
+
+	const fileName = node.getSourceFile().getFilePath().split('/').pop()
+	Logger.warn(`[${fileName}] Unknown zod type: ${typeName}`)
+	return 'unknown_zod'
+}
+
 export const getValidatorPropertyShape = (innerLiteralNode: Node): ShapeOfType['shape'] => {
+	// Zod validator (e.g. z.number(), z.string(), z.object({...}), z.array(...))
+	if (isZodCallExpression(innerLiteralNode)) {
+		return getZodCallShape(innerLiteralNode)
+	}
+
 	// Inline definition with `as Validator<...>` clause
 	const inlineValidatorAsExpression = innerLiteralNode
 		.getParent()!
@@ -360,6 +440,10 @@ export const getValidatorPropertyShape = (innerLiteralNode: Node): ShapeOfType['
 }
 
 export const getValidatorPropertyOptionality = (node: Node): boolean => {
+	if (isZodCallExpression(node)) {
+		return false
+	}
+
 	const callExpressionNode = node.asKind(SyntaxKind.CallExpression)
 	if (callExpressionNode) {
 		const identifierNode = callExpressionNode.getFirstChildByKind(SyntaxKind.Identifier)
@@ -393,6 +477,10 @@ export const getValidatorPropertyStringValue = (
 	nodeOrReference: Node,
 	name: 'description' | 'errorMessage',
 ): string => {
+	if (isZodCallExpression(nodeOrReference)) {
+		return ''
+	}
+
 	const node = findNodeImplementation(nodeOrReference)
 
 	const callExpressionNode = node.asKind(SyntaxKind.CallExpression)
@@ -571,14 +659,16 @@ export const getProperTypeShape = (
 	}
 
 	if (type.isObject() && type.getProperties().length === 0) {
-		const targetType = type.getAliasTypeArguments()[1]
-		return [
-			{
-				role: 'record' as const,
-				shape: getProperTypeShape(targetType, atLocation, nextStack),
-				optional: false,
-			},
-		]
+		const targetType = type.getAliasTypeArguments()[1] ?? type.getStringIndexType()
+		if (targetType) {
+			return [
+				{
+					role: 'record' as const,
+					shape: getProperTypeShape(targetType, atLocation, nextStack),
+					optional: false,
+				},
+			]
+		}
 	}
 
 	if (type.isObject()) {
@@ -678,6 +768,21 @@ const getLiteralValueOfNode = (node: Node): string | string[] | unknown[] => {
 	Logger.dev(`[${fileName}] Unknown literal value node ${node.getKindName()}`)
 
 	return 'unknown_6'
+}
+
+export const resolveEndpointPath = (node: Node): string | null => {
+	const callExpression = node.getFirstDescendantByKind(SyntaxKind.CallExpression)
+	if (!callExpression) return null
+
+	const firstArg = callExpression.getArguments()[0]
+	if (!firstArg) return null
+
+	const argType = firstArg.getType()
+	if (argType.isStringLiteral()) {
+		return argType.getLiteralValue() as string
+	}
+
+	return null
 }
 
 export const getValuesOfObjectLiteral = (objectLiteralNode: Node<ts.ObjectLiteralExpression>) => {

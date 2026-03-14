@@ -30,10 +30,14 @@ export const getValidationResultMessage = (
 				originalName: string
 				validator: Pick<Validator<unknown>, 'description' | 'errorMessage'>
 		  },
+	exception?: string | null,
 ) => {
 	const name = 'name' in result ? result.name : result.originalName
 	const { description, errorMessage } = result.validator
 
+	if (exception) {
+		return `'${name}' (${exception})`
+	}
 	if (errorMessage) {
 		return `'${name}' (${errorMessage})`
 	}
