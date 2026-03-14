@@ -3,9 +3,9 @@ import * as path from 'path'
 import yargs, { ArgumentsCamelCase } from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import { prepareOpenApiSpec } from '../src/openapi/analyzerModule/analyzerModule'
-import { generateOpenApiSpec } from '../src/openapi/generatorModule'
-import { OpenApiManager } from '../src/openapi/manager/OpenApiManager'
+import { prepareOpenApiSpec } from '../openapi/analyzerModule/analyzerModule'
+import { generateOpenApiSpec } from '../openapi/generatorModule'
+import { OpenApiManager } from '../openapi/manager/OpenApiManager'
 import { printAnalysisStats } from './prettyprint'
 
 const originalConsole = console.info
@@ -31,12 +31,22 @@ yargs(hideBin(process.argv))
 				type: 'string',
 				coerce: (f) => path.resolve(f),
 			},
+
+			force: {
+				describe: 'Overwrite existing file',
+				type: 'boolean',
+				default: false,
+			},
 		},
 
-		handler(argv: ArgumentsCamelCase<{ targetPath: string; tsConfigPath?: string }>) {
+		handler(argv: ArgumentsCamelCase<{ targetPath: string; tsConfigPath?: string; force: boolean }>) {
 			if (fs.existsSync(argv.targetPath)) {
-				console.error(`[Error] File already exists at ${argv.targetPath}`)
-				return
+				if (!argv.force && !isValidMoonflowerOutput(argv.targetPath)) {
+					console.error(
+						`[Error] File already exists at ${argv.targetPath} and does not appear to be a moonflower output. Use --force to overwrite.`,
+					)
+					return
+				}
 			}
 
 			if (argv.tsConfigPath && !fs.existsSync(argv.tsConfigPath)) {
@@ -57,3 +67,13 @@ yargs(hideBin(process.argv))
 	})
 	.demandCommand()
 	.parse()
+
+function isValidMoonflowerOutput(filePath: string): boolean {
+	try {
+		const content = fs.readFileSync(filePath, 'utf-8')
+		const parsed = JSON.parse(content)
+		return typeof parsed === 'object' && parsed !== null && typeof parsed.openapi === 'string'
+	} catch {
+		return false
+	}
+}

@@ -1,5 +1,5 @@
-import { ApiAnalysisStats } from '../src/openapi/manager/OpenApiManager'
-import { Logger } from '../src/utils/logger'
+import { ApiAnalysisStats } from '../openapi/manager/OpenApiManager'
+import { Logger } from '../utils/logger'
 
 export const printAnalysisStats = (stats: ApiAnalysisStats) => {
 	stats.explicitRouterFiles.forEach((file) => printRouterFile(file))

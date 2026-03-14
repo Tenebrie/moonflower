@@ -1,7 +1,13 @@
+import * as fs from 'fs'
+import Koa from 'koa'
+import * as os from 'os'
+import * as path from 'path'
 import request from 'supertest'
 import { vi } from 'vitest'
 
 import { generateOpenApiSpec } from '../openapi/generatorModule/generatorModule'
+import { initOpenApiEngine } from '../openapi/initOpenApiEngine'
+import { OpenApiManager } from '../openapi/manager/OpenApiManager'
 import { app } from './app'
 
 describe('TestAppRouter', () => {
@@ -147,5 +153,26 @@ describe('OpenApiRouter', () => {
 				},
 			},
 		})
+	})
+
+	it('serves a prebuilt spec from file', async () => {
+		const manager = OpenApiManager.getInstance()
+		const liveSpec = generateOpenApiSpec(manager)
+
+		const specPath = path.join(os.tmpdir(), `moonflower-test-spec-${Date.now()}.json`)
+		fs.writeFileSync(specPath, JSON.stringify(liveSpec))
+
+		try {
+			const prebuiltApp = new Koa()
+			prebuiltApp.use(initOpenApiEngine({ specPath }))
+
+			const response = await request(prebuiltApp.callback()).get('/api-json')
+			expect(response.status).toBe(200)
+			const responseJson = JSON.parse(response.text)
+			expect(responseJson).toEqual(liveSpec)
+		} finally {
+			manager.clearPrebuiltSpec()
+			fs.unlinkSync(specPath)
+		}
 	})
 })

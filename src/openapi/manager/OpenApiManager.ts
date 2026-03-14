@@ -45,6 +45,7 @@ export class OpenApiManager {
 
 	private isInitialized = false
 	private registeredRouters: Router[] = []
+	private prebuiltSpec: Record<string, unknown> | null = null
 
 	constructor(
 		private apiDocsHeader: ApiDocsHeader,
@@ -125,9 +126,24 @@ export class OpenApiManager {
 		return this
 	}
 
+	public getPrebuiltSpec(): Record<string, unknown> | null {
+		return this.prebuiltSpec
+	}
+
+	public setPrebuiltSpec(spec: Record<string, unknown>) {
+		this.prebuiltSpec = spec
+		return this
+	}
+
+	public clearPrebuiltSpec() {
+		this.prebuiltSpec = null
+		return this
+	}
+
 	public reset() {
 		this.exposedModels = []
 		this.endpoints = []
+		this.prebuiltSpec = null
 	}
 
 	public static getInstance() {

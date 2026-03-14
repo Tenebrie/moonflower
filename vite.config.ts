@@ -23,6 +23,7 @@ const entries = {
 	'router/Router': resolve(__dirname, 'src/router/Router.ts'),
 	'validators/BuiltInValidators': resolve(__dirname, 'src/validators/BuiltInValidators.ts'),
 	'validators/ParamWrappers': resolve(__dirname, 'src/validators/ParamWrappers.ts'),
+	'cli/cli': resolve(__dirname, 'src/cli/cli.ts'),
 }
 
 export const baseViteConfig: ViteUserConfig = {
@@ -53,6 +54,8 @@ export const baseViteConfig: ViteUserConfig = {
 				'@ts-morph/common',
 				'typescript',
 				'ts-morph',
+				'yargs',
+				'yargs/helpers',
 			],
 			output: {
 				globals: {
