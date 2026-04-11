@@ -1108,6 +1108,20 @@ describe('OpenApi Analyzer', () => {
 				// ReadableStream should be treated as buffer, not expanded
 				expect(valueProperty.shape).toEqual([{ role: 'buffer', shape: 'buffer', optional: false }])
 			})
+			it('handles interface-based JsonArray (Prisma pattern) without leaking Array properties', () => {
+				const endpoint = analyzeEndpointById(TestCase.parsesPrismaJsonObjectReturnedFromFunction)
+				expect(endpoint.responses[0].status).toEqual(200)
+				const dataProperty = (endpoint.responses[0].signature as any[]).find(
+					(prop: any) => prop.identifier === 'data',
+				)
+				// The union should contain an array entry, not expanded Array prototype properties
+				const unionShape = dataProperty.shape[0].shape
+				const arrayEntry = unionShape.find(
+					(entry: any) => Array.isArray(entry.shape) && entry.shape[0]?.role === 'array',
+				)
+				expect(arrayEntry).toBeDefined()
+				expect(arrayEntry.shape[0].role).toEqual('array')
+			})
 			it('handles content type of normal object', () => {
 				const endpoint = analyzeEndpointById('a47c9a37-a6cb-45bd-9460-e58562f179d4')
 				expect(endpoint.responses[0].status).toEqual(200)

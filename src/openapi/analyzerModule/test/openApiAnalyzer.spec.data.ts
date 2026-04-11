@@ -637,3 +637,18 @@ const getReadableStreamFromService = (): ReadableStream<Uint8Array> => new Reada
 router.get(`/test/${TestCase.parsesReadableStreamReturnedFromFunction}`, () => {
 	return useReturnValue(getReadableStreamFromService(), 200, 'application/octet-stream')
 })
+
+// Deliberate syntax edge case to simulate Prisma's JsonValue
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+interface PrismaJsonArray extends Array<PrismaJsonValue> {}
+type PrismaJsonValue =
+	| string
+	| number
+	| boolean
+	| { [Key in string]?: PrismaJsonValue }
+	| PrismaJsonArray
+	| null
+
+router.get(`/test/${TestCase.parsesPrismaJsonObjectReturnedFromFunction}`, () => {
+	return {} as { data: PrismaJsonValue | null }
+})

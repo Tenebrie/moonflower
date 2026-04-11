@@ -17,4 +17,5 @@ export const TestCase = {
 	parsesFloat32ArrayReturnedFromFunction: 'parses-float32array-returned-from-function',
 	parsesArrayBufferReturnedFromFunction: 'parses-arraybuffer-returned-from-function',
 	parsesReadableStreamReturnedFromFunction: 'parses-readablestream-returned-from-function',
+	parsesPrismaJsonObjectReturnedFromFunction: 'parses-prisma-jsonobject-returned-from-function',
 } as const

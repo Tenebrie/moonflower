@@ -652,6 +652,27 @@ export const getProperTypeShape = (
 		]
 	}
 
+	// Handles `interface Foo extends Array<T>` (e.g. Prisma's JsonArray)
+	// which fails type.isArray() but is still array-like
+	if (type.isObject()) {
+		const arrayElementType = type.getNumberIndexType()
+		const baseTypes = type.getBaseTypes()
+		const arrayBase = baseTypes?.find((base) => base.isArray())
+		if (arrayBase) {
+			return [
+				{
+					role: 'array' as const,
+					shape: getProperTypeShape(
+						arrayBase.getArrayElementType() ?? arrayElementType!,
+						atLocation,
+						nextStack,
+					),
+					optional: false,
+				},
+			]
+		}
+	}
+
 	const typeSymbolName = type.getSymbol()?.getName()
 
 	const bufferLikeTypes = new Set([
