@@ -8,4 +8,13 @@ export const TestCase = {
 	parsesReturnRecordStringUnknown: 'parses-return-record-string-unknown',
 	parsesReturnObjectWithRecordProperty: 'parses-return-object-with-record-property',
 	parsesBufferReturnedFromFunction: 'parses-buffer-returned-from-function',
+	parsesDateReturnedFromFunction: 'parses-date-returned-from-function',
+	parsesMapReturnedFromFunction: 'parses-map-returned-from-function',
+	parsesSetReturnedFromFunction: 'parses-set-returned-from-function',
+	parsesRegExpReturnedFromFunction: 'parses-regexp-returned-from-function',
+	parsesErrorReturnedFromFunction: 'parses-error-returned-from-function',
+	parsesInt8ArrayReturnedFromFunction: 'parses-int8array-returned-from-function',
+	parsesFloat32ArrayReturnedFromFunction: 'parses-float32array-returned-from-function',
+	parsesArrayBufferReturnedFromFunction: 'parses-arraybuffer-returned-from-function',
+	parsesReadableStreamReturnedFromFunction: 'parses-readablestream-returned-from-function',
 } as const

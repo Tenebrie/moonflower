@@ -1029,6 +1029,85 @@ describe('OpenApi Analyzer', () => {
 				)
 				expect(valueProperty.shape).toEqual([{ role: 'buffer', shape: 'buffer', optional: false }])
 			})
+			it('handles Date returned from external function', () => {
+				const endpoint = analyzeEndpointById(TestCase.parsesDateReturnedFromFunction)
+				expect(endpoint.responses[0].signature).toEqual([
+					{
+						identifier: 'createdAt',
+						optional: false,
+						role: 'property',
+						shape: 'Date',
+					},
+				])
+			})
+			it('handles Map returned from external function', () => {
+				const endpoint = analyzeEndpointById(TestCase.parsesMapReturnedFromFunction)
+				const dataProperty = (endpoint.responses[0].signature as any[]).find(
+					(prop: any) => prop.identifier === 'data',
+				)
+				// Map<string, number> should be represented as a record, not expanded into internal properties
+				expect(dataProperty.shape).toEqual([{ role: 'record', shape: 'number', optional: false }])
+			})
+			it('handles Set returned from external function', () => {
+				const endpoint = analyzeEndpointById(TestCase.parsesSetReturnedFromFunction)
+				const dataProperty = (endpoint.responses[0].signature as any[]).find(
+					(prop: any) => prop.identifier === 'data',
+				)
+				// Set<string> should be represented as an array, not expanded into internal properties
+				expect(dataProperty.shape).toEqual([{ role: 'array', shape: 'string', optional: false }])
+			})
+			it('handles RegExp returned from external function', () => {
+				const endpoint = analyzeEndpointById(TestCase.parsesRegExpReturnedFromFunction)
+				const dataProperty = (endpoint.responses[0].signature as any[]).find(
+					(prop: any) => prop.identifier === 'data',
+				)
+				// RegExp should be represented as a string, not expanded into internal properties
+				expect(dataProperty.shape).toEqual('string')
+			})
+			it('handles Error returned from external function', () => {
+				const endpoint = analyzeEndpointById(TestCase.parsesErrorReturnedFromFunction)
+				const dataProperty = (endpoint.responses[0].signature as any[]).find(
+					(prop: any) => prop.identifier === 'data',
+				)
+				// Error has a small, reasonable property set — expanding is acceptable
+				expect(dataProperty.shape).toEqual([
+					{ identifier: 'name', optional: false, role: 'property', shape: 'string' },
+					{ identifier: 'message', optional: false, role: 'property', shape: 'string' },
+					{ identifier: 'stack', optional: true, role: 'property', shape: 'string' },
+				])
+			})
+			it('handles Int8Array returned from external function', () => {
+				const endpoint = analyzeEndpointById(TestCase.parsesInt8ArrayReturnedFromFunction)
+				const valueProperty = (endpoint.responses[0].signature as any[]).find(
+					(prop: any) => prop.identifier === 'value',
+				)
+				// Int8Array should be treated as buffer, not expanded
+				expect(valueProperty.shape).toEqual([{ role: 'buffer', shape: 'buffer', optional: false }])
+			})
+			it('handles Float32Array returned from external function', () => {
+				const endpoint = analyzeEndpointById(TestCase.parsesFloat32ArrayReturnedFromFunction)
+				const valueProperty = (endpoint.responses[0].signature as any[]).find(
+					(prop: any) => prop.identifier === 'value',
+				)
+				// Float32Array should be treated as buffer, not expanded
+				expect(valueProperty.shape).toEqual([{ role: 'buffer', shape: 'buffer', optional: false }])
+			})
+			it('handles ArrayBuffer returned from external function', () => {
+				const endpoint = analyzeEndpointById(TestCase.parsesArrayBufferReturnedFromFunction)
+				const valueProperty = (endpoint.responses[0].signature as any[]).find(
+					(prop: any) => prop.identifier === 'value',
+				)
+				// ArrayBuffer should be treated as buffer, not expanded
+				expect(valueProperty.shape).toEqual([{ role: 'buffer', shape: 'buffer', optional: false }])
+			})
+			it('handles ReadableStream returned from external function', () => {
+				const endpoint = analyzeEndpointById(TestCase.parsesReadableStreamReturnedFromFunction)
+				const valueProperty = (endpoint.responses[0].signature as any[]).find(
+					(prop: any) => prop.identifier === 'value',
+				)
+				// ReadableStream should be treated as buffer, not expanded
+				expect(valueProperty.shape).toEqual([{ role: 'buffer', shape: 'buffer', optional: false }])
+			})
 			it('handles content type of normal object', () => {
 				const endpoint = analyzeEndpointById('a47c9a37-a6cb-45bd-9460-e58562f179d4')
 				expect(endpoint.responses[0].status).toEqual(200)

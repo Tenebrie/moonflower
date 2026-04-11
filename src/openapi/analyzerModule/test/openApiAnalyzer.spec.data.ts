@@ -574,3 +574,66 @@ const getImageData = (): Uint8Array => Buffer.from('foo')
 router.get(`/test/${TestCase.parsesBufferReturnedFromFunction}`, () => {
 	return useReturnValue(getImageData(), 200, 'image/webp')
 })
+
+// Date returned from a function (simulates service/ORM layer)
+const getDateFromService = (): Date => new Date()
+
+router.get(`/test/${TestCase.parsesDateReturnedFromFunction}`, () => {
+	return { createdAt: getDateFromService() }
+})
+
+// Map returned from a function
+const getMapFromService = (): Map<string, number> => new Map()
+
+router.get(`/test/${TestCase.parsesMapReturnedFromFunction}`, () => {
+	return { data: getMapFromService() }
+})
+
+// Set returned from a function
+const getSetFromService = (): Set<string> => new Set()
+
+router.get(`/test/${TestCase.parsesSetReturnedFromFunction}`, () => {
+	return { data: getSetFromService() }
+})
+
+// RegExp returned from a function
+const getRegExpFromService = (): RegExp => /foo/
+
+router.get(`/test/${TestCase.parsesRegExpReturnedFromFunction}`, () => {
+	return { data: getRegExpFromService() }
+})
+
+// Error returned from a function
+const getErrorFromService = (): Error => new Error('foo')
+
+router.get(`/test/${TestCase.parsesErrorReturnedFromFunction}`, () => {
+	return { data: getErrorFromService() }
+})
+
+// Int8Array returned from a function
+const getInt8ArrayFromService = (): Int8Array => new Int8Array()
+
+router.get(`/test/${TestCase.parsesInt8ArrayReturnedFromFunction}`, () => {
+	return useReturnValue(getInt8ArrayFromService(), 200, 'application/octet-stream')
+})
+
+// Float32Array returned from a function
+const getFloat32ArrayFromService = (): Float32Array => new Float32Array()
+
+router.get(`/test/${TestCase.parsesFloat32ArrayReturnedFromFunction}`, () => {
+	return useReturnValue(getFloat32ArrayFromService(), 200, 'application/octet-stream')
+})
+
+// ArrayBuffer returned from a function
+const getArrayBufferFromService = (): ArrayBuffer => new ArrayBuffer(8)
+
+router.get(`/test/${TestCase.parsesArrayBufferReturnedFromFunction}`, () => {
+	return useReturnValue(getArrayBufferFromService(), 200, 'application/octet-stream')
+})
+
+// ReadableStream returned from a function
+const getReadableStreamFromService = (): ReadableStream<Uint8Array> => new ReadableStream()
+
+router.get(`/test/${TestCase.parsesReadableStreamReturnedFromFunction}`, () => {
+	return useReturnValue(getReadableStreamFromService(), 200, 'application/octet-stream')
+})

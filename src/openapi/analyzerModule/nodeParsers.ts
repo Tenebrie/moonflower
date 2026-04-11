@@ -653,11 +653,58 @@ export const getProperTypeShape = (
 	}
 
 	const typeSymbolName = type.getSymbol()?.getName()
-	if (type.isObject() && (typeSymbolName === 'Buffer' || typeSymbolName === 'Uint8Array')) {
+
+	const bufferLikeTypes = new Set([
+		'Buffer',
+		'Uint8Array',
+		'Int8Array',
+		'Uint8ClampedArray',
+		'Int16Array',
+		'Uint16Array',
+		'Int32Array',
+		'Uint32Array',
+		'Float32Array',
+		'Float64Array',
+		'BigInt64Array',
+		'BigUint64Array',
+		'ArrayBuffer',
+		'SharedArrayBuffer',
+		'ReadableStream',
+	])
+
+	if (type.isObject() && typeSymbolName && bufferLikeTypes.has(typeSymbolName)) {
 		return [
 			{
 				role: 'buffer' as const,
 				shape: 'buffer',
+				optional: false,
+			},
+		]
+	}
+
+	if (type.isObject() && typeSymbolName === 'RegExp') {
+		return 'string'
+	}
+
+	if (type.isObject() && typeSymbolName === 'Map') {
+		const typeArgs = type.getTypeArguments()
+		const valueType = typeArgs[1]
+		return [
+			{
+				role: 'record' as const,
+				shape: valueType ? getProperTypeShape(valueType, atLocation, nextStack) : 'unknown',
+				optional: false,
+			},
+		]
+	}
+
+	if (type.isObject() && typeSymbolName === 'Set') {
+		const typeArgs = type.getTypeArguments()
+		const elementType = typeArgs[0]
+		return [
+			{
+				role: 'array' as const,
+				shape: elementType ? getProperTypeShape(elementType, atLocation, nextStack) : 'unknown',
 				optional: false,
 			},
 		]
@@ -677,7 +724,7 @@ export const getProperTypeShape = (
 	}
 
 	if (type.isObject()) {
-		if (type.getText() === 'Date') {
+		if (typeSymbolName === 'Date' || type.getText() === 'Date') {
 			return 'Date'
 		}
 		return type
