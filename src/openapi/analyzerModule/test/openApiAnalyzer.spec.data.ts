@@ -17,6 +17,7 @@ import {
 	StringValidator,
 } from '../../../validators/BuiltInValidators'
 import { OptionalParam, PathParam, RequiredParam } from '../../../validators/ParamWrappers'
+import { TestCase } from './TestCase'
 
 const router = new Router()
 
@@ -549,6 +550,14 @@ router.get('/test/2ec01787-13d0-4512-9cf3-468f409508b7', () => {
 	return {
 		value: 'foo',
 	}
+})
+
+router.get(`/test/${TestCase.parsesReturnRecordStringUnknown}`, () => {
+	return {} as Record<string, unknown>
+})
+
+router.get(`/test/${TestCase.parsesReturnObjectWithRecordProperty}`, () => {
+	return {} as { foo: string; bar: Record<string, unknown> }
 })
 
 // Mimics Prisma's JsonValue / JsonObject: an object with an index signature and no own properties

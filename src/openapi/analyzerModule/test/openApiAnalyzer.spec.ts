@@ -1,4 +1,5 @@
 import { Project, SyntaxKind } from 'ts-morph'
+import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import { loadTestData } from '../../../utils/loadTestData'
 import { StringValidator } from '../../../validators/BuiltInValidators'
@@ -6,6 +7,7 @@ import { discoverRouters } from '../../discoveryModule/discoverRouters/discoverR
 import { OpenApiManager } from '../../manager/OpenApiManager'
 import { analyzeSourceFileEndpoints } from '../analyzerModule'
 import { getValidatorPropertyShape, getValidatorPropertyStringValue } from '../nodeParsers'
+import { TestCase } from './TestCase'
 
 describe('OpenApi Analyzer', () => {
 	describe('when analyzing a test data file', () => {
@@ -717,6 +719,47 @@ describe('OpenApi Analyzer', () => {
 								optional: false,
 								role: 'property',
 								shape: 'string',
+							},
+						],
+						optional: false,
+					},
+				])
+				expect(endpoint.responses.length).toEqual(1)
+			})
+
+			it('parses return Record<string, unknown> type correctly', () => {
+				const endpoint = analyzeEndpointById(TestCase.parsesReturnRecordStringUnknown)
+
+				expect(endpoint.responses[0].status).toEqual(200)
+				expect(endpoint.responses[0].signature).toEqual([
+					{
+						role: 'record',
+						shape: 'unknown',
+						optional: false,
+					},
+				])
+				expect(endpoint.responses.length).toEqual(1)
+			})
+
+			it('parses return object with Record<string, unknown> property correctly', () => {
+				const endpoint = analyzeEndpointById(TestCase.parsesReturnObjectWithRecordProperty)
+
+				expect(endpoint.responses[0].status).toEqual(200)
+				expect(endpoint.responses[0].signature).toEqual([
+					{
+						role: 'property',
+						identifier: 'foo',
+						shape: 'string',
+						optional: false,
+					},
+					{
+						role: 'property',
+						identifier: 'bar',
+						shape: [
+							{
+								role: 'record',
+								shape: 'unknown',
+								optional: false,
 							},
 						],
 						optional: false,

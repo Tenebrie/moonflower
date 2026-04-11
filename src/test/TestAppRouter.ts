@@ -82,4 +82,12 @@ myRouter.get('/test/get/middleware-data', (ctx) => {
 	}
 })
 
+myRouter.get('/test/get/record-string-unknown', () => {
+	return {} as Record<string, unknown>
+})
+
+myRouter.get('/test/get/object-with-record', () => {
+	return {} as { foo: string; bar: Record<string, unknown> }
+})
+
 export const TestAppRouter = myRouter

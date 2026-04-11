@@ -5,4 +5,6 @@ export const TestCase = {
 	parsesInlineZodNumberArray: 'parses-inline-zod-number-array',
 	parsesInlineZodObjectArray: 'parses-inline-zod-object-array',
 	parsedAliasedZodSchema: 'parses-aliased-zod-schema',
+	parsesReturnRecordStringUnknown: 'parses-return-record-string-unknown',
+	parsesReturnObjectWithRecordProperty: 'parses-return-object-with-record-property',
 } as const

@@ -1,4 +1,5 @@
 import { SyntaxKind } from 'ts-morph'
+import { describe, expect, it } from 'vitest'
 
 import { loadTestData } from '../../../utils/loadTestData'
 import { discoverRouters } from './discoverRouters'

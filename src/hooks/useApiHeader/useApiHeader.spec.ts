@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vitest'
+
 import { analyzeSourceFileApiHeader } from '../../openapi/analyzerModule/analyzerModule'
 import { loadTestData } from '../../utils/loadTestData'
 import { useApiHeader } from './useApiHeader'

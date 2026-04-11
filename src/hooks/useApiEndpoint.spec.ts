@@ -1,3 +1,5 @@
+import { describe, it } from 'vitest'
+
 import { useApiEndpoint } from './useApiEndpoint'
 
 describe('useApiEndpoint', () => {

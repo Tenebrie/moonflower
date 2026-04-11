@@ -580,6 +580,10 @@ export const getProperTypeShape = (
 		return 'any'
 	}
 
+	if (type.isUnknown()) {
+		return 'unknown'
+	}
+
 	if (type.isNull()) {
 		return 'null'
 	}

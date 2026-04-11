@@ -28,6 +28,10 @@ export const getSchema = (shape: string | ShapeOfType[]): SchemaType => {
 		return generateAny()
 	}
 
+	if (typeof shape === 'string' && shape === 'unknown') {
+		return generateAny()
+	}
+
 	if (typeof shape === 'string' && shape === 'circular') {
 		return generateAny()
 	}

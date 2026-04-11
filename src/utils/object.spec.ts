@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vitest'
+
 import { camelToKebabCase, camelToSnakeCase, snakeToCamelCase, uncapitalize } from './object'
 
 describe('object utilities', () => {

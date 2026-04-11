@@ -1,6 +1,6 @@
 import { Project } from 'ts-morph'
 import * as util from 'util'
-import { vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { debugNode, debugNodeChildren, debugNodes, debugObject } from './printers'
 

@@ -3,7 +3,7 @@ import Koa from 'koa'
 import * as os from 'os'
 import * as path from 'path'
 import request from 'supertest'
-import { vi } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import { generateOpenApiSpec } from '../openapi/generatorModule/generatorModule'
 import { initOpenApiEngine } from '../openapi/initOpenApiEngine'
@@ -144,6 +144,85 @@ describe('OpenApiRouter', () => {
 											type: 'object',
 											properties: { greeting: { type: 'string' } },
 											required: ['greeting'],
+										},
+									],
+								},
+							},
+						},
+					},
+				},
+			},
+		})
+	})
+
+	it('generates correct spec for Record<string, unknown> return type', async () => {
+		const response = await request(app.callback()).get('/api-json')
+		const responseJson = JSON.parse(response.text) as ReturnType<typeof generateOpenApiSpec>
+		expect(responseJson.paths['/test/get/record-string-unknown']).toEqual({
+			get: {
+				description: '',
+				parameters: [],
+				responses: {
+					'200': {
+						description: '',
+						content: {
+							'application/json': {
+								schema: {
+									oneOf: [
+										{
+											type: 'object',
+											additionalProperties: {
+												oneOf: [
+													{ type: 'string' },
+													{ type: 'boolean' },
+													{ type: 'number' },
+													{ type: 'object' },
+													{ type: 'array' },
+												],
+											},
+										},
+									],
+								},
+							},
+						},
+					},
+				},
+			},
+		})
+	})
+
+	it('generates correct spec for object with Record<string, unknown> property', async () => {
+		const response = await request(app.callback()).get('/api-json')
+		const responseJson = JSON.parse(response.text) as ReturnType<typeof generateOpenApiSpec>
+		expect(responseJson.paths['/test/get/object-with-record']).toEqual({
+			get: {
+				description: '',
+				parameters: [],
+				responses: {
+					'200': {
+						description: '',
+						content: {
+							'application/json': {
+								schema: {
+									oneOf: [
+										{
+											type: 'object',
+											properties: {
+												foo: { type: 'string' },
+												bar: {
+													type: 'object',
+													additionalProperties: {
+														oneOf: [
+															{ type: 'string' },
+															{ type: 'boolean' },
+															{ type: 'number' },
+															{ type: 'object' },
+															{ type: 'array' },
+														],
+													},
+												},
+											},
+											required: ['foo', 'bar'],
 										},
 									],
 								},

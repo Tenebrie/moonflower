@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vitest'
+
 import { loadTestData } from '../../../utils/loadTestData'
 import { discoverRouters } from '../../discoveryModule/discoverRouters/discoverRouters'
 import { analyzeSourceFileEndpoints } from '../analyzerModule'
