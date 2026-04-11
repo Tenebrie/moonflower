@@ -568,3 +568,9 @@ type JsonArray = JsonValue[]
 router.get('/test/c4a1e7b2-9f3d-4e8a-b5c6-7d2f1a3e4b5c', () => {
 	return {} as { data: JsonObject }
 })
+
+const getImageData = (): Uint8Array => Buffer.from('foo')
+
+router.get(`/test/${TestCase.parsesBufferReturnedFromFunction}`, () => {
+	return useReturnValue(getImageData(), 200, 'image/webp')
+})

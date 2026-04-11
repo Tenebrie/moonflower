@@ -1020,6 +1020,15 @@ describe('OpenApi Analyzer', () => {
 				expect(endpoint.responses[0].status).toEqual(200)
 				expect(endpoint.responses[0].contentType).toEqual('application/octet-stream')
 			})
+			it('handles Buffer returned from external function via useReturnValue', () => {
+				const endpoint = analyzeEndpointById(TestCase.parsesBufferReturnedFromFunction)
+				expect(endpoint.responses[0].status).toEqual(200)
+				expect(endpoint.responses[0].contentType).toEqual('image/webp')
+				const valueProperty = (endpoint.responses[0].signature as any[]).find(
+					(prop: any) => prop.identifier === 'value',
+				)
+				expect(valueProperty.shape).toEqual([{ role: 'buffer', shape: 'buffer', optional: false }])
+			})
 			it('handles content type of normal object', () => {
 				const endpoint = analyzeEndpointById('a47c9a37-a6cb-45bd-9460-e58562f179d4')
 				expect(endpoint.responses[0].status).toEqual(200)

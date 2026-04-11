@@ -7,4 +7,5 @@ export const TestCase = {
 	parsedAliasedZodSchema: 'parses-aliased-zod-schema',
 	parsesReturnRecordStringUnknown: 'parses-return-record-string-unknown',
 	parsesReturnObjectWithRecordProperty: 'parses-return-object-with-record-property',
+	parsesBufferReturnedFromFunction: 'parses-buffer-returned-from-function',
 } as const

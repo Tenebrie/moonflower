@@ -652,7 +652,8 @@ export const getProperTypeShape = (
 		]
 	}
 
-	if (type.isObject() && type.getText() === 'Buffer') {
+	const typeSymbolName = type.getSymbol()?.getName()
+	if (type.isObject() && (typeSymbolName === 'Buffer' || typeSymbolName === 'Uint8Array')) {
 		return [
 			{
 				role: 'buffer' as const,
