@@ -349,6 +349,16 @@ const getZodCallShape = (node: Node): ShapeOfType['shape'] => {
 		return 'unknown_zod_enum'
 	}
 
+	if (typeName === 'ZodOptional') {
+		const innerCallExpression = callExpression
+			.getFirstChildByKind(SyntaxKind.PropertyAccessExpression)
+			?.getFirstChildByKind(SyntaxKind.CallExpression)
+		if (innerCallExpression && isZodCallExpression(innerCallExpression)) {
+			return getZodCallShape(innerCallExpression)
+		}
+		return 'unknown_zod_optional'
+	}
+
 	const fileName = node.getSourceFile().getFilePath().split('/').pop()
 	Logger.warn(`[${fileName}] Unknown zod type: ${typeName}`)
 	return 'unknown_zod'
@@ -467,6 +477,12 @@ export const getValidatorPropertyShape = (innerLiteralNode: Node): ShapeOfType['
 
 export const getValidatorPropertyOptionality = (node: Node): boolean => {
 	if (isZodCallExpression(node)) {
+		const callExpression = node.asKind(SyntaxKind.CallExpression)!
+		const returnType = callExpression.getReturnType()
+		const typeName = returnType.getSymbol()?.getName() ?? ''
+		if (typeName === 'ZodOptional') {
+			return true
+		}
 		return false
 	}
 

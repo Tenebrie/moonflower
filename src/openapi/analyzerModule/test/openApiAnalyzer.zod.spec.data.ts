@@ -108,3 +108,11 @@ router.post(`/test/${TestCase.parsesInlineZodEnum}/:direction`, (ctx) => {
 	expectTypeOf(body.direction).toEqualTypeOf<MindmapLinkDirection>()
 	expectTypeOf(body.optionalDirection).toEqualTypeOf<MindmapLinkDirection | undefined>()
 })
+
+router.post(`/test/${TestCase.parsesZodOptional}`, (ctx) => {
+	useRequestBody(ctx, {
+		requiredField: z.string(),
+		optionalField: z.string().optional(),
+		optionalNumber: z.number().optional(),
+	})
+})
