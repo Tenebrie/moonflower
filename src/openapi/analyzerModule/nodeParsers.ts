@@ -323,6 +323,32 @@ const getZodCallShape = (node: Node): ShapeOfType['shape'] => {
 		]
 	}
 
+	if (typeName === 'ZodEnum') {
+		const typeArgs = returnType.getTypeArguments()
+		if (typeArgs.length > 0) {
+			const enumType = typeArgs[0]
+			const properties = enumType.getProperties()
+			const shapes: ShapeOfUnionEntry[] = properties.map((prop) => ({
+				role: 'union_entry' as const,
+				shape: getProperTypeShape(prop.getTypeAtLocation(callExpression), callExpression, []),
+				optional: false,
+			}))
+			if (shapes.length === 1) {
+				return shapes[0].shape
+			}
+			if (shapes.length > 1) {
+				return [
+					{
+						role: 'union' as const,
+						shape: shapes,
+						optional: false,
+					},
+				]
+			}
+		}
+		return 'unknown_zod_enum'
+	}
+
 	const fileName = node.getSourceFile().getFilePath().split('/').pop()
 	Logger.warn(`[${fileName}] Unknown zod type: ${typeName}`)
 	return 'unknown_zod'

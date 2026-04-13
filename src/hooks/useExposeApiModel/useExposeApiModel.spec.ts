@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vitest'
+
 import { analyzeSourceFileExposedModels } from '../../openapi/analyzerModule/analyzerModule'
 import { loadTestData } from '../../utils/loadTestData'
 import { useExposeApiModel, useExposeNamedApiModels } from './useExposeApiModel'

@@ -138,8 +138,54 @@ describe('OpenApi Analyzer (Zod Validator)', () => {
 				expect(endpoint.objectBody[0].optional).toEqual(false)
 			})
 
+			it('parses inline zod enum validators', () => {
+				const endpoint = analyzeEndpointById(TestCase.parsesInlineZodEnum)
+
+				const expectedSignature = [
+					{
+						role: 'union',
+						optional: false,
+						shape: [
+							{
+								role: 'union_entry',
+								shape: [
+									{
+										optional: false,
+										role: 'literal_string',
+										shape: 'Normal',
+									},
+								],
+								optional: false,
+							},
+							{
+								role: 'union_entry',
+								shape: [
+									{
+										optional: false,
+										role: 'literal_string',
+										shape: 'Reversed',
+									},
+								],
+								optional: false,
+							},
+						],
+					},
+				]
+
+				expect(endpoint.requestPathParams[0].identifier).toEqual('direction')
+				expect(endpoint.requestPathParams[0].signature).toEqual(expectedSignature)
+				expect(endpoint.requestPathParams[0].optional).toEqual(false)
+
+				expect(endpoint.objectBody[0].identifier).toEqual('direction')
+				expect(endpoint.objectBody[0].signature).toEqual(expectedSignature)
+				expect(endpoint.objectBody[0].optional).toEqual(false)
+				expect(endpoint.objectBody[1].identifier).toEqual('optionalDirection')
+				expect(endpoint.objectBody[1].signature).toEqual(expectedSignature)
+				expect(endpoint.objectBody[1].optional).toEqual(true)
+			})
+
 			it('parses aliased zod object array validators', () => {
-				const endpoint = analyzeEndpointById(TestCase.parsedAliasedZodSchema)
+				const endpoint = analyzeEndpointById(TestCase.parsesAliasedZodSchema)
 
 				expect(endpoint.requestPathParams[0].identifier).toEqual('id')
 				expect(endpoint.requestPathParams[0].signature).toEqual([
