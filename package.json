@@ -107,6 +107,11 @@
 			"types": "./dist/validators/ParamWrappers.d.ts",
 			"import": "./dist/validators/ParamWrappers.mjs",
 			"require": "./dist/validators/ParamWrappers.cjs"
+		},
+		"./validators/types": {
+			"types": "./dist/validators/types.d.ts",
+			"import": "./dist/validators/types.mjs",
+			"require": "./dist/validators/types.cjs"
 		}
 	},
 	"bin": {
