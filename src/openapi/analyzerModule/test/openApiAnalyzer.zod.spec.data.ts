@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { z as valibot } from 'zod'
 
 import { usePathParams } from '../../../hooks/usePathParams'
+import { useQueryParams } from '../../../hooks/useQueryParams'
 import { useRequestBody } from '../../../hooks/useRequestBody'
 import { Router } from '../../../router/Router'
 import { OptionalParam } from '../../../validators/ParamWrappers'
@@ -114,5 +115,35 @@ router.post(`/test/${TestCase.parsesZodOptional}`, (ctx) => {
 		requiredField: z.string(),
 		optionalField: z.string().optional(),
 		optionalNumber: z.number().optional(),
+	})
+})
+
+router.get(`/test/${TestCase.parsesZodQueryStringArray}`, (ctx) => {
+	useQueryParams(ctx, {
+		tags: z.array(z.string()),
+		otherTags: z.string().array(),
+	})
+})
+
+router.get(`/test/${TestCase.parsesZodQueryNumberArray}`, (ctx) => {
+	useQueryParams(ctx, {
+		ids: z.array(z.number()),
+	})
+})
+
+router.get(`/test/${TestCase.parsesZodQueryObjectArray}`, (ctx) => {
+	useQueryParams(ctx, {
+		items: z.array(
+			z.object({
+				name: z.string(),
+				value: z.number(),
+			}),
+		),
+	})
+})
+
+router.get(`/test/${TestCase.parsesZodQueryOptionalArray}`, (ctx) => {
+	useQueryParams(ctx, {
+		tags: z.array(z.string()).optional(),
 	})
 })

@@ -308,19 +308,31 @@ const getZodCallShape = (node: Node): ShapeOfType['shape'] => {
 
 	if (typeName === 'ZodArray') {
 		const argNode = callExpression.getFirstChildByKind(SyntaxKind.SyntaxList)?.getFirstChild()
-		if (!argNode) {
-			return 'unknown_zod_array'
+		if (argNode) {
+			const elementShape = isZodCallExpression(argNode)
+				? getZodCallShape(argNode)
+				: getValidatorPropertyShape(argNode)
+			return [
+				{
+					role: 'array' as const,
+					shape: elementShape,
+					optional: false,
+				},
+			]
 		}
-		const elementShape = isZodCallExpression(argNode)
-			? getZodCallShape(argNode)
-			: getValidatorPropertyShape(argNode)
-		return [
-			{
-				role: 'array' as const,
-				shape: elementShape,
-				optional: false,
-			},
-		]
+		// Handle chained form: z.string().array()
+		const propertyAccess = callExpression.getFirstChildByKind(SyntaxKind.PropertyAccessExpression)
+		const receiverCall = propertyAccess?.getFirstChildByKind(SyntaxKind.CallExpression)
+		if (receiverCall && isZodCallExpression(receiverCall)) {
+			return [
+				{
+					role: 'array' as const,
+					shape: getZodCallShape(receiverCall),
+					optional: false,
+				},
+			]
+		}
+		return 'unknown_zod_array'
 	}
 
 	if (typeName === 'ZodEnum') {

@@ -237,6 +237,84 @@ describe('OpenApi Analyzer (Zod Validator)', () => {
 				])
 				expect(endpoint.objectBody[0].optional).toEqual(false)
 			})
+
+			it('parses zod query string array validators', () => {
+				const endpoint = analyzeEndpointById(TestCase.parsesZodQueryStringArray)
+
+				expect(endpoint.requestQuery[0].identifier).toEqual('tags')
+				expect(endpoint.requestQuery[0].signature).toEqual([
+					{
+						role: 'array',
+						shape: 'string',
+						optional: false,
+					},
+				])
+				expect(endpoint.requestQuery[0].optional).toEqual(false)
+				expect(endpoint.requestQuery[1].identifier).toEqual('otherTags')
+				expect(endpoint.requestQuery[1].signature).toEqual([
+					{
+						role: 'array',
+						shape: 'string',
+						optional: false,
+					},
+				])
+				expect(endpoint.requestQuery[1].optional).toEqual(false)
+			})
+
+			it('parses zod query number array validators', () => {
+				const endpoint = analyzeEndpointById(TestCase.parsesZodQueryNumberArray)
+
+				expect(endpoint.requestQuery[0].identifier).toEqual('ids')
+				expect(endpoint.requestQuery[0].signature).toEqual([
+					{
+						role: 'array',
+						shape: 'number',
+						optional: false,
+					},
+				])
+				expect(endpoint.requestQuery[0].optional).toEqual(false)
+			})
+
+			it('parses zod query object array validators', () => {
+				const endpoint = analyzeEndpointById(TestCase.parsesZodQueryObjectArray)
+
+				expect(endpoint.requestQuery[0].identifier).toEqual('items')
+				expect(endpoint.requestQuery[0].signature).toEqual([
+					{
+						role: 'array',
+						shape: [
+							{
+								identifier: 'name',
+								optional: false,
+								role: 'property',
+								shape: 'string',
+							},
+							{
+								identifier: 'value',
+								optional: false,
+								role: 'property',
+								shape: 'number',
+							},
+						],
+						optional: false,
+					},
+				])
+				expect(endpoint.requestQuery[0].optional).toEqual(false)
+			})
+
+			it('parses zod query optional array validators', () => {
+				const endpoint = analyzeEndpointById(TestCase.parsesZodQueryOptionalArray)
+
+				expect(endpoint.requestQuery[0].identifier).toEqual('tags')
+				expect(endpoint.requestQuery[0].signature).toEqual([
+					{
+						role: 'array',
+						shape: 'string',
+						optional: false,
+					},
+				])
+				expect(endpoint.requestQuery[0].optional).toEqual(true)
+			})
 		})
 	})
 })
