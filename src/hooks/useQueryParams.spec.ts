@@ -321,4 +321,275 @@ describe('useQueryParams', () => {
 			expectTypeOf(params.numberParam).toEqualTypeOf<number | undefined>()
 		})
 	})
+
+	describe('legacy array validators', () => {
+		it('parses JSON string array with legacy validator', () => {
+			const ctx = mockContextQuery(mockContext(), {
+				nodes: JSON.stringify(['node1', 'node2']),
+			})
+
+			const params = useQueryParams(ctx, {
+				nodes: RequiredParam<string[]>({
+					parse: (v) => JSON.parse(String(v)),
+				}),
+			})
+
+			expect(params.nodes).toEqual(['node1', 'node2'])
+		})
+
+		it('parses comma-separated array with legacy validator', () => {
+			const ctx = mockContextQuery(mockContext(), {
+				nodes: 'node1,node2,node3',
+			})
+
+			const params = useQueryParams(ctx, {
+				nodes: RequiredParam<string[]>({
+					parse: (v) => String(v).split(','),
+				}),
+			})
+
+			expect(params.nodes).toEqual(['node1', 'node2', 'node3'])
+		})
+
+		it('fails validation on invalid legacy array param', () => {
+			const test = () => {
+				const ctx = mockContextQuery(mockContext(), {
+					nodes: 'not valid json array',
+				})
+
+				useQueryParams(ctx, {
+					nodes: RequiredParam<string[]>({
+						parse: (v) => JSON.parse(String(v)),
+					}),
+				})
+			}
+
+			expect(test).toThrow(ValidationError)
+			expect(test).toThrow("Failed query param validation: 'nodes'")
+		})
+
+		it('allows missing optional legacy array param', () => {
+			const ctx = mockContextQuery(mockContext(), {})
+
+			const params = useQueryParams(ctx, {
+				nodes: OptionalParam<string[]>({
+					parse: (v) => JSON.parse(String(v)),
+				}),
+			})
+
+			expect(params.nodes).toEqual(undefined)
+		})
+	})
+
+	describe('zod array validators', () => {
+		it('parses JSON string array', () => {
+			const ctx = mockContextQuery(mockContext(), {
+				nodes: JSON.stringify(['node1', 'node2']),
+			})
+
+			const params = useQueryParams(ctx, {
+				nodes: z.array(z.string()),
+			})
+
+			expect(params.nodes).toEqual(['node1', 'node2'])
+		})
+
+		it('parses JSON number array', () => {
+			const ctx = mockContextQuery(mockContext(), {
+				ids: JSON.stringify([1, 2, 3]),
+			})
+
+			const params = useQueryParams(ctx, {
+				ids: z.array(z.number()),
+			})
+
+			expect(params.ids).toEqual([1, 2, 3])
+		})
+
+		it('parses JSON object array', () => {
+			const ctx = mockContextQuery(mockContext(), {
+				items: JSON.stringify([
+					{ name: 'first', value: 1 },
+					{ name: 'second', value: 2 },
+				]),
+			})
+
+			const params = useQueryParams(ctx, {
+				items: z.array(z.object({ name: z.string(), value: z.number() })),
+			})
+
+			expect(params.items).toEqual([
+				{ name: 'first', value: 1 },
+				{ name: 'second', value: 2 },
+			])
+		})
+
+		it('parses comma-separated string array', () => {
+			const ctx = mockContextQuery(mockContext(), {
+				nodes: 'node1,node2,node3',
+			})
+
+			const params = useQueryParams(ctx, {
+				nodes: z.array(z.string()),
+			})
+
+			expect(params.nodes).toEqual(['node1', 'node2', 'node3'])
+		})
+
+		it('parses comma-separated number array', () => {
+			const ctx = mockContextQuery(mockContext(), {
+				ids: '1,2,3',
+			})
+
+			const params = useQueryParams(ctx, {
+				ids: z.array(z.number()),
+			})
+
+			expect(params.ids).toEqual([1, 2, 3])
+		})
+
+		it('parses comma-separated boolean array', () => {
+			const ctx = mockContextQuery(mockContext(), {
+				flags: 'true,false,true',
+			})
+
+			const params = useQueryParams(ctx, {
+				flags: z.array(z.boolean()),
+			})
+
+			expect(params.flags).toEqual([true, false, true])
+		})
+
+		it('parses comma-separated values with whitespace', () => {
+			const ctx = mockContextQuery(mockContext(), {
+				nodes: 'node1, node2 , node3',
+			})
+
+			const params = useQueryParams(ctx, {
+				nodes: z.array(z.string()),
+			})
+
+			expect(params.nodes).toEqual(['node1', 'node2', 'node3'])
+		})
+
+		it('parses single value as string array', () => {
+			const ctx = mockContextQuery(mockContext(), {
+				nodes: 'single',
+			})
+
+			const params = useQueryParams(ctx, {
+				nodes: z.array(z.string()),
+			})
+
+			expect(params.nodes).toEqual(['single'])
+		})
+
+		it('parses single value as number array', () => {
+			const ctx = mockContextQuery(mockContext(), {
+				ids: '42',
+			})
+
+			const params = useQueryParams(ctx, {
+				ids: z.array(z.number()),
+			})
+
+			expect(params.ids).toEqual([42])
+		})
+
+		it('fails validation on invalid array element', () => {
+			const test = () => {
+				const ctx = mockContextQuery(mockContext(), {
+					ids: 'abc,def',
+				})
+
+				useQueryParams(ctx, {
+					ids: z.array(z.number()),
+				})
+			}
+
+			expect(test).toThrow(ValidationError)
+			expect(test).toThrow("Failed query param validation: 'ids'")
+		})
+
+		it('fails when required array is missing', () => {
+			const test = () => {
+				const ctx = mockContextQuery(mockContext(), {})
+
+				useQueryParams(ctx, {
+					nodes: z.array(z.string()),
+				})
+			}
+
+			expect(test).toThrow(ValidationError)
+			expect(test).toThrow("Missing query params: 'nodes'")
+		})
+
+		it('parses optional array when missing', () => {
+			const ctx = mockContextQuery(mockContext(), {})
+
+			const params = useQueryParams(ctx, {
+				nodes: z.array(z.string()).optional(),
+			})
+
+			expect(params.nodes).toEqual(undefined)
+		})
+
+		it('parses optional array when present', () => {
+			const ctx = mockContextQuery(mockContext(), {
+				nodes: 'node1,node2',
+			})
+
+			const params = useQueryParams(ctx, {
+				nodes: z.array(z.string()).optional(),
+			})
+
+			expect(params.nodes).toEqual(['node1', 'node2'])
+		})
+
+		it('infers return type of string array', () => {
+			const ctx = mockContextQuery(mockContext(), {
+				nodes: 'a,b',
+			})
+
+			const params = useQueryParams(ctx, {
+				nodes: z.array(z.string()),
+			})
+
+			expectTypeOf(params.nodes).toEqualTypeOf<string[]>()
+		})
+
+		it('infers return type of number array', () => {
+			const ctx = mockContextQuery(mockContext(), {
+				ids: '1,2',
+			})
+
+			const params = useQueryParams(ctx, {
+				ids: z.array(z.number()),
+			})
+
+			expectTypeOf(params.ids).toEqualTypeOf<number[]>()
+		})
+
+		it('infers return type of object array', () => {
+			const ctx = mockContextQuery(mockContext(), {
+				items: JSON.stringify([{ name: 'a' }]),
+			})
+
+			const params = useQueryParams(ctx, {
+				items: z.array(z.object({ name: z.string() })),
+			})
+
+			expectTypeOf(params.items).toEqualTypeOf<{ name: string }[]>()
+		})
+
+		it('infers return type of optional array', () => {
+			const ctx = mockContextQuery(mockContext(), {})
+
+			const params = useQueryParams(ctx, {
+				nodes: z.array(z.string()).optional(),
+			})
+
+			expectTypeOf(params.nodes).toEqualTypeOf<string[] | undefined>()
+		})
+	})
 })
