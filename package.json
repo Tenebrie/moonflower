@@ -131,7 +131,7 @@
 		"yargs": "^17.7.2"
 	},
 	"peerDependencies": {
-		"@koa/router": "^15.4.0",
+		"@koa/router": "^13.1.1",
 		"koa": "^3.2.0",
 		"koa-bodyparser": "^4.4.1",
 		"ts-morph": "^28.0.0",
