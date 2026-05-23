@@ -46,9 +46,11 @@ export const parseEndpoint = (node: Node<ts.Node>, sourceFilePath: string) => {
 		error: Error
 	}[] = []
 
+	const hookNodes = getHookNodes(node)
+
 	// API documentation
 	try {
-		const entries = parseApiDocumentation(node)
+		const entries = parseApiDocumentation(hookNodes.useApiEndpoint)
 		entries.forEach((param) => {
 			endpointData[param.identifier] = param.value as string & string[]
 		})
@@ -62,7 +64,7 @@ export const parseEndpoint = (node: Node<ts.Node>, sourceFilePath: string) => {
 
 	// Request params
 	try {
-		endpointData.requestPathParams = parseRequestParams(node, endpointPath)
+		endpointData.requestPathParams = parseRequestParams(hookNodes.usePathParams, endpointPath)
 	} catch (err) {
 		warningData.push({
 			segment: 'path',
@@ -73,7 +75,7 @@ export const parseEndpoint = (node: Node<ts.Node>, sourceFilePath: string) => {
 
 	// Request query
 	try {
-		endpointData.requestQuery = parseRequestObjectInput(node, 'useQueryParams')
+		endpointData.requestQuery = parseRequestObjectInput(hookNodes.useQueryParams, 'useQueryParams')
 	} catch (err) {
 		warningData.push({
 			segment: 'query',
@@ -84,7 +86,7 @@ export const parseEndpoint = (node: Node<ts.Node>, sourceFilePath: string) => {
 
 	// Request headers
 	try {
-		endpointData.requestHeaders = parseRequestObjectInput(node, 'useHeaderParams')
+		endpointData.requestHeaders = parseRequestObjectInput(hookNodes.useHeaderParams, 'useHeaderParams')
 	} catch (err) {
 		warningData.push({
 			segment: 'headers',
@@ -95,7 +97,7 @@ export const parseEndpoint = (node: Node<ts.Node>, sourceFilePath: string) => {
 
 	// Raw request body
 	try {
-		const parsedBody = parseRequestRawBody(node)
+		const parsedBody = parseRequestRawBody(hookNodes.useRequestRawBody)
 		if (parsedBody) {
 			endpointData.rawBody = parsedBody
 		}
@@ -109,7 +111,7 @@ export const parseEndpoint = (node: Node<ts.Node>, sourceFilePath: string) => {
 
 	// Object request body
 	try {
-		endpointData.objectBody = parseRequestObjectInput(node, 'useRequestBody')
+		endpointData.objectBody = parseRequestObjectInput(hookNodes.useRequestBody, 'useRequestBody')
 	} catch (err) {
 		warningData.push({
 			segment: 'objectBody',
@@ -132,25 +134,33 @@ export const parseEndpoint = (node: Node<ts.Node>, sourceFilePath: string) => {
 	return endpointData
 }
 
-const getHookNode = (
-	endpointNode: Node<ts.Node>,
-	hookName:
-		| 'useApiEndpoint'
-		| 'usePathParams'
-		| 'useQueryParams'
-		| 'useHeaderParams'
-		| 'useRequestBody'
-		| 'useRequestRawBody',
-) => {
-	const callExpressions = endpointNode.getDescendantsOfKind(SyntaxKind.CallExpression)
-	const matchingCallExpressions = callExpressions.filter((node) => {
-		return node.getFirstChildByKind(SyntaxKind.Identifier)?.getText() === hookName
-	})
-	return matchingCallExpressions[0] ?? null
+type HookName =
+	| 'useApiEndpoint'
+	| 'usePathParams'
+	| 'useQueryParams'
+	| 'useHeaderParams'
+	| 'useRequestBody'
+	| 'useRequestRawBody'
+
+const getHookNodes = (endpointNode: Node<ts.Node>): Record<HookName, Node<ts.CallExpression> | null> => {
+	const result: Record<HookName, Node<ts.CallExpression> | null> = {
+		useApiEndpoint: null,
+		usePathParams: null,
+		useQueryParams: null,
+		useHeaderParams: null,
+		useRequestBody: null,
+		useRequestRawBody: null,
+	}
+	for (const node of endpointNode.getDescendantsOfKind(SyntaxKind.CallExpression)) {
+		const name = node.getFirstChildByKind(SyntaxKind.Identifier)?.getText() as HookName | undefined
+		if (name && name in result && result[name] === null) {
+			result[name] = node
+		}
+	}
+	return result
 }
 
-const parseApiDocumentation = (node: Node<ts.Node>) => {
-	const hookNode = getHookNode(node, 'useApiEndpoint')
+const parseApiDocumentation = (hookNode: Node<ts.CallExpression> | null) => {
 	if (!hookNode) {
 		return []
 	}
@@ -170,8 +180,10 @@ const parseApiDocumentation = (node: Node<ts.Node>) => {
 	}[]
 }
 
-const parseRequestParams = (node: Node<ts.Node>, endpointPath: string): EndpointData['requestPathParams'] => {
-	const hookNode = getHookNode(node, 'usePathParams')
+const parseRequestParams = (
+	hookNode: Node<ts.CallExpression> | null,
+	endpointPath: string,
+): EndpointData['requestPathParams'] => {
 	if (!hookNode) {
 		return []
 	}
@@ -203,8 +215,9 @@ const parseRequestParams = (node: Node<ts.Node>, endpointPath: string): Endpoint
 		}))
 }
 
-const parseRequestRawBody = (node: Node<ts.Node>): NonNullable<EndpointData['rawBody']> | null => {
-	const hookNode = getHookNode(node, 'useRequestRawBody')
+const parseRequestRawBody = (
+	hookNode: Node<ts.CallExpression> | null,
+): NonNullable<EndpointData['rawBody']> | null => {
 	if (!hookNode) {
 		return null
 	}
@@ -222,10 +235,9 @@ const parseRequestRawBody = (node: Node<ts.Node>): NonNullable<EndpointData['raw
 }
 
 const parseRequestObjectInput = (
-	node: Node<ts.Node>,
+	hookNode: Node<ts.CallExpression> | null,
 	nodeName: 'useQueryParams' | 'useHeaderParams' | 'useRequestBody',
 ): EndpointData['requestQuery'] | EndpointData['objectBody'] => {
-	const hookNode = getHookNode(node, nodeName)
 	if (!hookNode) {
 		return []
 	}

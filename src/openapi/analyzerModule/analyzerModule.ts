@@ -209,9 +209,9 @@ export const analyzeSourceFileEndpoints = (
 	const joinedOperations = operations.join('|')
 
 	file.routers.named.forEach((routerName) => {
+		const routerPattern = new RegExp(`${routerName}\\.(?:${joinedOperations})`)
 		file.sourceFile.forEachChild((node) => {
 			const nodeText = node.getText()
-			const routerPattern = new RegExp(`${routerName}\\.(?:${joinedOperations})`)
 
 			if (routerPattern.test(nodeText)) {
 				const endpointPath = resolveEndpointPath(node) ?? ''

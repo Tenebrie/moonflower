@@ -829,11 +829,12 @@ const computeProperTypeShape = (type: Type, atLocation: Node, stack: Type[]): Sh
 			.getProperties()
 			.map((prop) => {
 				const valueDeclaration = prop.getValueDeclaration() || prop.getDeclarations()[0]!
+				const shape = getProperTypeShape(prop.getTypeAtLocation(atLocation), atLocation, nextStack)
 				if (!valueDeclaration) {
 					return {
 						role: 'property' as const,
 						identifier: prop.getName(),
-						shape: getProperTypeShape(prop.getTypeAtLocation(atLocation), atLocation, nextStack),
+						shape,
 						optional: false,
 					}
 				}
@@ -846,18 +847,17 @@ const computeProperTypeShape = (type: Type, atLocation: Node, stack: Type[]): Sh
 					return {
 						role: 'property' as const,
 						identifier: prop.getName(),
-						shape: getProperTypeShape(prop.getTypeAtLocation(atLocation), atLocation, nextStack),
+						shape,
 						optional: false,
 					}
 				}
 
 				const isOptional = prop.getTypeAtLocation(atLocation).isNullable()
 
-				const shape = getProperTypeShape(prop.getTypeAtLocation(atLocation), atLocation, nextStack)
 				return {
 					role: 'property' as const,
 					identifier: prop.getName(),
-					shape: shape,
+					shape,
 					optional: isOptional,
 				}
 			})
