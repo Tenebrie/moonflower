@@ -1,4 +1,20 @@
+import crypto from 'crypto'
+import { existsSync } from 'fs'
 import * as path from 'path'
+import { fileURLToPath } from 'url'
+
+function resolveWorkerUrl(): URL {
+	const candidates = ['./analyzerWorker.mjs', './analyzerWorker.test.mjs']
+	for (const candidate of candidates) {
+		const url = new URL(candidate, import.meta.url)
+		if (existsSync(fileURLToPath(url))) {
+			return url
+		}
+	}
+	throw new Error(
+		'analyzerWorker.mjs not found. Run yarn build, or run tests via yarn test (which compiles the worker first).',
+	)
+}
 import { SourceFile, SyntaxKind } from 'ts-morph'
 import { Project } from 'ts-morph'
 
@@ -16,6 +32,7 @@ import { getValuesOfObjectLiteral, resolveEndpointPath } from './nodeParsers'
 import { parseEndpoint, SectionTiming } from './parseEndpoint'
 import { parseExposedModel, parseNamedExposedModels } from './parseExposedModels'
 import { SourceFileCache } from './sourceFileCache'
+import { WorkerPool, WorkerResult, WorkerTask } from './workerPool'
 
 type Props = {
 	logLevel?: Parameters<(typeof Logger)['setLevel']>[0]
@@ -40,14 +57,14 @@ type EndpointTiming = { method: string; path: string; timing: number; sectionTim
  * @param tsconfigPath Path to tsconfig file relative to project root
  * @param sourceFilePaths Array of router source files relative to project root
  */
-export const prepareOpenApiSpec = ({
+export const prepareOpenApiSpec = async ({
 	logLevel,
 	tsconfigPath,
 	sourceFilePaths,
 	sourceFileDiscovery,
 	incremental,
 	profiling = 'stats',
-}: Props) => {
+}: Props): Promise<void> => {
 	const openApiManager = OpenApiManager.getInstance()
 
 	if (openApiManager.isReady()) {
@@ -122,11 +139,12 @@ export const prepareOpenApiSpec = ({
 		}
 		return path.resolve(process.cwd(), 'node_modules', '.cache', 'moonflower')
 	})()
-	const endpoints = analyzeMultipleSourceFiles(filesToAnalyze, {
+	const endpoints = await analyzeMultipleSourceFiles(filesToAnalyze, {
 		incremental: incremental !== false,
 		cachePath,
 		timestampCache: {},
 		profiling,
+		tsconfigPath: path.resolve(tsconfigPath),
 	})
 
 	openApiManager.setStats({
@@ -154,19 +172,135 @@ export const prepareOpenApiSpec = ({
 	openApiManager.markAsReady()
 }
 
-export const analyzeMultipleSourceFiles = (
+export const analyzeMultipleSourceFiles = async (
 	files: DiscoveredSourceFile[],
 	config: {
 		incremental: boolean
 		cachePath: string
 		timestampCache: TimestampCache
 		profiling?: 'stats' | 'off' | 'debug'
+		tsconfigPath: string
 	},
 	filterEndpointPaths?: string[],
-): EndpointData[] => {
+): Promise<EndpointData[]> => {
 	const profiling = config.profiling ?? 'stats'
 	const startTime = performance.now()
-	const analyzedFiles = files.map((file) => analyzeSourceFileWithCache(file, config, filterEndpointPaths))
+
+	// Separate cached files from those needing analysis
+	type CachedFile = { endpoints: EndpointData[]; fileName: string; timing: 0; endpointTimings: [] }
+	type UncachedFile = { file: DiscoveredSourceFile; timestamp: number }
+
+	const cached: CachedFile[] = []
+	const uncached: UncachedFile[] = []
+
+	for (const file of files) {
+		const timestamp = getSourceFileTimestamp(file.sourceFile, config.timestampCache)
+		const hit = config.incremental
+			? SourceFileCache.getCachedResults(file.sourceFile, timestamp, config.cachePath)
+			: null
+		if (hit) {
+			Logger.debug(`[${file.fileName}] Found cached results`)
+			cached.push({ endpoints: hit.endpoints, fileName: file.fileName, timing: 0, endpointTimings: [] })
+		} else {
+			uncached.push({ file, timestamp })
+		}
+	}
+
+	if (uncached.length === 0) {
+		if (profiling !== 'off') {
+			Logger.info(`Router analysis took ${Math.round(performance.now() - startTime)}ms`)
+		}
+		return cached.flatMap((f) => f.endpoints)
+	}
+
+	// Build one task per endpoint across all uncached files
+	const OPERATIONS = ['get', 'post', 'put', 'delete', 'del', 'patch']
+	const operationsPattern = OPERATIONS.join('|')
+
+	type FileTask = { task: WorkerTask; fileName: string }
+	const allTasks: FileTask[] = []
+
+	for (const { file } of uncached) {
+		for (const routerName of file.routers.named) {
+			const routerPattern = new RegExp(`${routerName}\\.(?:${operationsPattern})`)
+			let endpointIndex = 0
+			file.sourceFile.forEachChild((node) => {
+				const nodeText = node.getText()
+				if (routerPattern.test(nodeText)) {
+					if (
+						!filterEndpointPaths ||
+						filterEndpointPaths.some((p) => resolveEndpointPath(node)?.includes(p))
+					) {
+						allTasks.push({
+							fileName: file.fileName,
+							task: {
+								taskId: crypto.randomUUID(),
+								tsconfigPath: config.tsconfigPath,
+								sourceFilePath: file.sourceFile.getFilePath(),
+								routerName,
+								endpointIndex,
+							},
+						})
+					}
+					endpointIndex++
+				}
+			})
+		}
+	}
+
+	// Dispatch all tasks to the worker pool
+	const pool = new WorkerPool(resolveWorkerUrl())
+
+	type EndpointTiming = { method: string; path: string; timing: number; sectionTimings: SectionTiming[] }
+	type FileResult = {
+		endpoints: EndpointData[]
+		fileName: string
+		timing: number
+		endpointTimings: EndpointTiming[]
+	}
+
+	let results: WorkerResult[]
+	try {
+		results = await pool.runAll(allTasks.map((ft) => ft.task))
+	} finally {
+		pool.terminate()
+	}
+
+	// Group results by file
+	const byFile = new Map<string, FileResult>()
+	for (const { file } of uncached) {
+		byFile.set(file.fileName, { endpoints: [], fileName: file.fileName, timing: 0, endpointTimings: [] })
+	}
+
+	for (let i = 0; i < results.length; i++) {
+		const result = results[i]
+		const fileName = allTasks[i].fileName
+		const fileResult = byFile.get(fileName)!
+
+		if ('error' in result) {
+			Logger.error(`[${fileName}] Worker error: ${result.error}`)
+			continue
+		}
+
+		fileResult.endpoints.push(result.endpoint)
+		fileResult.timing += result.timing
+		fileResult.endpointTimings.push({
+			method: result.endpoint.method,
+			path: result.endpoint.path,
+			timing: result.timing,
+			sectionTimings: result.sectionTimings,
+		})
+	}
+
+	// Write cache for each uncached file
+	for (const { file, timestamp } of uncached) {
+		const fileResult = byFile.get(file.fileName)!
+		if (fileResult.endpoints.length > 0) {
+			SourceFileCache.cacheResults(file.sourceFile, timestamp, config.cachePath, fileResult.endpoints)
+		}
+	}
+
+	const analyzedFiles = [...cached, ...Array.from(byFile.values())]
 
 	if (profiling !== 'off') {
 		Logger.info(`Router analysis took ${Math.round(performance.now() - startTime)}ms`)
@@ -174,7 +308,7 @@ export const analyzeMultipleSourceFiles = (
 
 	if (profiling === 'stats') {
 		analyzedFiles
-			.map((f, index) => ({ fileName: files[index].fileName, timeTaken: f.timing }))
+			.map((f) => ({ fileName: f.fileName, timeTaken: f.timing }))
 			.sort((a, b) => b.timeTaken - a.timeTaken)
 			.filter((t) => t.timeTaken > 500)
 			.forEach((t) => {
@@ -182,11 +316,7 @@ export const analyzeMultipleSourceFiles = (
 			})
 	} else if (profiling === 'debug') {
 		analyzedFiles
-			.map((f, index) => ({
-				fileName: files[index].fileName,
-				timeTaken: f.timing,
-				endpointTimings: f.endpointTimings,
-			}))
+			.map((f) => ({ fileName: f.fileName, timeTaken: f.timing, endpointTimings: f.endpointTimings }))
 			.sort((a, b) => b.timeTaken - a.timeTaken)
 			.forEach((t) => {
 				Logger.info(`- [${t.fileName}] Took ${Math.round(t.timeTaken)}ms to analyze`)

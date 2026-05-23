@@ -24,6 +24,7 @@ const entries = {
 	'validators/BuiltInValidators': resolve(__dirname, 'src/validators/BuiltInValidators.ts'),
 	'validators/ParamWrappers': resolve(__dirname, 'src/validators/ParamWrappers.ts'),
 	'cli/cli': resolve(__dirname, 'src/cli/cli.ts'),
+	'openapi/analyzerModule/analyzerWorker': resolve(__dirname, 'src/openapi/analyzerModule/analyzerWorker.ts'),
 }
 
 export const baseViteConfig: ViteUserConfig = {
@@ -50,7 +51,9 @@ export const baseViteConfig: ViteUserConfig = {
 				'fs/promises',
 				'assert',
 				'crypto',
+				'os',
 				'perf_hooks',
+				'worker_threads',
 				'@ts-morph/common',
 				'typescript',
 				'ts-morph',
@@ -90,6 +93,7 @@ export const baseViteConfig: ViteUserConfig = {
 	},
 	test: {
 		globals: true,
+		globalSetup: 'src/openapi/analyzerModule/test/workerGlobalSetup.ts',
 		setupFiles: 'src/setupTests.ts',
 		include: ['src/**/*.spec.ts'],
 		coverage: {
