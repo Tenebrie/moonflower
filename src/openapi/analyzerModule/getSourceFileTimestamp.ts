@@ -5,11 +5,29 @@ import { formatTimestamp, Logger } from '../../utils/logger'
 
 export type TimestampCache = Record<string, { dependencies: SourceFile[] }>
 
-export function getSourceFileTimestamp(sourceFile: SourceFile, timestampCache: TimestampCache) {
+/**
+ * Per-run cache of file mtimes keyed by absolute path. Router files share large parts of their
+ * transitive import graphs (common types, utils, models), so without this the same dependency gets
+ * `statSync`-ed once per importing router — tens of thousands of redundant syscalls across a project
+ * with dozens of routers. mtimes don't change mid-run, so memoizing is safe.
+ */
+export type MtimeCache = Map<string, number>
+
+export function getSourceFileTimestamp(
+	sourceFile: SourceFile,
+	timestampCache: TimestampCache,
+	mtimeCache: MtimeCache = new Map(),
+) {
 	const dependencies = getFileDependencies(sourceFile, timestampCache)
 	const timestamps = dependencies.map((dep) => {
-		const stat = fs.statSync(dep.getFilePath())
-		return stat.mtimeMs
+		const depPath = dep.getFilePath()
+		const cached = mtimeCache.get(depPath)
+		if (cached !== undefined) {
+			return cached
+		}
+		const mtime = fs.statSync(depPath).mtimeMs
+		mtimeCache.set(depPath, mtime)
+		return mtime
 	})
 	const latestTimestamp = Math.max(...timestamps)
 

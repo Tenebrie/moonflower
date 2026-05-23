@@ -27,7 +27,7 @@ import {
 import { discoverRouters } from '../discoveryModule/discoverRouters/discoverRouters'
 import { ApiDocsHeader, OpenApiManager } from '../manager/OpenApiManager'
 import { EndpointData, ExposedModelData } from '../types'
-import { getSourceFileTimestamp, TimestampCache } from './getSourceFileTimestamp'
+import { getSourceFileTimestamp, MtimeCache, TimestampCache } from './getSourceFileTimestamp'
 import { getValuesOfObjectLiteral, resolveEndpointPath } from './nodeParsers'
 import { parseEndpoint, SectionTiming } from './parseEndpoint'
 import { parseExposedModel, parseNamedExposedModels } from './parseExposedModels'
@@ -200,8 +200,10 @@ export const analyzeMultipleSourceFiles = async (
 	const cached: CachedFile[] = []
 	const uncached: UncachedFile[] = []
 
+	const freshnessCheckStart = performance.now()
+	const mtimeCache: MtimeCache = new Map()
 	for (const file of files) {
-		const timestamp = getSourceFileTimestamp(file.sourceFile, config.timestampCache)
+		const timestamp = getSourceFileTimestamp(file.sourceFile, config.timestampCache, mtimeCache)
 		const hit = config.incremental
 			? SourceFileCache.getCachedResults(file.sourceFile, timestamp, config.cachePath)
 			: null
@@ -211,6 +213,9 @@ export const analyzeMultipleSourceFiles = async (
 		} else {
 			uncached.push({ file, timestamp })
 		}
+	}
+	if (profiling !== 'off') {
+		Logger.info(`Cache freshness check took ${Math.round(performance.now() - freshnessCheckStart)}ms`)
 	}
 
 	if (uncached.length === 0) {
