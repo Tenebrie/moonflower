@@ -315,6 +315,14 @@ describe('OpenApi Analyzer (Zod Validator)', () => {
 				])
 				expect(endpoint.requestQuery[0].optional).toEqual(true)
 			})
+
+			it('parses zod pipe validators', () => {
+				const endpoint = analyzeEndpointById(TestCase.parsesZodPipe)
+
+				expect(endpoint.objectBody[0].identifier).toEqual('value')
+				expect(endpoint.objectBody[0].signature).toEqual('number')
+				expect(endpoint.objectBody[0].optional).toEqual(false)
+			})
 		})
 	})
 })

@@ -278,112 +278,12 @@ const isZodCallExpression = (node: Node): boolean => {
 const getZodCallShape = (node: Node): ShapeOfType['shape'] => {
 	const callExpression = node.asKind(SyntaxKind.CallExpression)!
 	const returnType = callExpression.getReturnType()
-	const typeName = returnType.getSymbol()?.getName() ?? ''
-
-	if (typeName === 'ZodNumber') {
-		return 'number'
+	const outputProp = returnType.getProperty('_output')
+	if (outputProp) {
+		return getProperTypeShape(outputProp.getTypeAtLocation(callExpression), callExpression)
 	}
-	if (typeName === 'ZodString') {
-		return 'string'
-	}
-	if (typeName === 'ZodBoolean') {
-		return 'boolean'
-	}
-	if (typeName === 'ZodBigInt') {
-		return 'bigint'
-	}
-
-	if (typeName === 'ZodObject') {
-		const argNode = callExpression.getFirstChildByKind(SyntaxKind.SyntaxList)?.getFirstChild()
-		const objectLiteral = argNode?.asKind(SyntaxKind.ObjectLiteralExpression)
-		if (!objectLiteral) {
-			return 'unknown_zod_object'
-		}
-		const syntaxList = objectLiteral.getFirstChildByKind(SyntaxKind.SyntaxList)
-		if (!syntaxList) {
-			return []
-		}
-		const properties = syntaxList.getChildrenOfKind(SyntaxKind.PropertyAssignment)
-		return properties.map((prop) => {
-			const identifier = prop.getFirstChildByKind(SyntaxKind.Identifier)!.getText()
-			const valueNode = prop.getLastChild()!
-			return {
-				role: 'property' as const,
-				identifier,
-				shape: isZodCallExpression(valueNode)
-					? getZodCallShape(valueNode)
-					: getValidatorPropertyShape(valueNode),
-				optional: false,
-			}
-		})
-	}
-
-	if (typeName === 'ZodArray') {
-		const argNode = callExpression.getFirstChildByKind(SyntaxKind.SyntaxList)?.getFirstChild()
-		if (argNode) {
-			const elementShape = isZodCallExpression(argNode)
-				? getZodCallShape(argNode)
-				: getValidatorPropertyShape(argNode)
-			return [
-				{
-					role: 'array' as const,
-					shape: elementShape,
-					optional: false,
-				},
-			]
-		}
-		// Handle chained form: z.string().array()
-		const propertyAccess = callExpression.getFirstChildByKind(SyntaxKind.PropertyAccessExpression)
-		const receiverCall = propertyAccess?.getFirstChildByKind(SyntaxKind.CallExpression)
-		if (receiverCall && isZodCallExpression(receiverCall)) {
-			return [
-				{
-					role: 'array' as const,
-					shape: getZodCallShape(receiverCall),
-					optional: false,
-				},
-			]
-		}
-		return 'unknown_zod_array'
-	}
-
-	if (typeName === 'ZodEnum') {
-		const typeArgs = returnType.getTypeArguments()
-		if (typeArgs.length > 0) {
-			const enumType = typeArgs[0]
-			const properties = enumType.getProperties()
-			const shapes: ShapeOfUnionEntry[] = properties.map((prop) => ({
-				role: 'union_entry' as const,
-				shape: getProperTypeShape(prop.getTypeAtLocation(callExpression), callExpression, []),
-				optional: false,
-			}))
-			if (shapes.length === 1) {
-				return shapes[0].shape
-			}
-			if (shapes.length > 1) {
-				return [
-					{
-						role: 'union' as const,
-						shape: shapes,
-						optional: false,
-					},
-				]
-			}
-		}
-		return 'unknown_zod_enum'
-	}
-
-	if (typeName === 'ZodOptional') {
-		const innerCallExpression = callExpression
-			.getFirstChildByKind(SyntaxKind.PropertyAccessExpression)
-			?.getFirstChildByKind(SyntaxKind.CallExpression)
-		if (innerCallExpression && isZodCallExpression(innerCallExpression)) {
-			return getZodCallShape(innerCallExpression)
-		}
-		return 'unknown_zod_optional'
-	}
-
 	const fileName = node.getSourceFile().getFilePath().split('/').pop()
+	const typeName = returnType.getSymbol()?.getName() ?? ''
 	Logger.warn(`[${fileName}] Unknown zod type: ${typeName}`)
 	return 'unknown_zod'
 }

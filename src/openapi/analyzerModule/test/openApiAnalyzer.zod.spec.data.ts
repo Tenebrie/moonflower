@@ -147,3 +147,9 @@ router.get(`/test/${TestCase.parsesZodQueryOptionalArray}`, (ctx) => {
 		tags: z.array(z.string()).optional(),
 	})
 })
+
+router.post(`/test/${TestCase.parsesZodPipe}`, (ctx) => {
+	useRequestBody(ctx, {
+		value: z.string().pipe(z.coerce.number()),
+	})
+})
