@@ -19,7 +19,7 @@ describe('OpenApi Analyzer (Zod Validator)', () => {
 				},
 				[`/test/${id}`],
 			)
-			const endpoint = analysisResult.find((endpoint) => endpoint.path.startsWith(`/test/${id}`))
+			const endpoint = analysisResult.endpoints.find((endpoint) => endpoint.path.startsWith(`/test/${id}`))
 			if (!endpoint) {
 				throw new Error(`No endpoint with id ${id} found!`)
 			}

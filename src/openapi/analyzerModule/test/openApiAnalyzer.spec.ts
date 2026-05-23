@@ -23,7 +23,7 @@ describe('OpenApi Analyzer', () => {
 				},
 				[`/test/${id}`],
 			)
-			const endpoint = analysisResult.find((endpoint) => endpoint.path.startsWith(`/test/${id}`))
+			const endpoint = analysisResult.endpoints.find((endpoint) => endpoint.path.startsWith(`/test/${id}`))
 			if (!endpoint) {
 				throw new Error(`No endpoint with id ${id} found!`)
 			}
@@ -39,7 +39,7 @@ describe('OpenApi Analyzer', () => {
 				},
 				[`/test/${id}`],
 			)
-			const endpoints = analysisResult.filter((endpoint) => endpoint.path.startsWith(`/test/${id}`))
+			const endpoints = analysisResult.endpoints.filter((endpoint) => endpoint.path.startsWith(`/test/${id}`))
 			if (endpoints.length === 0) {
 				throw new Error(`No endpoint with id ${id} found!`)
 			}

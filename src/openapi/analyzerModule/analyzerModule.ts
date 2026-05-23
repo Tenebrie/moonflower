@@ -13,7 +13,7 @@ import { ApiDocsHeader, OpenApiManager } from '../manager/OpenApiManager'
 import { EndpointData, ExposedModelData } from '../types'
 import { getSourceFileTimestamp, TimestampCache } from './getSourceFileTimestamp'
 import { getValuesOfObjectLiteral, resolveEndpointPath } from './nodeParsers'
-import { parseEndpoint } from './parseEndpoint'
+import { parseEndpoint, SectionTiming } from './parseEndpoint'
 import { parseExposedModel, parseNamedExposedModels } from './parseExposedModels'
 import { SourceFileCache } from './sourceFileCache'
 
@@ -27,11 +27,14 @@ type Props = {
 		| {
 				cachePath: string
 		  }
+	profiling?: 'stats' | 'off' | 'debug'
 }
 
 type FileDiscoveryConfig = {
 	rootPath: string
 }
+
+type EndpointTiming = { method: string; path: string; timing: number; sectionTimings: SectionTiming[] }
 
 /**
  * @param tsconfigPath Path to tsconfig file relative to project root
@@ -43,6 +46,7 @@ export const prepareOpenApiSpec = ({
 	sourceFilePaths,
 	sourceFileDiscovery,
 	incremental,
+	profiling = 'stats',
 }: Props) => {
 	const openApiManager = OpenApiManager.getInstance()
 
@@ -81,7 +85,9 @@ export const prepareOpenApiSpec = ({
 				targetPath: typeof sourceFileDiscovery === 'object' ? sourceFileDiscovery.rootPath : '.',
 				tsConfigPath: tsconfigPath,
 			})
-			Logger.info(`File discovery took ${Math.round(performance.now() - startTime)}ms`)
+			if (profiling !== 'off') {
+				Logger.info(`File discovery took ${Math.round(performance.now() - startTime)}ms`)
+			}
 			return files
 		})()
 
@@ -120,6 +126,7 @@ export const prepareOpenApiSpec = ({
 		incremental: incremental !== false,
 		cachePath,
 		timestampCache: {},
+		profiling,
 	})
 
 	openApiManager.setStats({
@@ -153,23 +160,49 @@ export const analyzeMultipleSourceFiles = (
 		incremental: boolean
 		cachePath: string
 		timestampCache: TimestampCache
+		profiling?: 'stats' | 'off' | 'debug'
 	},
 	filterEndpointPaths?: string[],
 ): EndpointData[] => {
+	const profiling = config.profiling ?? 'stats'
 	const startTime = performance.now()
 	const analyzedFiles = files.map((file) => analyzeSourceFileWithCache(file, config, filterEndpointPaths))
-	Logger.info(`Router analysis took ${Math.round(performance.now() - startTime)}ms`)
 
-	analyzedFiles
-		.map((f, index) => ({
-			fileName: files[index].fileName,
-			timeTaken: f.timing,
-		}))
-		.sort((a, b) => b.timeTaken - a.timeTaken)
-		.filter((t) => t.timeTaken > 500)
-		.forEach((t) => {
-			Logger.info(`- [${t.fileName}] Took ${Math.round(t.timeTaken)}ms to analyze`)
-		})
+	if (profiling !== 'off') {
+		Logger.info(`Router analysis took ${Math.round(performance.now() - startTime)}ms`)
+	}
+
+	if (profiling === 'stats') {
+		analyzedFiles
+			.map((f, index) => ({ fileName: files[index].fileName, timeTaken: f.timing }))
+			.sort((a, b) => b.timeTaken - a.timeTaken)
+			.filter((t) => t.timeTaken > 500)
+			.forEach((t) => {
+				Logger.info(`- [${t.fileName}] Took ${Math.round(t.timeTaken)}ms to analyze`)
+			})
+	} else if (profiling === 'debug') {
+		analyzedFiles
+			.map((f, index) => ({
+				fileName: files[index].fileName,
+				timeTaken: f.timing,
+				endpointTimings: f.endpointTimings,
+			}))
+			.sort((a, b) => b.timeTaken - a.timeTaken)
+			.forEach((t) => {
+				Logger.info(`- [${t.fileName}] Took ${Math.round(t.timeTaken)}ms to analyze`)
+				t.endpointTimings
+					.sort((a, b) => b.timing - a.timing)
+					.forEach((ep) => {
+						Logger.info(`  - ${ep.method} ${ep.path} (${Math.round(ep.timing)}ms)`)
+						ep.sectionTimings
+							.filter((s) => s.timing >= 1)
+							.sort((a, b) => b.timing - a.timing)
+							.forEach((s) => {
+								Logger.info(`    - ${s.section}: ${Math.round(s.timing)}ms`)
+							})
+					})
+			})
+	}
 
 	return analyzedFiles.flatMap((f) => f.endpoints)
 }
@@ -180,31 +213,33 @@ export const analyzeSourceFileWithCache = (
 		incremental: boolean
 		cachePath: string
 		timestampCache: TimestampCache
+		profiling?: 'stats' | 'off' | 'debug'
 	},
 	filterEndpointPaths?: string[],
-): { endpoints: EndpointData[]; timing: number } => {
+): { endpoints: EndpointData[]; timing: number; endpointTimings: EndpointTiming[] } => {
 	const timestamp = getSourceFileTimestamp(file.sourceFile, config.timestampCache)
 	const cachedResults = SourceFileCache.getCachedResults(file.sourceFile, timestamp, config.cachePath)
 
 	if (cachedResults) {
 		Logger.debug(`[${file.fileName}] Found cached results`)
-		return { endpoints: cachedResults.endpoints, timing: 0 }
+		return { endpoints: cachedResults.endpoints, timing: 0, endpointTimings: [] }
 	}
 	Logger.debug(`[${file.fileName}] Analyzing...`)
 
 	const t1 = performance.now()
-	const endpoints = analyzeSourceFileEndpoints(file, filterEndpointPaths)
+	const { endpoints, endpointTimings } = analyzeSourceFileEndpoints(file, filterEndpointPaths)
 	const t2 = performance.now()
 	Logger.debug(`[${file.fileName}] Analyzed in ${t2 - t1}ms`)
 	SourceFileCache.cacheResults(file.sourceFile, timestamp, config.cachePath, endpoints)
-	return { endpoints, timing: t2 - t1 }
+	return { endpoints, timing: t2 - t1, endpointTimings }
 }
 
 export const analyzeSourceFileEndpoints = (
 	file: DiscoveredSourceFile,
 	filterEndpointPaths?: string[],
-): EndpointData[] => {
+): { endpoints: EndpointData[]; endpointTimings: EndpointTiming[] } => {
 	const endpoints: EndpointData[] = []
+	const endpointTimings: EndpointTiming[] = []
 	const operations = ['get', 'post', 'put', 'delete', 'del', 'patch']
 	const joinedOperations = operations.join('|')
 
@@ -220,12 +255,20 @@ export const analyzeSourceFileEndpoints = (
 					return
 				}
 
-				endpoints.push(parseEndpoint(node, file.fileName))
+				const t1 = performance.now()
+				const { endpoint, sectionTimings } = parseEndpoint(node, file.fileName)
+				endpointTimings.push({
+					method: endpoint.method,
+					path: endpoint.path,
+					timing: performance.now() - t1,
+					sectionTimings,
+				})
+				endpoints.push(endpoint)
 			}
 		})
 	})
 
-	return endpoints
+	return { endpoints, endpointTimings }
 }
 
 export const analyzeSourceFileApiHeader = (sourceFile: SourceFile): ApiDocsHeader | null => {

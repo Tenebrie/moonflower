@@ -14,7 +14,12 @@ import {
 	resolveEndpointPath,
 } from './nodeParsers'
 
-export const parseEndpoint = (node: Node<ts.Node>, sourceFilePath: string) => {
+export type SectionTiming = { section: string; timing: number }
+
+export const parseEndpoint = (
+	node: Node<ts.Node>,
+	sourceFilePath: string,
+): { endpoint: EndpointData; sectionTimings: SectionTiming[] } => {
 	const parsedEndpointMethod = node
 		.getFirstDescendantByKind(SyntaxKind.PropertyAccessExpression)!
 		.getText()
@@ -46,11 +51,20 @@ export const parseEndpoint = (node: Node<ts.Node>, sourceFilePath: string) => {
 		error: Error
 	}[] = []
 
+	const sectionTimings: SectionTiming[] = []
+
+	const time = <T>(section: string, fn: () => T): T => {
+		const t1 = performance.now()
+		const result = fn()
+		sectionTimings.push({ section, timing: performance.now() - t1 })
+		return result
+	}
+
 	const hookNodes = getHookNodes(node)
 
 	// API documentation
 	try {
-		const entries = parseApiDocumentation(hookNodes.useApiEndpoint)
+		const entries = time('useApiEndpoint', () => parseApiDocumentation(hookNodes.useApiEndpoint))
 		entries.forEach((param) => {
 			endpointData[param.identifier] = param.value as string & string[]
 		})
@@ -64,7 +78,9 @@ export const parseEndpoint = (node: Node<ts.Node>, sourceFilePath: string) => {
 
 	// Request params
 	try {
-		endpointData.requestPathParams = parseRequestParams(hookNodes.usePathParams, endpointPath)
+		endpointData.requestPathParams = time('usePathParams', () =>
+			parseRequestParams(hookNodes.usePathParams, endpointPath),
+		)
 	} catch (err) {
 		warningData.push({
 			segment: 'path',
@@ -75,7 +91,9 @@ export const parseEndpoint = (node: Node<ts.Node>, sourceFilePath: string) => {
 
 	// Request query
 	try {
-		endpointData.requestQuery = parseRequestObjectInput(hookNodes.useQueryParams, 'useQueryParams')
+		endpointData.requestQuery = time('useQueryParams', () =>
+			parseRequestObjectInput(hookNodes.useQueryParams, 'useQueryParams'),
+		)
 	} catch (err) {
 		warningData.push({
 			segment: 'query',
@@ -86,7 +104,9 @@ export const parseEndpoint = (node: Node<ts.Node>, sourceFilePath: string) => {
 
 	// Request headers
 	try {
-		endpointData.requestHeaders = parseRequestObjectInput(hookNodes.useHeaderParams, 'useHeaderParams')
+		endpointData.requestHeaders = time('useHeaderParams', () =>
+			parseRequestObjectInput(hookNodes.useHeaderParams, 'useHeaderParams'),
+		)
 	} catch (err) {
 		warningData.push({
 			segment: 'headers',
@@ -97,7 +117,7 @@ export const parseEndpoint = (node: Node<ts.Node>, sourceFilePath: string) => {
 
 	// Raw request body
 	try {
-		const parsedBody = parseRequestRawBody(hookNodes.useRequestRawBody)
+		const parsedBody = time('useRequestRawBody', () => parseRequestRawBody(hookNodes.useRequestRawBody))
 		if (parsedBody) {
 			endpointData.rawBody = parsedBody
 		}
@@ -111,7 +131,9 @@ export const parseEndpoint = (node: Node<ts.Node>, sourceFilePath: string) => {
 
 	// Object request body
 	try {
-		endpointData.objectBody = parseRequestObjectInput(hookNodes.useRequestBody, 'useRequestBody')
+		endpointData.objectBody = time('useRequestBody', () =>
+			parseRequestObjectInput(hookNodes.useRequestBody, 'useRequestBody'),
+		)
 	} catch (err) {
 		warningData.push({
 			segment: 'objectBody',
@@ -122,7 +144,7 @@ export const parseEndpoint = (node: Node<ts.Node>, sourceFilePath: string) => {
 
 	// Request response
 	try {
-		endpointData.responses = parseRequestResponse(node)
+		endpointData.responses = time('response', () => parseRequestResponse(node))
 	} catch (err) {
 		warningData.push({
 			segment: 'response',
@@ -131,7 +153,7 @@ export const parseEndpoint = (node: Node<ts.Node>, sourceFilePath: string) => {
 		Logger.error('Error', err)
 	}
 
-	return endpointData
+	return { endpoint: endpointData, sectionTimings }
 }
 
 type HookName =
