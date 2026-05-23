@@ -54,6 +54,13 @@ type FileDiscoveryConfig = {
 type EndpointTiming = { method: string; path: string; timing: number; sectionTimings: SectionTiming[] }
 
 /**
+ * Number of uncached files at or below which analysis runs inline on the (already-warm) main-thread
+ * Project instead of fanning out to worker threads. Each worker pays a multi-second cold-start to
+ * build its own Project, so parallelism only wins once there are several files to share that cost.
+ */
+const INLINE_ANALYSIS_FILE_THRESHOLD = 2
+
+/**
  * @param tsconfigPath Path to tsconfig file relative to project root
  * @param sourceFilePaths Array of router source files relative to project root
  */
@@ -213,24 +220,6 @@ export const analyzeMultipleSourceFiles = async (
 		return cached.flatMap((f) => f.endpoints)
 	}
 
-	// Build one task per uncached file. Each worker analyzes a whole file in a single pass, so it
-	// pays the ts-morph Project cold-start (full TS program load + type-checker warmup) once and
-	// reuses the warmed-up checker for every endpoint in that file.
-	type FileTask = { task: WorkerTask; fileName: string }
-	const allTasks: FileTask[] = uncached.map(({ file }) => ({
-		fileName: file.fileName,
-		task: {
-			taskId: crypto.randomUUID(),
-			tsconfigPath: config.tsconfigPath,
-			sourceFilePath: file.sourceFile.getFilePath(),
-			routerNames: file.routers.named,
-			filterEndpointPaths,
-		},
-	}))
-
-	// Dispatch all tasks to the worker pool, capped at one worker per file.
-	const pool = new WorkerPool(resolveWorkerUrl(), allTasks.length)
-
 	type FileResult = {
 		endpoints: EndpointData[]
 		fileName: string
@@ -238,32 +227,63 @@ export const analyzeMultipleSourceFiles = async (
 		endpointTimings: EndpointTiming[]
 	}
 
-	let results: WorkerResult[]
-	try {
-		results = await pool.runAll(allTasks.map((ft) => ft.task))
-	} finally {
-		pool.terminate()
-	}
-
-	// Each result maps 1:1 to a file task.
 	const byFile = new Map<string, FileResult>()
 	for (const { file } of uncached) {
 		byFile.set(file.fileName, { endpoints: [], fileName: file.fileName, timing: 0, endpointTimings: [] })
 	}
 
-	for (let i = 0; i < results.length; i++) {
-		const result = results[i]
-		const fileName = allTasks[i].fileName
-		const fileResult = byFile.get(fileName)!
+	// The caller (prepareOpenApiSpec) already built and warmed a ts-morph Project on this thread, so
+	// inline analysis runs against a hot type-checker. A worker, by contrast, must spawn a thread and
+	// build its own Project from scratch — a multi-second cold-start. That cold-start only pays off
+	// when there are enough uncached files that spreading the parse work across workers beats it; below
+	// the threshold (e.g. the common single-file incremental rebuild), inline is strictly faster.
+	if (uncached.length <= INLINE_ANALYSIS_FILE_THRESHOLD) {
+		for (const { file } of uncached) {
+			const { endpoints, endpointTimings } = analyzeSourceFileEndpoints(file, filterEndpointPaths)
+			const fileResult = byFile.get(file.fileName)!
+			fileResult.endpoints = endpoints
+			fileResult.endpointTimings = endpointTimings
+			fileResult.timing = endpointTimings.reduce((sum, t) => sum + t.timing, 0)
+		}
+	} else {
+		// One task per file: each worker analyzes a whole file in a single pass, paying its Project
+		// cold-start once and reusing the warmed-up checker for every endpoint in that file. Cap the
+		// pool at one worker per file so we never spin up a worker with nothing to do.
+		type FileTask = { task: WorkerTask; fileName: string }
+		const allTasks: FileTask[] = uncached.map(({ file }) => ({
+			fileName: file.fileName,
+			task: {
+				taskId: crypto.randomUUID(),
+				tsconfigPath: config.tsconfigPath,
+				sourceFilePath: file.sourceFile.getFilePath(),
+				routerNames: file.routers.named,
+				filterEndpointPaths,
+			},
+		}))
 
-		if ('error' in result) {
-			Logger.error(`[${fileName}] Worker error: ${result.error}`)
-			continue
+		const pool = new WorkerPool(resolveWorkerUrl(), allTasks.length)
+		let results: WorkerResult[]
+		try {
+			results = await pool.runAll(allTasks.map((ft) => ft.task))
+		} finally {
+			pool.terminate()
 		}
 
-		fileResult.endpoints = result.endpoints
-		fileResult.endpointTimings = result.endpointTimings
-		fileResult.timing = result.endpointTimings.reduce((sum, t) => sum + t.timing, 0)
+		// Each result maps 1:1 to a file task.
+		for (let i = 0; i < results.length; i++) {
+			const result = results[i]
+			const fileName = allTasks[i].fileName
+			const fileResult = byFile.get(fileName)!
+
+			if ('error' in result) {
+				Logger.error(`[${fileName}] Worker error: ${result.error}`)
+				continue
+			}
+
+			fileResult.endpoints = result.endpoints
+			fileResult.endpointTimings = result.endpointTimings
+			fileResult.timing = result.endpointTimings.reduce((sum, t) => sum + t.timing, 0)
+		}
 	}
 
 	// Write cache for each uncached file
