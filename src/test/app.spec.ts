@@ -3,12 +3,21 @@ import Koa from 'koa'
 import * as os from 'os'
 import * as path from 'path'
 import request from 'supertest'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeAll, describe, expect, it, vi } from 'vitest'
 
 import { generateOpenApiSpec } from '../openapi/generatorModule/generatorModule'
 import { initOpenApiEngine } from '../openapi/initOpenApiEngine'
 import { OpenApiManager } from '../openapi/manager/OpenApiManager'
 import { app } from './app'
+
+// The OpenAPI engine runs the TypeScript analyzer lazily on first request, and any request that
+// reaches the initOpenApiEngine middleware awaits its readiness. Requests that match a route never
+// reach it, but unmatched ones (e.g. the 405 test) do, so the first such request pays the full
+// analyzer cold-start cost. That can exceed a single test's default 5s timeout in CI. Warm the
+// engine up once here so no individual test bears that cost.
+beforeAll(async () => {
+	await request(app.callback()).get('/api-json')
+}, 60_000)
 
 describe('TestAppRouter', () => {
 	it('includes content type header', async () => {
