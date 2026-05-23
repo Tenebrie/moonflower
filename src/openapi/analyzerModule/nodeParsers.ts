@@ -15,6 +15,8 @@ import { OpenApiManager } from '../manager/OpenApiManager'
 import { ShapeOfProperty, ShapeOfType, ShapeOfUnionEntry } from './types'
 
 const implementationCache = new WeakMap<Node, Node>()
+const nodeShapeCache = new WeakMap<Node, ShapeOfType['shape']>()
+const typeShapeCache = new WeakMap<object, ShapeOfType['shape']>()
 
 export const findNodeImplementation = (node: Node): Node => {
 	const cached = implementationCache.get(node)
@@ -84,6 +86,16 @@ export const getTypeReferenceShape = (node: TypeReferenceNode): ShapeOfType['sha
 }
 
 export const getRecursiveNodeShape = (nodeOrReference: Node): ShapeOfType['shape'] => {
+	const cached = nodeShapeCache.get(nodeOrReference)
+	if (cached !== undefined) {
+		return cached
+	}
+	const result = computeRecursiveNodeShape(nodeOrReference)
+	nodeShapeCache.set(nodeOrReference, result)
+	return result
+}
+
+const computeRecursiveNodeShape = (nodeOrReference: Node): ShapeOfType['shape'] => {
 	const typeName = nodeOrReference.getSymbol()?.getName()
 	if (typeName && OpenApiManager.getInstance().hasExposedModel(typeName)) {
 		return [
@@ -624,6 +636,17 @@ export const getProperTypeShape = (
 		return 'circular'
 	}
 
+	const cacheKey = type.compilerType
+	const cached = typeShapeCache.get(cacheKey)
+	if (cached !== undefined) {
+		return cached
+	}
+	const result = computeProperTypeShape(type, atLocation, stack)
+	typeShapeCache.set(cacheKey, result)
+	return result
+}
+
+const computeProperTypeShape = (type: Type, atLocation: Node, stack: Type[]): ShapeOfType['shape'] => {
 	const nextStack = stack.concat(type)
 
 	if (type.getText() === 'void') {
@@ -874,7 +897,7 @@ export const getProperTypeShape = (
 	}
 
 	const fileName = atLocation.getSourceFile().getFilePath().split('/').pop()
-	Logger.warn(`[${fileName}] Unknown type shape node ${typeOrPromise.getText()}`)
+	Logger.warn(`[${fileName}] Unknown type shape node ${type.getText()}`)
 	return 'unknown_5'
 }
 
