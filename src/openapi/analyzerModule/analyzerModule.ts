@@ -45,6 +45,7 @@ type Props = {
 				cachePath: string
 		  }
 	profiling?: 'stats' | 'off' | 'debug'
+	workers?: boolean
 }
 
 type FileDiscoveryConfig = {
@@ -71,6 +72,7 @@ export const prepareOpenApiSpec = async ({
 	sourceFileDiscovery,
 	incremental,
 	profiling = 'stats',
+	workers = false,
 }: Props): Promise<void> => {
 	const openApiManager = OpenApiManager.getInstance()
 
@@ -152,6 +154,7 @@ export const prepareOpenApiSpec = async ({
 		timestampCache: {},
 		profiling,
 		tsconfigPath: path.resolve(tsconfigPath),
+		workers,
 	})
 
 	openApiManager.setStats({
@@ -187,6 +190,7 @@ export const analyzeMultipleSourceFiles = async (
 		timestampCache: TimestampCache
 		profiling?: 'stats' | 'off' | 'debug'
 		tsconfigPath: string
+		workers?: boolean
 	},
 	filterEndpointPaths?: string[],
 ): Promise<EndpointData[]> => {
@@ -237,12 +241,8 @@ export const analyzeMultipleSourceFiles = async (
 		byFile.set(file.fileName, { endpoints: [], fileName: file.fileName, timing: 0, endpointTimings: [] })
 	}
 
-	// The caller (prepareOpenApiSpec) already built and warmed a ts-morph Project on this thread, so
-	// inline analysis runs against a hot type-checker. A worker, by contrast, must spawn a thread and
-	// build its own Project from scratch — a multi-second cold-start. That cold-start only pays off
-	// when there are enough uncached files that spreading the parse work across workers beats it; below
-	// the threshold (e.g. the common single-file incremental rebuild), inline is strictly faster.
-	if (uncached.length <= INLINE_ANALYSIS_FILE_THRESHOLD) {
+	const useWorkers = config.workers !== false
+	if (!useWorkers || uncached.length <= INLINE_ANALYSIS_FILE_THRESHOLD) {
 		for (const { file } of uncached) {
 			const { endpoints, endpointTimings } = analyzeSourceFileEndpoints(file, filterEndpointPaths)
 			const fileResult = byFile.get(file.fileName)!
@@ -251,9 +251,6 @@ export const analyzeMultipleSourceFiles = async (
 			fileResult.timing = endpointTimings.reduce((sum, t) => sum + t.timing, 0)
 		}
 	} else {
-		// One task per file: each worker analyzes a whole file in a single pass, paying its Project
-		// cold-start once and reusing the warmed-up checker for every endpoint in that file. Cap the
-		// pool at one worker per file so we never spin up a worker with nothing to do.
 		type FileTask = { task: WorkerTask; fileName: string }
 		const allTasks: FileTask[] = uncached.map(({ file }) => ({
 			fileName: file.fileName,
