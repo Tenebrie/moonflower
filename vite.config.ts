@@ -53,6 +53,7 @@ export const baseViteConfig: ViteUserConfig = {
 				'crypto',
 				'os',
 				'perf_hooks',
+				'url',
 				'worker_threads',
 				'@ts-morph/common',
 				'typescript',
