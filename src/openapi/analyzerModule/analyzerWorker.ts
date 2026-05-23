@@ -1,8 +1,10 @@
-import { Node, Project, ts } from 'ts-morph'
+import { Project } from 'ts-morph'
 import { parentPort } from 'worker_threads'
 
+import { EndpointData } from '../types'
+import { resolveEndpointPath } from './nodeParsers'
 import { parseEndpoint } from './parseEndpoint'
-import { WorkerResult, WorkerTask } from './workerPool'
+import { EndpointTiming, WorkerResult, WorkerTask } from './workerPool'
 
 const OPERATIONS = ['get', 'post', 'put', 'delete', 'del', 'patch']
 const OPERATIONS_PATTERN = OPERATIONS.join('|')
@@ -30,37 +32,39 @@ parentPort!.on('message', (task: WorkerTask) => {
 			sourceFile = proj.addSourceFileAtPath(task.sourceFilePath)
 		}
 
-		const routerPattern = new RegExp(`${task.routerName}\\.(?:${OPERATIONS_PATTERN})`)
-		let index = 0
-		let targetNode: Node<ts.Node> | undefined
+		const endpoints: EndpointData[] = []
+		const endpointTimings: EndpointTiming[] = []
 
-		sourceFile.forEachChild((node) => {
-			if (targetNode) return
-			if (routerPattern.test(node.getText())) {
-				if (index === task.endpointIndex) {
-					targetNode = node
+		task.routerNames.forEach((routerName) => {
+			const routerPattern = new RegExp(`${routerName}\\.(?:${OPERATIONS_PATTERN})`)
+			sourceFile!.forEachChild((node) => {
+				if (!routerPattern.test(node.getText())) {
+					return
 				}
-				index++
-			}
+
+				if (task.filterEndpointPaths) {
+					const endpointPath = resolveEndpointPath(node) ?? ''
+					if (!task.filterEndpointPaths.some((p) => endpointPath.includes(p))) {
+						return
+					}
+				}
+
+				const t1 = performance.now()
+				const { endpoint, sectionTimings } = parseEndpoint(node, task.sourceFilePath)
+				endpointTimings.push({
+					method: endpoint.method,
+					path: endpoint.path,
+					timing: performance.now() - t1,
+					sectionTimings,
+				})
+				endpoints.push(endpoint)
+			})
 		})
-
-		if (!targetNode) {
-			const result: WorkerResult = {
-				taskId: task.taskId,
-				error: `Endpoint not found: routerName=${task.routerName} index=${task.endpointIndex} in ${task.sourceFilePath}`,
-			}
-			parentPort!.postMessage(result)
-			return
-		}
-
-		const t1 = performance.now()
-		const { endpoint, sectionTimings } = parseEndpoint(targetNode, task.sourceFilePath)
 
 		const result: WorkerResult = {
 			taskId: task.taskId,
-			endpoint,
-			sectionTimings,
-			timing: performance.now() - t1,
+			endpoints,
+			endpointTimings,
 		}
 		parentPort!.postMessage(result)
 	} catch (err) {

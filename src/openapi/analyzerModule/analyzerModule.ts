@@ -213,45 +213,24 @@ export const analyzeMultipleSourceFiles = async (
 		return cached.flatMap((f) => f.endpoints)
 	}
 
-	// Build one task per endpoint across all uncached files
-	const OPERATIONS = ['get', 'post', 'put', 'delete', 'del', 'patch']
-	const operationsPattern = OPERATIONS.join('|')
-
+	// Build one task per uncached file. Each worker analyzes a whole file in a single pass, so it
+	// pays the ts-morph Project cold-start (full TS program load + type-checker warmup) once and
+	// reuses the warmed-up checker for every endpoint in that file.
 	type FileTask = { task: WorkerTask; fileName: string }
-	const allTasks: FileTask[] = []
+	const allTasks: FileTask[] = uncached.map(({ file }) => ({
+		fileName: file.fileName,
+		task: {
+			taskId: crypto.randomUUID(),
+			tsconfigPath: config.tsconfigPath,
+			sourceFilePath: file.sourceFile.getFilePath(),
+			routerNames: file.routers.named,
+			filterEndpointPaths,
+		},
+	}))
 
-	for (const { file } of uncached) {
-		for (const routerName of file.routers.named) {
-			const routerPattern = new RegExp(`${routerName}\\.(?:${operationsPattern})`)
-			let endpointIndex = 0
-			file.sourceFile.forEachChild((node) => {
-				const nodeText = node.getText()
-				if (routerPattern.test(nodeText)) {
-					if (
-						!filterEndpointPaths ||
-						filterEndpointPaths.some((p) => resolveEndpointPath(node)?.includes(p))
-					) {
-						allTasks.push({
-							fileName: file.fileName,
-							task: {
-								taskId: crypto.randomUUID(),
-								tsconfigPath: config.tsconfigPath,
-								sourceFilePath: file.sourceFile.getFilePath(),
-								routerName,
-								endpointIndex,
-							},
-						})
-					}
-					endpointIndex++
-				}
-			})
-		}
-	}
+	// Dispatch all tasks to the worker pool, capped at one worker per file.
+	const pool = new WorkerPool(resolveWorkerUrl(), allTasks.length)
 
-	// Dispatch all tasks to the worker pool
-	const pool = new WorkerPool(resolveWorkerUrl())
-
-	type EndpointTiming = { method: string; path: string; timing: number; sectionTimings: SectionTiming[] }
 	type FileResult = {
 		endpoints: EndpointData[]
 		fileName: string
@@ -266,7 +245,7 @@ export const analyzeMultipleSourceFiles = async (
 		pool.terminate()
 	}
 
-	// Group results by file
+	// Each result maps 1:1 to a file task.
 	const byFile = new Map<string, FileResult>()
 	for (const { file } of uncached) {
 		byFile.set(file.fileName, { endpoints: [], fileName: file.fileName, timing: 0, endpointTimings: [] })
@@ -282,14 +261,9 @@ export const analyzeMultipleSourceFiles = async (
 			continue
 		}
 
-		fileResult.endpoints.push(result.endpoint)
-		fileResult.timing += result.timing
-		fileResult.endpointTimings.push({
-			method: result.endpoint.method,
-			path: result.endpoint.path,
-			timing: result.timing,
-			sectionTimings: result.sectionTimings,
-		})
+		fileResult.endpoints = result.endpoints
+		fileResult.endpointTimings = result.endpointTimings
+		fileResult.timing = result.endpointTimings.reduce((sum, t) => sum + t.timing, 0)
 	}
 
 	// Write cache for each uncached file

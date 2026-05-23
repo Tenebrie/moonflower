@@ -8,15 +8,21 @@ export type WorkerTask = {
 	taskId: string
 	tsconfigPath: string
 	sourceFilePath: string
-	routerName: string
-	endpointIndex: number
+	routerNames: string[]
+	filterEndpointPaths?: string[]
+}
+
+export type EndpointTiming = {
+	method: string
+	path: string
+	timing: number
+	sectionTimings: SectionTiming[]
 }
 
 export type WorkerResultSuccess = {
 	taskId: string
-	endpoint: EndpointData
-	sectionTimings: SectionTiming[]
-	timing: number
+	endpoints: EndpointData[]
+	endpointTimings: EndpointTiming[]
 }
 
 export type WorkerResultError = {
@@ -32,8 +38,12 @@ export class WorkerPool {
 	private queue: Array<{ task: WorkerTask; resolve: (r: WorkerResult) => void }> = []
 	private pending = new Map<string, (r: WorkerResult) => void>()
 
-	constructor(workerUrl: URL) {
-		const size = Math.max(1, Math.min(os.cpus().length - 1, 8))
+	constructor(workerUrl: URL, maxWorkers?: number) {
+		const cpuBound = Math.max(1, Math.min(os.cpus().length - 1, 8))
+		// Never spin up more workers than there are files to analyze: each extra worker would
+		// just pay the ts-morph Project cold-start (full TS program load + type-checker warmup)
+		// for nothing while contending for CPU with the workers that actually have work.
+		const size = maxWorkers === undefined ? cpuBound : Math.max(1, Math.min(cpuBound, maxWorkers))
 		this.workers = Array.from({ length: size }, () => {
 			const worker = new Worker(workerUrl)
 			worker.on('message', (result: WorkerResult) => {
