@@ -109,7 +109,7 @@ export const prepareOpenApiSpec = async ({
 			const startTime = performance.now()
 			const files = discoverRouterFiles({
 				targetPath: typeof sourceFileDiscovery === 'object' ? sourceFileDiscovery.rootPath : '.',
-				tsConfigPath: tsconfigPath,
+				project,
 			})
 			if (profiling !== 'off') {
 				Logger.info(`File discovery took ${Math.round(performance.now() - startTime)}ms`)

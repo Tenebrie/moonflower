@@ -1,12 +1,21 @@
 import { resolve } from 'path'
+import { Project } from 'ts-morph'
+import { beforeEach, describe, expect, it } from 'vitest'
 
 import { discoverRouterFiles } from './discoverRouterFiles'
 
 describe('discoverRouterFiles', () => {
+	let project: Project
+	beforeEach(() => {
+		project = new Project({
+			tsConfigFilePath: resolve('./tsconfig.json'),
+			skipFileDependencyResolution: true,
+		})
+	})
 	it('discovers routers from folder correctly', () => {
 		const { discoveredRouterFiles } = discoverRouterFiles({
 			targetPath: resolve(__dirname, '.'),
-			tsConfigPath: resolve('./tsconfig.json'),
+			project,
 		})
 
 		expect(discoveredRouterFiles.length).toEqual(2)
@@ -15,8 +24,8 @@ describe('discoverRouterFiles', () => {
 	it('respects ignoring files by string', () => {
 		const { discoveredRouterFiles } = discoverRouterFiles({
 			targetPath: resolve(__dirname, '.'),
-			tsConfigPath: resolve('./tsconfig.json'),
 			excludedFiles: ['testRouterA'],
+			project,
 		})
 
 		expect(discoveredRouterFiles.length).toEqual(1)
@@ -26,8 +35,8 @@ describe('discoverRouterFiles', () => {
 	it('respects ignoring files by regex', () => {
 		const { discoveredRouterFiles } = discoverRouterFiles({
 			targetPath: resolve(__dirname, '.'),
-			tsConfigPath: resolve('./tsconfig.json'),
 			excludedFiles: [/B/g],
+			project,
 		})
 
 		expect(discoveredRouterFiles.length).toEqual(1)

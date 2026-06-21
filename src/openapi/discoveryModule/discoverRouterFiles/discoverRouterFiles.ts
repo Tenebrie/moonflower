@@ -8,12 +8,12 @@ export type DiscoveredSourceFile = ReturnType<typeof discoverRouterFiles>['disco
 
 export const discoverRouterFiles = ({
 	targetPath,
-	tsConfigPath,
 	excludedFiles,
+	project,
 }: {
 	targetPath: string
-	tsConfigPath: string
 	excludedFiles?: (string | RegExp)[]
+	project: Project
 }) => {
 	if (!fs.existsSync(targetPath)) {
 		return { discoveredRouterFiles: [], discoveredSourceFiles: [] }
@@ -39,11 +39,6 @@ export const discoverRouterFiles = ({
 			return false
 		}
 		return true
-	})
-
-	const project = new Project({
-		tsConfigFilePath: tsConfigPath,
-		skipFileDependencyResolution: true,
 	})
 
 	const allSourceFiles = files
