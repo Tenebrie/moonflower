@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-import KoaRouter from '@koa/router'
+import KoaRouter, { RouterContext, RouterMiddleware } from '@koa/router'
 import Koa from 'koa'
 
 import { OpenApiManager } from '../openapi/manager/OpenApiManager'
@@ -21,10 +20,10 @@ export class Router<StateT = Koa.DefaultState, ContextT = Koa.DefaultContext> {
 	}
 
 	private async sendResponseValue<P extends string>(
-		ctx: Parameters<Parameters<KoaRouter['get']>[1]>[0],
-		callback: KoaRouter.Middleware<StateT, ContextT & ExtractedRequestParams<P>>,
+		ctx: RouterContext,
+		callback: RouterMiddleware<StateT, ContextT & ExtractedRequestParams<P>>,
 	) {
-		// @ts-ignore
+		// @ts-expect-error - Context is valid
 		const responseValue = await callback(ctx, undefined)
 		const { value, status, contentType } = parseEndpointReturnValue(responseValue)
 		ctx.body = value
@@ -34,8 +33,7 @@ export class Router<StateT = Koa.DefaultState, ContextT = Koa.DefaultContext> {
 		ctx.set('Content-Type', contentType)
 	}
 
-	public use(...middleware: Array<KoaRouter.Middleware<StateT, ContextT>>) {
-		// @ts-ignore
+	public use(...middleware: Array<RouterMiddleware<StateT, ContextT>>) {
 		this.koaRouter.use(...middleware)
 		return this
 	}
@@ -45,7 +43,6 @@ export class Router<StateT = Koa.DefaultState, ContextT = Koa.DefaultContext> {
 	) {
 		type AugmentedData = ResponseTypeT extends Promise<any> ? Awaited<ResponseTypeT> : ResponseTypeT
 		this.koaRouter.use(async (ctx, next) => {
-			// @ts-ignore
 			const userData = await Promise.resolve(middleware(ctx))
 			Object.keys(userData).forEach((key) => {
 				ctx[key] = userData[key]
@@ -57,7 +54,7 @@ export class Router<StateT = Koa.DefaultState, ContextT = Koa.DefaultContext> {
 
 	public get<P extends string>(
 		path: P,
-		callback: KoaRouter.Middleware<StateT, ContextT & ExtractedRequestParams<P>>,
+		callback: RouterMiddleware<StateT, ContextT & ExtractedRequestParams<P>>,
 	) {
 		this.koaRouter.get(path, async (ctx) => {
 			await this.sendResponseValue(ctx, callback)
@@ -67,7 +64,7 @@ export class Router<StateT = Koa.DefaultState, ContextT = Koa.DefaultContext> {
 
 	public post<P extends string>(
 		path: P,
-		callback: KoaRouter.Middleware<StateT, ContextT & ExtractedRequestParams<P>>,
+		callback: RouterMiddleware<StateT, ContextT & ExtractedRequestParams<P>>,
 	) {
 		this.koaRouter.post(path, async (ctx) => {
 			await this.sendResponseValue(ctx, callback)
@@ -77,7 +74,7 @@ export class Router<StateT = Koa.DefaultState, ContextT = Koa.DefaultContext> {
 
 	public put<P extends string>(
 		path: P,
-		callback: KoaRouter.Middleware<StateT, ContextT & ExtractedRequestParams<P>>,
+		callback: RouterMiddleware<StateT, ContextT & ExtractedRequestParams<P>>,
 	) {
 		this.koaRouter.put(path, async (ctx) => {
 			await this.sendResponseValue(ctx, callback)
@@ -87,7 +84,7 @@ export class Router<StateT = Koa.DefaultState, ContextT = Koa.DefaultContext> {
 
 	public delete<P extends string>(
 		path: P,
-		callback: KoaRouter.Middleware<StateT, ContextT & ExtractedRequestParams<P>>,
+		callback: RouterMiddleware<StateT, ContextT & ExtractedRequestParams<P>>,
 	) {
 		this.koaRouter.delete(path, async (ctx) => {
 			await this.sendResponseValue(ctx, callback)
@@ -97,7 +94,7 @@ export class Router<StateT = Koa.DefaultState, ContextT = Koa.DefaultContext> {
 
 	public del<P extends string>(
 		path: P,
-		callback: KoaRouter.Middleware<StateT, ContextT & ExtractedRequestParams<P>>,
+		callback: RouterMiddleware<StateT, ContextT & ExtractedRequestParams<P>>,
 	) {
 		this.koaRouter.del(path, async (ctx) => {
 			await this.sendResponseValue(ctx, callback)
@@ -107,7 +104,7 @@ export class Router<StateT = Koa.DefaultState, ContextT = Koa.DefaultContext> {
 
 	public patch<P extends string>(
 		path: P,
-		callback: KoaRouter.Middleware<StateT, ContextT & ExtractedRequestParams<P>>,
+		callback: RouterMiddleware<StateT, ContextT & ExtractedRequestParams<P>>,
 	) {
 		this.koaRouter.patch(path, async (ctx) => {
 			await this.sendResponseValue(ctx, callback)
