@@ -271,7 +271,6 @@ export const analyzeMultipleSourceFiles = async (
 			pool.terminate()
 		}
 
-		// Each result maps 1:1 to a file task.
 		for (let i = 0; i < results.length; i++) {
 			const result = results[i]
 			const fileName = allTasks[i].fileName
@@ -288,7 +287,6 @@ export const analyzeMultipleSourceFiles = async (
 		}
 	}
 
-	// Write cache for each uncached file
 	for (const { file, timestamp } of uncached) {
 		const fileResult = byFile.get(file.fileName)!
 		if (fileResult.endpoints.length > 0) {

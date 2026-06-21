@@ -18,6 +18,16 @@ const implementationCache = new WeakMap<Node, Node>()
 const nodeShapeCache = new WeakMap<Node, ShapeOfType['shape']>()
 const typeShapeCache = new WeakMap<object, ShapeOfType['shape']>()
 
+const implementationBySymbolCache = new WeakMap<ts.Symbol, Node>()
+
+const getCanonicalSymbol = (node: Node): ts.Symbol | undefined => {
+	const symbol = node.getSymbol()
+	if (!symbol) {
+		return undefined
+	}
+	return (symbol.getAliasedSymbol() ?? symbol).compilerSymbol
+}
+
 export const findNodeImplementation = (node: Node): Node => {
 	const cached = implementationCache.get(node)
 	if (cached) {
@@ -25,30 +35,44 @@ export const findNodeImplementation = (node: Node): Node => {
 	}
 
 	if (node.getKind() === SyntaxKind.Identifier) {
-		const implementationNode = node.asKind(SyntaxKind.Identifier)!.getImplementations()[0]?.getNode()
-		if (implementationNode) {
-			const implementationParentNode = implementationNode.getParent()!
-			const assignmentValueNode = implementationParentNode.getLastChild()!
-			if (assignmentValueNode === node) {
-				throw new Error('Recursive implementation found')
+		const symbol = getCanonicalSymbol(node)
+		if (symbol) {
+			const cachedBySymbol = implementationBySymbolCache.get(symbol)
+			if (cachedBySymbol) {
+				implementationCache.set(node, cachedBySymbol)
+				return cachedBySymbol
 			}
-			const result = findNodeImplementation(assignmentValueNode)
-			implementationCache.set(node, result)
-			return result
 		}
 
-		const definitionNode = node.asKind(SyntaxKind.Identifier)!.getDefinitions()[0]?.getNode()
-		if (definitionNode) {
-			const definitionParentNode = definitionNode.getParent()!
-			const assignmentValueNode = definitionParentNode.getLastChild()!
-			if (assignmentValueNode === node) {
-				throw new Error('Recursive implementation found')
+		const resolve = (): Node => {
+			const implementationNode = node.asKind(SyntaxKind.Identifier)!.getImplementations()[0]?.getNode()
+			if (implementationNode) {
+				const implementationParentNode = implementationNode.getParent()!
+				const assignmentValueNode = implementationParentNode.getLastChild()!
+				if (assignmentValueNode === node) {
+					throw new Error('Recursive implementation found')
+				}
+				return findNodeImplementation(assignmentValueNode)
 			}
-			const result = findNodeImplementation(assignmentValueNode)
-			implementationCache.set(node, result)
-			return result
+
+			const definitionNode = node.asKind(SyntaxKind.Identifier)!.getDefinitions()[0]?.getNode()
+			if (definitionNode) {
+				const definitionParentNode = definitionNode.getParent()!
+				const assignmentValueNode = definitionParentNode.getLastChild()!
+				if (assignmentValueNode === node) {
+					throw new Error('Recursive implementation found')
+				}
+				return findNodeImplementation(assignmentValueNode)
+			}
+			throw new Error('No implementation nor definition available')
 		}
-		throw new Error('No implementation nor definition available')
+
+		const result = resolve()
+		if (symbol) {
+			implementationBySymbolCache.set(symbol, result)
+		}
+		implementationCache.set(node, result)
+		return result
 	}
 
 	implementationCache.set(node, node)
@@ -265,19 +289,30 @@ export const getShapeOfValidatorLiteral = (
 	return properties || []
 }
 
+const returnTypeCache = new WeakMap<Node, Type>()
+const getCallReturnType = (callExpression: Node): Type => {
+	const cached = returnTypeCache.get(callExpression)
+	if (cached) {
+		return cached
+	}
+	const result = callExpression.asKindOrThrow(SyntaxKind.CallExpression).getReturnType()
+	returnTypeCache.set(callExpression, result)
+	return result
+}
+
 const isZodCallExpression = (node: Node): boolean => {
 	const callExpression = node.asKind(SyntaxKind.CallExpression)
 	if (!callExpression) {
 		return false
 	}
-	const returnType = callExpression.getReturnType()
+	const returnType = getCallReturnType(callExpression)
 	const typeName = returnType.getSymbol()?.getName() ?? ''
 	return typeName.startsWith('Zod')
 }
 
 const getZodCallShape = (node: Node): ShapeOfType['shape'] => {
 	const callExpression = node.asKind(SyntaxKind.CallExpression)!
-	const returnType = callExpression.getReturnType()
+	const returnType = getCallReturnType(callExpression)
 	const outputProp = returnType.getProperty('_output')
 	if (outputProp) {
 		return getProperTypeShape(outputProp.getTypeAtLocation(callExpression), callExpression)
@@ -402,7 +437,7 @@ export const getValidatorPropertyShape = (innerLiteralNode: Node): ShapeOfType['
 export const getValidatorPropertyOptionality = (node: Node): boolean => {
 	if (isZodCallExpression(node)) {
 		const callExpression = node.asKind(SyntaxKind.CallExpression)!
-		const returnType = callExpression.getReturnType()
+		const returnType = getCallReturnType(callExpression)
 		const typeName = returnType.getSymbol()?.getName() ?? ''
 		if (typeName === 'ZodOptional') {
 			return true
