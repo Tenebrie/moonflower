@@ -58,29 +58,37 @@ function isZodArrayValidator(validator: z.ZodType): boolean {
 }
 
 function runParser(validator: ValidatorUnion, value: string | number | boolean | object | null) {
-	// Zod validator
-	if (validator instanceof z.ZodType) {
-		const isArrayValidator = isZodArrayValidator(validator)
-		const coercedValue = (() => {
-			if (typeof value !== 'string') return value
-
-			try {
-				const parsed = JSON.parse(value)
-				if (isArrayValidator && !Array.isArray(parsed)) {
-					return coerceCommaSeparatedToArray(value)
-				}
-				return parsed
-			} catch {
-				if (isArrayValidator) {
-					return coerceCommaSeparatedToArray(value)
-				}
-				return value
-			}
-		})()
-		return validator.parse(coercedValue)
-	}
+	const isZod = validator instanceof z.ZodType
 	// Legacy validator
-	return validator.parse(getValueAsNullableString(value))
+	if (!isZod) {
+		return validator.parse(getValueAsNullableString(value))
+	}
+
+	const directParseResult = validator.safeParse(value)
+	if (directParseResult.success) {
+		return directParseResult.data
+	}
+
+	const coercedValue = (() => {
+		if (typeof value !== 'string') {
+			return value
+		}
+
+		const isArrayValidator = isZodArrayValidator(validator)
+		try {
+			const parsed = JSON.parse(value)
+			if (isArrayValidator && !Array.isArray(parsed)) {
+				return coerceCommaSeparatedToArray(value)
+			}
+			return parsed
+		} catch {
+			if (isArrayValidator) {
+				return coerceCommaSeparatedToArray(value)
+			}
+			return value
+		}
+	})()
+	return validator.parse(coercedValue)
 }
 
 function coerceCommaSeparatedToArray(value: string): unknown[] {

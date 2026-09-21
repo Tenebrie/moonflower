@@ -195,5 +195,23 @@ describe('usePathParams', () => {
 
 			expect(params.stringParam).toEqual('default_string')
 		})
+
+		it('keeps a string param that happens to be valid JSON', () => {
+			const ctx = mockContextPath(mockContext(), '/test/:numericString/:booleanString/:arrayString', {
+				numericString: '1523',
+				booleanString: 'true',
+				arrayString: '[1,2]',
+			})
+
+			const params = usePathParams(ctx, {
+				numericString: z.string(),
+				booleanString: z.string(),
+				arrayString: z.string(),
+			})
+
+			expect(params.numericString).toEqual('1523')
+			expect(params.booleanString).toEqual('true')
+			expect(params.arrayString).toEqual('[1,2]')
+		})
 	})
 })

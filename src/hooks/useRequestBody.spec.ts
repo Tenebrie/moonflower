@@ -374,5 +374,44 @@ describe('useRequestBody', () => {
 
 			expect(params.numberParam).toEqual(7)
 		})
+
+		it('keeps a string param that happens to be valid JSON', () => {
+			const ctx = mockContextBody(mockContext(), {
+				numericString: '123',
+				booleanString: 'true',
+				nullString: 'null',
+				arrayString: '[1,2]',
+			})
+
+			const params = useRequestBody(ctx, {
+				numericString: z.string(),
+				booleanString: z.string(),
+				nullString: z.string(),
+				arrayString: z.string(),
+			})
+
+			expect(params.numericString).toEqual('123')
+			expect(params.booleanString).toEqual('true')
+			expect(params.nullString).toEqual('null')
+			expect(params.arrayString).toEqual('[1,2]')
+		})
+
+		it('applies a transform exactly once', () => {
+			const ctx = mockContextBody(mockContext(), {
+				appended: 'hi',
+				measured: 'abcd',
+				numericString: '123',
+			})
+
+			const params = useRequestBody(ctx, {
+				appended: z.string().transform((value) => `${value}!`),
+				measured: z.string().transform((value) => value.length),
+				numericString: z.string().transform((value) => `${value}!`),
+			})
+
+			expect(params.appended).toEqual('hi!')
+			expect(params.measured).toEqual(4)
+			expect(params.numericString).toEqual('123!')
+		})
 	})
 })

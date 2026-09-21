@@ -330,5 +330,26 @@ describe('useHeaderParams', () => {
 
 			expect(params.numberHeader).toEqual(7)
 		})
+
+		it('keeps a string header that happens to be valid JSON', () => {
+			const ctx = mockContextHeaders(mockContext(), {
+				'numeric-header': '123',
+				'boolean-header': 'true',
+				'null-header': 'null',
+				'array-header': '[1,2]',
+			})
+
+			const params = useHeaderParams(ctx, {
+				'numeric-header': z.string(),
+				'boolean-header': z.string(),
+				'null-header': z.string(),
+				'array-header': z.string(),
+			})
+
+			expect(params.numericHeader).toEqual('123')
+			expect(params.booleanHeader).toEqual('true')
+			expect(params.nullHeader).toEqual('null')
+			expect(params.arrayHeader).toEqual('[1,2]')
+		})
 	})
 })

@@ -175,6 +175,14 @@ describe('useRequestRawBody', () => {
 			expectTypeOf(rawBody).toEqualTypeOf<string>()
 		})
 
+		it('keeps a string raw body that happens to be valid JSON', () => {
+			for (const value of ['123', 'true', 'null', '[1,2]']) {
+				const ctx = mockContextRawBody(mockContext(), value)
+
+				expect(useRequestRawBody(ctx, z.string())).toEqual(value)
+			}
+		})
+
 		it('parses an object raw body', () => {
 			const ctx = mockContextRawBody(mockContext(), JSON.stringify({ foo: 'aaa', bar: 'bbb' }))
 

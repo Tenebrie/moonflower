@@ -344,6 +344,27 @@ describe('useQueryParams', () => {
 
 			expect(params.numberParam).toEqual(7)
 		})
+
+		it('keeps a string param that happens to be valid JSON', () => {
+			const ctx = mockContextQuery(mockContext(), {
+				numericString: '123',
+				booleanString: 'true',
+				nullString: 'null',
+				arrayString: '[1,2]',
+			})
+
+			const params = useQueryParams(ctx, {
+				numericString: z.string(),
+				booleanString: z.string(),
+				nullString: z.string(),
+				arrayString: z.string(),
+			})
+
+			expect(params.numericString).toEqual('123')
+			expect(params.booleanString).toEqual('true')
+			expect(params.nullString).toEqual('null')
+			expect(params.arrayString).toEqual('[1,2]')
+		})
 	})
 
 	describe('legacy array validators', () => {
