@@ -7,6 +7,7 @@ export const TestCase = {
 	parsesInlineZodEnum: 'parses-inline-zod-enum',
 	parsesZodOptional: 'parses-zod-optional',
 	parsesZodDefault: 'parses-zod-default',
+	parsesZodDescription: 'parses-zod-description',
 	parsesAliasedZodSchema: 'parses-aliased-zod-schema',
 	parsesZodQueryStringArray: 'parses-zod-query-string-array',
 	parsesZodQueryNumberArray: 'parses-zod-query-number-array',

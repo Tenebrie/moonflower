@@ -127,6 +127,15 @@ router.post(`/test/${TestCase.parsesZodDefault}`, (ctx) => {
 	})
 })
 
+router.post(`/test/${TestCase.parsesZodDescription}`, (ctx) => {
+	useRequestBody(ctx, {
+		undescribedField: z.string(),
+		describedField: z.string().describe('Described field'),
+		describedBeforeOptional: z.string().describe('Described before optional').optional(),
+		describedAfterOptional: z.string().optional().describe('Described after optional'),
+	})
+})
+
 router.get(`/test/${TestCase.parsesZodQueryStringArray}`, (ctx) => {
 	useQueryParams(ctx, {
 		tags: z.array(z.string()),

@@ -220,6 +220,24 @@ describe('OpenApi Analyzer (Zod Validator)', () => {
 				expect(endpoint.objectBody[3].optional).toEqual(true)
 			})
 
+			it('parses zod describe calls into descriptions', () => {
+				const endpoint = analyzeEndpointById(TestCase.parsesZodDescription)
+
+				expect(endpoint.objectBody[0].identifier).toEqual('undescribedField')
+				expect(endpoint.objectBody[0].description).toEqual('')
+
+				expect(endpoint.objectBody[1].identifier).toEqual('describedField')
+				expect(endpoint.objectBody[1].description).toEqual('Described field')
+
+				expect(endpoint.objectBody[2].identifier).toEqual('describedBeforeOptional')
+				expect(endpoint.objectBody[2].description).toEqual('Described before optional')
+				expect(endpoint.objectBody[2].optional).toEqual(true)
+
+				expect(endpoint.objectBody[3].identifier).toEqual('describedAfterOptional')
+				expect(endpoint.objectBody[3].description).toEqual('Described after optional')
+				expect(endpoint.objectBody[3].optional).toEqual(true)
+			})
+
 			it('parses aliased zod object array validators', () => {
 				const endpoint = analyzeEndpointById(TestCase.parsesAliasedZodSchema)
 

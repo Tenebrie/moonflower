@@ -475,12 +475,31 @@ export const getValidatorPropertyOptionality = (node: Node): boolean => {
 	})
 }
 
+const getZodDescription = (node: Node): string => {
+	const callExpression = node.asKind(SyntaxKind.CallExpression)
+	if (!callExpression) {
+		return ''
+	}
+
+	const propertyAccessNode = callExpression.getFirstChildByKind(SyntaxKind.PropertyAccessExpression)
+	if (!propertyAccessNode) {
+		return ''
+	}
+
+	if (propertyAccessNode.getName() === 'describe') {
+		const argumentNode = callExpression.getArguments()[0]?.asKind(SyntaxKind.StringLiteral)
+		return argumentNode?.getLiteralText() ?? ''
+	}
+
+	return getZodDescription(propertyAccessNode.getExpression())
+}
+
 export const getValidatorPropertyStringValue = (
 	nodeOrReference: Node,
 	name: 'description' | 'errorMessage',
 ): string => {
 	if (isZodCallExpression(nodeOrReference)) {
-		return ''
+		return name === 'description' ? getZodDescription(nodeOrReference) : ''
 	}
 
 	const node = findNodeImplementation(nodeOrReference)
