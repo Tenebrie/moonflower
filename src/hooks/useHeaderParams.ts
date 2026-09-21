@@ -1,23 +1,26 @@
 import { ParameterizedContext } from 'koa'
+import z from 'zod'
 
 import { ValidationError } from '../errors/UserFacingErrors'
 import { kebabToCamelCase, keysOf } from '../utils/object'
 import { CamelCase } from '../utils/TypeUtils'
-import {
-	getMissingParamMessage,
-	getValidationResultMessage as getValidationFailedMessage,
-} from '../utils/validationMessages'
+import { getValidationResultMessage as getValidationFailedMessage } from '../utils/validationMessages'
 import { Validator } from '../validators/types'
+import { validateMissingParams } from '../validators/validateMissingParams'
+import { applyDefaultValue, validateParam } from '../validators/validateParam'
 
 type CheckIfOptional<T, B extends boolean | undefined> = B extends false ? T : T | undefined
 
 type HeaderToCamelCase<T> = T extends string ? CamelCase<Uncapitalize<T>> : T
 
-type ValidatedData<T extends Record<string, Validator<any>>> = {
-	[K in keyof T as HeaderToCamelCase<K>]: CheckIfOptional<ReturnType<T[K]['parse']>, T[K]['optional']>
+type ValidatedData<T extends Record<string, Validator<any> | z.ZodType<any>>> = {
+	[K in keyof T as HeaderToCamelCase<K>]: CheckIfOptional<
+		ReturnType<T[K] extends Validator<any> ? T[K]['parse'] : T[K]['parse']>,
+		T[K] extends Validator<any> ? T[K]['optional'] : false
+	>
 }
 
-export const useHeaderParams = <ValidatorsT extends Record<string, Validator<any>>>(
+export const useHeaderParams = <ValidatorsT extends Record<string, Validator<any> | z.ZodType<any>>>(
 	ctx: ParameterizedContext,
 	validators: ValidatorsT,
 ) => {
@@ -28,35 +31,19 @@ export const useHeaderParams = <ValidatorsT extends Record<string, Validator<any
 		validator: validators[name],
 	}))
 
-	const missingParams = params.filter((param) => !headers[param.name] && !param.validator.optional)
-
-	if (missingParams.length > 0) {
-		throw new ValidationError(
-			`Missing headers: ${missingParams.map((param) => getMissingParamMessage(param)).join(', ')}`,
-		)
-	}
+	validateMissingParams(params, headers, 'header')
 
 	const validationResults = params.map((param) => {
 		const paramValue = headers[param.name]
 
-		// Param is optional and is not provided - skip validation
+		// Param is not provided - fall back to the validator's default value, if any
 		if (paramValue === undefined) {
-			return { param, validated: true }
+			return { ...applyDefaultValue(param.validator), param }
 		}
 
-		try {
-			const validatorObject = param.validator
-			const prevalidatorSuccess =
-				!validatorObject.prevalidate || validatorObject.prevalidate(paramValue as string)
-			const parsedValue = validatorObject.parse(paramValue as string)
-			const validatorSuccess = !validatorObject.validate || validatorObject.validate(parsedValue)
-			return {
-				param,
-				validated: prevalidatorSuccess && validatorSuccess,
-				parsedValue,
-			}
-		} catch {
-			return { param, validated: false }
+		return {
+			...validateParam(param.validator, paramValue),
+			param,
 		}
 	})
 

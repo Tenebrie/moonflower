@@ -185,5 +185,15 @@ describe('usePathParams', () => {
 			expectTypeOf(params.numberParam).toEqualTypeOf<number>()
 			expectTypeOf(params.booleanParam).toEqualTypeOf<boolean>()
 		})
+
+		it('applies the default value when the param is missing', () => {
+			const ctx = mockContextPath(mockContext(), '/test/:stringParam', {})
+
+			const params = usePathParams(ctx, {
+				stringParam: z.string().default('default_string'),
+			})
+
+			expect(params.stringParam).toEqual('default_string')
+		})
 	})
 })

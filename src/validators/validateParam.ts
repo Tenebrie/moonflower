@@ -27,6 +27,21 @@ export function validateParam(
 	}
 }
 
+export function applyDefaultValue(validator: ValidatorUnion): {
+	validated: boolean
+	parsedValue: unknown
+	exception: string | null
+} {
+	if (validator instanceof z.ZodType) {
+		const result = validator.safeParse(undefined)
+		if (result.success) {
+			return { validated: true, parsedValue: result.data, exception: null }
+		}
+	}
+
+	return { validated: true, parsedValue: undefined, exception: null }
+}
+
 function runPrevalidator(validator: ValidatorUnion, value: string | number | boolean | object | null) {
 	// Legacy validator
 	if ('prevalidate' in validator && typeof validator.prevalidate === 'function') {

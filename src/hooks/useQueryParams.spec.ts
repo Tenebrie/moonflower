@@ -320,6 +320,30 @@ describe('useQueryParams', () => {
 
 			expectTypeOf(params.numberParam).toEqualTypeOf<number | undefined>()
 		})
+
+		it('applies the default value when the param is missing', () => {
+			const ctx = mockContextQuery(mockContext(), {})
+
+			const params = useQueryParams(ctx, {
+				numberParam: z.number().default(12),
+				stringParam: z.string().default('default_string'),
+			})
+
+			expect(params.numberParam).toEqual(12)
+			expect(params.stringParam).toEqual('default_string')
+		})
+
+		it('keeps the provided value instead of the default', () => {
+			const ctx = mockContextQuery(mockContext(), {
+				numberParam: '7',
+			})
+
+			const params = useQueryParams(ctx, {
+				numberParam: z.number().default(12),
+			})
+
+			expect(params.numberParam).toEqual(7)
+		})
 	})
 
 	describe('legacy array validators', () => {

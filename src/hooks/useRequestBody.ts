@@ -6,7 +6,7 @@ import { keysOf } from '../utils/object'
 import { getValidationResultMessage } from '../utils/validationMessages'
 import { Validator } from '../validators/types'
 import { validateMissingParams } from '../validators/validateMissingParams'
-import { validateParam } from '../validators/validateParam'
+import { applyDefaultValue, validateParam } from '../validators/validateParam'
 
 type CheckIfOptional<T, B extends boolean | undefined> = B extends false ? T : T | undefined
 
@@ -38,14 +38,14 @@ export const useRequestBody = <ValidatorsT extends Record<string, Validator<any>
 		validator: validators[name],
 	}))
 
-	validateMissingParams(params, providedParams, validators, 'body')
+	validateMissingParams(params, providedParams, 'body')
 
 	const validationResults = params.map((param) => {
 		const paramValue = providedParams[param.name]
 
-		// Param is optional and is not provided - skip validation
+		// Param is not provided - fall back to the validator's default value, if any
 		if (paramValue === undefined) {
-			return { param, validated: true, parsedValue: undefined, exception: null }
+			return { ...applyDefaultValue(param.validator), param }
 		}
 
 		return {

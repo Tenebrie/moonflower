@@ -1,4 +1,6 @@
+import { expectTypeOf } from 'vitest'
 import { describe, expect, it } from 'vitest'
+import z from 'zod'
 
 import {
 	BooleanValidator,
@@ -172,5 +174,119 @@ describe('useCookieParams', () => {
 
 		expect(test).toThrow(ValidationError)
 		expect(test).toThrow("Failed cookie param validation: 'testParam' (Description)")
+	})
+
+	describe('zod validators', () => {
+		it('parses required params when present', () => {
+			const ctx = mockContextCookies(mockContext(), {
+				stringParam: 'test_string',
+				numberParam: '12',
+				booleanParam: 'true',
+				objectParam: JSON.stringify({
+					foo: 'aaa',
+					bar: 'bbb',
+				}),
+			})
+
+			const params = useCookieParams(ctx, {
+				stringParam: z.string(),
+				numberParam: z.number(),
+				booleanParam: z.boolean(),
+				objectParam: z.object({
+					foo: z.string(),
+					bar: z.string(),
+				}),
+			})
+
+			expect(params.stringParam).toEqual('test_string')
+			expect(params.numberParam).toEqual(12)
+			expect(params.booleanParam).toEqual(true)
+			expect(params.objectParam).toEqual({ foo: 'aaa', bar: 'bbb' })
+
+			expectTypeOf(params.stringParam).toEqualTypeOf<string>()
+			expectTypeOf(params.numberParam).toEqualTypeOf<number>()
+			expectTypeOf(params.booleanParam).toEqualTypeOf<boolean>()
+			expectTypeOf(params.objectParam).toEqualTypeOf<{ foo: string; bar: string }>()
+		})
+
+		it('throws if a required param is missing', () => {
+			const ctx = mockContextCookies(mockContext(), {
+				stringParam: 'test_string',
+			})
+
+			const test = () => {
+				useCookieParams(ctx, {
+					stringParam: z.string(),
+					numberParam: z.number(),
+				})
+			}
+
+			expect(test).toThrow(ValidationError)
+			expect(test).toThrow("Missing cookie params: 'numberParam'")
+		})
+
+		it('allows missing params when optional', () => {
+			const ctx = mockContextCookies(mockContext(), {
+				stringParam: 'test_string',
+			})
+
+			const test = () => {
+				useCookieParams(ctx, {
+					stringParam: z.string(),
+					numberParam: z.number().optional(),
+				})
+			}
+
+			expect(test).not.toThrow(ValidationError)
+		})
+
+		it('infers the return type of optional params', () => {
+			const ctx = mockContextCookies(mockContext(), {})
+
+			const params = useCookieParams(ctx, {
+				numberParam: z.number().optional(),
+			})
+
+			expectTypeOf(params.numberParam).toEqualTypeOf<number | undefined>()
+		})
+
+		it('fails validation on an invalid value', () => {
+			const test = () => {
+				const ctx = mockContextCookies(mockContext(), {
+					numberParam: 'qwerty',
+				})
+
+				useCookieParams(ctx, {
+					numberParam: z.number(),
+				})
+			}
+
+			expect(test).toThrow(ValidationError)
+			expect(test).toThrow("Failed cookie param validation: 'numberParam'")
+		})
+
+		it('applies the default value when the param is missing', () => {
+			const ctx = mockContextCookies(mockContext(), {})
+
+			const params = useCookieParams(ctx, {
+				numberParam: z.number().default(12),
+				stringParam: z.string().default('default_string'),
+			})
+
+			expect(params.numberParam).toEqual(12)
+			expect(params.stringParam).toEqual('default_string')
+		})
+
+		it('keeps the provided value instead of the default', () => {
+			const ctx = mockContextCookies(mockContext(), {
+				numberParam: '7',
+			})
+
+			const params = useCookieParams(ctx, {
+				numberParam: z.number().default(12),
+			})
+
+			expect(params.numberParam).toEqual(7)
+		})
 	})
 })

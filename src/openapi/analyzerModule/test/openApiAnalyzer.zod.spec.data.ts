@@ -118,6 +118,15 @@ router.post(`/test/${TestCase.parsesZodOptional}`, (ctx) => {
 	})
 })
 
+router.post(`/test/${TestCase.parsesZodDefault}`, (ctx) => {
+	useRequestBody(ctx, {
+		requiredField: z.string(),
+		defaultedString: z.string().default('default_string'),
+		defaultedNumber: z.number().default(12),
+		optionalDefaultedNumber: z.number().optional().default(12),
+	})
+})
+
 router.get(`/test/${TestCase.parsesZodQueryStringArray}`, (ctx) => {
 	useQueryParams(ctx, {
 		tags: z.array(z.string()),

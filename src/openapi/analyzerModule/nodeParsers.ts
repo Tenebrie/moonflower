@@ -439,7 +439,8 @@ export const getValidatorPropertyOptionality = (node: Node): boolean => {
 		const callExpression = node.asKind(SyntaxKind.CallExpression)!
 		const returnType = getCallReturnType(callExpression)
 		const typeName = returnType.getSymbol()?.getName() ?? ''
-		if (typeName === 'ZodOptional') {
+		// A schema with a default value does not have to be provided by the client
+		if (typeName === 'ZodOptional' || typeName === 'ZodDefault') {
 			return true
 		}
 		return false
@@ -600,7 +601,7 @@ const computeProperTypeShape = (type: Type, atLocation: Node, stack: Type[]): Sh
 		return 'null'
 	}
 
-	if (type.isUndefined()) {
+	if (type.isUndefined() || type.isNever()) {
 		return 'undefined'
 	}
 

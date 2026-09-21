@@ -5,7 +5,7 @@ import { keysOf } from '../utils/object'
 import { CleanUpPathParam } from '../utils/TypeUtils'
 import { getValidationResultMessage } from '../utils/validationMessages'
 import { Validator } from '../validators/types'
-import { validateParam } from '../validators/validateParam'
+import { applyDefaultValue, validateParam } from '../validators/validateParam'
 
 type CheckIfOptional<T, B> = B extends string ? (B extends `${string}?` ? T | undefined : T) : never
 
@@ -49,9 +49,9 @@ export const usePathParams = <
 	const validationResults = expectedParams.map((param) => {
 		const paramValue = params[param.name] as string
 
-		// Param is optional and is not provided - skip validation
+		// Param is not provided - fall back to the validator's default value, if any
 		if (paramValue === undefined) {
-			return { param, validated: true, parsedValue: undefined, exception: null }
+			return { ...applyDefaultValue(param.validator), param }
 		}
 
 		return {

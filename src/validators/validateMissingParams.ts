@@ -2,18 +2,25 @@ import z from 'zod'
 
 import { ValidationError } from '../errors/UserFacingErrors'
 import { getMissingParamMessage } from '../utils/validationMessages'
-import { MaybeOptionalValidatorUnion, Validator } from './types'
+import { MaybeOptionalValidatorUnion } from './types'
 
-export function validateMissingParams<ValidatorsT extends Record<string, MaybeOptionalValidatorUnion>>(
-	params: { name: string; validator: Pick<Validator<unknown>, 'description' | 'errorMessage'> }[],
+const missingParamsPrefix = {
+	body: 'Missing body params',
+	query: 'Missing query params',
+	path: 'Missing path params',
+	cookie: 'Missing cookie params',
+	header: 'Missing headers',
+} as const
+
+export function validateMissingParams(
+	params: { name: string; validator: MaybeOptionalValidatorUnion }[],
 	providedParams: Record<string, unknown>,
-	validators: ValidatorsT,
-	suffix: 'body' | 'query' | 'path',
+	kind: keyof typeof missingParamsPrefix,
 ) {
 	const missingParams = params.filter((param) => {
-		let isOptional = validators[param.name].optional
-		if (validators[param.name] instanceof z.ZodType) {
-			isOptional = (validators[param.name] as z.ZodType).safeParse(undefined).success
+		let isOptional = param.validator.optional
+		if (param.validator instanceof z.ZodType) {
+			isOptional = param.validator.safeParse(undefined).success
 		}
 
 		return providedParams[param.name] === undefined && !isOptional
@@ -21,7 +28,9 @@ export function validateMissingParams<ValidatorsT extends Record<string, MaybeOp
 
 	if (missingParams.length > 0) {
 		throw new ValidationError(
-			`Missing ${suffix} params: ${missingParams.map((param) => getMissingParamMessage(param)).join(', ')}`,
+			`${missingParamsPrefix[kind]}: ${missingParams
+				.map((param) => getMissingParamMessage(param))
+				.join(', ')}`,
 		)
 	}
 }

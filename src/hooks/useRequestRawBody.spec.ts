@@ -1,4 +1,6 @@
+import { expectTypeOf } from 'vitest'
 import { describe, expect, it } from 'vitest'
+import z from 'zod'
 
 import { NumberValidator, OptionalParam, RequiredParam, useRequestRawBody, ValidationError } from '..'
 import { mockContext, mockContextBody, mockContextRawBody } from '../utils/mockContext'
@@ -152,5 +154,102 @@ describe('useRequestRawBody', () => {
 
 		expect(test).toThrow(ValidationError)
 		expect(test).toThrow('Failed request body validation (Description).')
+	})
+
+	describe('zod validators', () => {
+		it('parses a number raw body', () => {
+			const ctx = mockContextRawBody(mockContext(), '12')
+
+			const rawBody = useRequestRawBody(ctx, z.number())
+
+			expect(rawBody).toEqual(12)
+			expectTypeOf(rawBody).toEqualTypeOf<number>()
+		})
+
+		it('parses a string raw body', () => {
+			const ctx = mockContextRawBody(mockContext(), 'test_string')
+
+			const rawBody = useRequestRawBody(ctx, z.string())
+
+			expect(rawBody).toEqual('test_string')
+			expectTypeOf(rawBody).toEqualTypeOf<string>()
+		})
+
+		it('parses an object raw body', () => {
+			const ctx = mockContextRawBody(mockContext(), JSON.stringify({ foo: 'aaa', bar: 'bbb' }))
+
+			const rawBody = useRequestRawBody(
+				ctx,
+				z.object({
+					foo: z.string(),
+					bar: z.string(),
+				}),
+			)
+
+			expect(rawBody).toEqual({ foo: 'aaa', bar: 'bbb' })
+			expectTypeOf(rawBody).toEqualTypeOf<{ foo: string; bar: string }>()
+		})
+
+		it('fails validation on an invalid raw body', () => {
+			const test = () => {
+				const ctx = mockContextRawBody(mockContext(), 'not a number')
+
+				useRequestRawBody(ctx, z.number())
+			}
+
+			expect(test).toThrow(ValidationError)
+			expect(test).toThrow('Failed request body validation.')
+		})
+
+		it('fails validation when a required raw body is not provided', () => {
+			const test = () => {
+				useRequestRawBody(mockContext(), z.number())
+			}
+
+			expect(test).toThrow(ValidationError)
+			expect(test).toThrow('Missing request body.')
+		})
+
+		it('passes validation when an optional raw body is not provided', () => {
+			const rawBody = useRequestRawBody(mockContext(), z.number().optional())
+
+			expect(rawBody).toEqual(undefined)
+			expectTypeOf(rawBody).toEqualTypeOf<number | undefined>()
+		})
+
+		it('applies the default value when the raw body is not provided', () => {
+			const rawBody = useRequestRawBody(mockContext(), z.number().default(12))
+
+			expect(rawBody).toEqual(12)
+			expectTypeOf(rawBody).toEqualTypeOf<number>()
+		})
+
+		it('keeps the provided value instead of the default', () => {
+			const ctx = mockContextRawBody(mockContext(), '7')
+
+			const rawBody = useRequestRawBody(ctx, z.number().default(12))
+
+			expect(rawBody).toEqual(7)
+		})
+
+		it('sends the description when validation fails', () => {
+			const test = () => {
+				const ctx = mockContextRawBody(mockContext(), 'not a number')
+
+				useRequestRawBody(ctx, z.number().describe('Any numeric value'))
+			}
+
+			expect(test).toThrow(ValidationError)
+			expect(test).toThrow('Failed request body validation (Any numeric value).')
+		})
+
+		it('sends the description when a required raw body is not provided', () => {
+			const test = () => {
+				useRequestRawBody(mockContext(), z.number().describe('Any numeric value'))
+			}
+
+			expect(test).toThrow(ValidationError)
+			expect(test).toThrow('Missing request body (Any numeric value).')
+		})
 	})
 })

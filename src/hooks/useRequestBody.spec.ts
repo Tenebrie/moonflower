@@ -340,5 +340,39 @@ describe('useRequestBody', () => {
 
 			expectTypeOf(params.numberParam).toEqualTypeOf<number | undefined>()
 		})
+
+		it('applies the default value when the param is missing', () => {
+			const ctx = mockContextBody(mockContext(), {})
+
+			const params = useRequestBody(ctx, {
+				numberParam: z.number().default(12),
+				stringParam: z.string().default('default_string'),
+			})
+
+			expect(params.numberParam).toEqual(12)
+			expect(params.stringParam).toEqual('default_string')
+		})
+
+		it('applies the default value when the param is missing and marked optional', () => {
+			const ctx = mockContextBody(mockContext(), {})
+
+			const params = useRequestBody(ctx, {
+				numberParam: z.number().optional().default(12),
+			})
+
+			expect(params.numberParam).toEqual(12)
+		})
+
+		it('keeps the provided value instead of the default', () => {
+			const ctx = mockContextBody(mockContext(), {
+				numberParam: 7,
+			})
+
+			const params = useRequestBody(ctx, {
+				numberParam: z.number().default(12),
+			})
+
+			expect(params.numberParam).toEqual(7)
+		})
 	})
 })

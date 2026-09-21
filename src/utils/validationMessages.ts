@@ -47,7 +47,9 @@ export const getValidationResultMessage = (
 	return `'${name}'`
 }
 
-export const getMissingRawBodyMessage = (validator: Validator<unknown>) => {
+export const getMissingRawBodyMessage = (
+	validator: Pick<Validator<unknown>, 'description' | 'errorMessage'>,
+) => {
 	const { description } = validator
 
 	if (description) {
@@ -56,7 +58,9 @@ export const getMissingRawBodyMessage = (validator: Validator<unknown>) => {
 	return 'Missing request body.'
 }
 
-export const getFailedRawBodyValidationMessage = (validator: Validator<unknown>) => {
+export const getFailedRawBodyValidationMessage = (
+	validator: Pick<Validator<unknown>, 'description' | 'errorMessage'>,
+) => {
 	const { description, errorMessage } = validator
 
 	if (errorMessage) {
