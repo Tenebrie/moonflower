@@ -300,22 +300,22 @@ const getCallReturnType = (callExpression: Node): Type => {
 	return result
 }
 
-const isZodCallExpression = (node: Node): boolean => {
-	const callExpression = node.asKind(SyntaxKind.CallExpression)
-	if (!callExpression) {
-		return false
-	}
-	const returnType = getCallReturnType(callExpression)
-	const typeName = returnType.getSymbol()?.getName() ?? ''
-	return typeName.startsWith('Zod')
+const getZodType = (node: Node): Type | undefined => {
+	const type = node.isKind(SyntaxKind.CallExpression)
+		? getCallReturnType(node)
+		: node.isKind(SyntaxKind.TypeReference)
+			? node.getType()
+			: undefined
+	return type?.getSymbol()?.getName().startsWith('Zod') ? type : undefined
 }
 
-const getZodCallShape = (node: Node): ShapeOfType['shape'] => {
-	const callExpression = node.asKind(SyntaxKind.CallExpression)!
-	const returnType = getCallReturnType(callExpression)
+const isZodNode = (node: Node): boolean => !!getZodType(node)
+
+const getZodShape = (node: Node): ShapeOfType['shape'] => {
+	const returnType = getZodType(node)!
 	const outputProp = returnType.getProperty('_output')
 	if (outputProp) {
-		return getProperTypeShape(outputProp.getTypeAtLocation(callExpression), callExpression)
+		return getProperTypeShape(outputProp.getTypeAtLocation(node), node)
 	}
 	const fileName = node.getSourceFile().getFilePath().split('/').pop()
 	const typeName = returnType.getSymbol()?.getName() ?? ''
@@ -325,8 +325,8 @@ const getZodCallShape = (node: Node): ShapeOfType['shape'] => {
 
 export const getValidatorPropertyShape = (innerLiteralNode: Node): ShapeOfType['shape'] => {
 	// Zod validator (e.g. z.number(), z.string(), z.object({...}), z.array(...))
-	if (isZodCallExpression(innerLiteralNode)) {
-		return getZodCallShape(innerLiteralNode)
+	if (isZodNode(innerLiteralNode)) {
+		return getZodShape(innerLiteralNode)
 	}
 
 	// Inline definition with `as Validator<...>` clause
@@ -435,10 +435,9 @@ export const getValidatorPropertyShape = (innerLiteralNode: Node): ShapeOfType['
 }
 
 export const getValidatorPropertyOptionality = (node: Node): boolean => {
-	if (isZodCallExpression(node)) {
-		const callExpression = node.asKind(SyntaxKind.CallExpression)!
-		const returnType = getCallReturnType(callExpression)
-		const typeName = returnType.getSymbol()?.getName() ?? ''
+	const zodType = getZodType(node)
+	if (zodType) {
+		const typeName = zodType.getSymbol()?.getName() ?? ''
 		// A schema with a default value does not have to be provided by the client
 		if (typeName === 'ZodOptional' || typeName === 'ZodDefault') {
 			return true
@@ -498,7 +497,7 @@ export const getValidatorPropertyStringValue = (
 	nodeOrReference: Node,
 	name: 'description' | 'errorMessage',
 ): string => {
-	if (isZodCallExpression(nodeOrReference)) {
+	if (isZodNode(nodeOrReference)) {
 		return name === 'description' ? getZodDescription(nodeOrReference) : ''
 	}
 

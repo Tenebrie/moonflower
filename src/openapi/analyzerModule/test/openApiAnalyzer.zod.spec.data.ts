@@ -7,6 +7,7 @@ import { useQueryParams } from '../../../hooks/useQueryParams'
 import { useRequestBody } from '../../../hooks/useRequestBody'
 import { Router } from '../../../router/Router'
 import { OptionalParam } from '../../../validators/ParamWrappers'
+import { DeclaredZodSchema } from './declaredZodSchema'
 import { TestCase } from './TestCase'
 
 const router = new Router()
@@ -169,5 +170,11 @@ router.get(`/test/${TestCase.parsesZodQueryOptionalArray}`, (ctx) => {
 router.post(`/test/${TestCase.parsesZodPipe}`, (ctx) => {
 	useRequestBody(ctx, {
 		value: z.string().pipe(z.coerce.number()),
+	})
+})
+
+router.post(`/test/${TestCase.parsesDeclaredZodSchema}`, (ctx) => {
+	useRequestBody(ctx, {
+		data: DeclaredZodSchema,
 	})
 })
