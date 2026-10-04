@@ -45,7 +45,11 @@ export const findNodeImplementation = (node: Node): Node => {
 		}
 
 		const resolve = (): Node => {
-			const implementationNode = node.asKind(SyntaxKind.Identifier)!.getImplementations()[0]?.getNode()
+			const implementationNode = node
+				.asKind(SyntaxKind.Identifier)!
+				.getImplementations()
+				.map((implementation) => implementation.getNode())
+				.find((implementation) => !implementation.getParent()?.isKind(SyntaxKind.ExportSpecifier))
 			if (implementationNode) {
 				const implementationParentNode = implementationNode.getParent()!
 				const assignmentValueNode = implementationParentNode.getLastChild()!

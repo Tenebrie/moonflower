@@ -8,6 +8,7 @@ import { useRequestBody } from '../../../hooks/useRequestBody'
 import { Router } from '../../../router/Router'
 import { OptionalParam } from '../../../validators/ParamWrappers'
 import { DeclaredZodSchema } from './declaredZodSchema'
+import { ReexportedZodSchema } from './reexportedZodSchema'
 import { TestCase } from './TestCase'
 
 const router = new Router()
@@ -176,5 +177,11 @@ router.post(`/test/${TestCase.parsesZodPipe}`, (ctx) => {
 router.post(`/test/${TestCase.parsesDeclaredZodSchema}`, (ctx) => {
 	useRequestBody(ctx, {
 		data: DeclaredZodSchema,
+	})
+})
+
+router.post(`/test/${TestCase.parsesReexportedDeclaredZodSchema}`, (ctx) => {
+	useRequestBody(ctx, {
+		data: ReexportedZodSchema,
 	})
 })

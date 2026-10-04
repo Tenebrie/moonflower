@@ -382,6 +382,27 @@ describe('OpenApi Analyzer (Zod Validator)', () => {
 				])
 				expect(endpoint.objectBody[0].optional).toEqual(false)
 			})
+
+			it('parses zod schemas declared in a .d.ts file and re-exported through a barrel', () => {
+				const endpoint = analyzeEndpointById(TestCase.parsesReexportedDeclaredZodSchema)
+
+				expect(endpoint.objectBody[0].identifier).toEqual('data')
+				expect(endpoint.objectBody[0].signature).toEqual([
+					{
+						identifier: 'value',
+						optional: false,
+						role: 'property',
+						shape: 'number',
+					},
+					{
+						identifier: 'label',
+						optional: true,
+						role: 'property',
+						shape: 'string',
+					},
+				])
+				expect(endpoint.objectBody[0].optional).toEqual(false)
+			})
 		})
 	})
 })

@@ -15,6 +15,7 @@ export const TestCase = {
 	parsesZodQueryOptionalArray: 'parses-zod-query-optional-array',
 	parsesZodPipe: 'parses-zod-pipe',
 	parsesDeclaredZodSchema: 'parses-declared-zod-schema',
+	parsesReexportedDeclaredZodSchema: 'parses-reexported-declared-zod-schema',
 	parsesReturnRecordStringUnknown: 'parses-return-record-string-unknown',
 	parsesReturnObjectWithRecordProperty: 'parses-return-object-with-record-property',
 	parsesBufferReturnedFromFunction: 'parses-buffer-returned-from-function',
